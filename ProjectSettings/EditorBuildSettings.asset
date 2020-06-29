@@ -5,6 +5,16 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
-    path: Assets/silkmMap0Scene.unity
+  - enabled: 0
+    path: Assets/Scenes/silkmMap0Scene.unity
     guid: f138387d2bce01a4d80cc2020cbd5199
+  - enabled: 0
+    path: Assets/Scenes/silkmMap0Scene_Pablo.unity
+    guid: 27d8602291de5f246a0b87839db1cb06
+  - enabled: 0
+    path: Assets/Scenes/SilkMapBase.unity
+    guid: cfc669a922493114cabe4bd1b1d884b8
+  - enabled: 1
+    path: Assets/Scenes/UI_Test.unity
+    guid: 3d00c0baeccb8cb47bb87dcc32fd3405
+  m_configObjects: {}
