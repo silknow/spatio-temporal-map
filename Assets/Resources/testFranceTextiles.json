@@ -1,0 +1,1946 @@
+﻿[
+  {
+    "id": "http://data.silknow.org/object/6497936a-8400-3747-a116-766bfad9b8a7",
+    "identifier": "27708",
+    "production": {
+      "id": "http://data.silknow.org/production/24135069-c58c-35b3-bca0-b4ddc81878ea",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Patterned fabric",
+        "Brocade (fabric)"
+      ],
+      "time": "sixteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f6fb21d5-1176-3a39-9e58-105a89ecb6a6",
+    "identifier": "30783",
+    "production": {
+      "id": "http://data.silknow.org/production/cdbd170a-77d8-3410-b737-2c0cfb4058d2",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Patterned fabric",
+        "Lamé"
+      ],
+      "time": [
+        "sixteenth century (dates CE)",
+        "seventeenth century (dates CE)"
+      ]
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/d6929121-02c6-3426-9a43-6a4aa74dbaab",
+    "identifier": "6577",
+    "production": {
+      "id": "http://data.silknow.org/production/7bd16c8d-64d4-3431-b727-f6c7cfce427a",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Metal thread",
+        "Silk"
+      ],
+      "technique": [
+        "Patterned fabric",
+        "Brocade (fabric)"
+      ],
+      "time": [
+        "sixteenth century (dates CE)",
+        "seventeenth century (dates CE)"
+      ]
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/8e757940-e8a6-31d2-a893-c5a894d323d2",
+    "identifier": "18218",
+    "production": {
+      "id": "http://data.silknow.org/production/f47d4489-f0df-3d55-82fa-2f43d09877f7",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Patterned fabric",
+        "Brocading weft"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/0b9ac8b8-dbf0-33f7-8259-60db0ea6e57a",
+    "identifier": "24580",
+    "production": {
+      "id": "http://data.silknow.org/production/4c1b0b6f-efd6-3fd8-b4af-4b3af7940223",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Patterned fabric",
+        "Damask"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/a0a4b582-cb89-3cbb-86e1-6848ab5a14de",
+    "identifier": "18197",
+    "production": {
+      "id": "http://data.silknow.org/production/6dffd602-e3d4-3053-865f-438523a8d561",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/9e7e3bc9-5821-3bfc-81ea-313d6c05c9a6",
+    "identifier": "4530",
+    "production": {
+      "id": "http://data.silknow.org/production/3ccb1a45-afd6-3854-a036-75d60174f74c",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Façonne cut velvet",
+        "Brocade (fabric)"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/e7c2e2bf-3c2c-3dfd-a511-f1c3a1f6cc08",
+    "identifier": "5064",
+    "production": {
+      "id": "http://data.silknow.org/production/648e27ee-fdc5-3c2f-aa1b-6cad2d7cb47a",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Façonne cut velvet",
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/ece10340-6494-30fa-8882-b5e84b8f18ea",
+    "identifier": "3676",
+    "production": {
+      "id": "http://data.silknow.org/production/9dfc3945-5c85-3b9c-9aad-88660b078a4f",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Patterned fabric",
+        "Brocade (fabric)",
+        "Ciselé velvet"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f4f20790-cd03-355f-951c-b32db4f9bb4c",
+    "identifier": "5978",
+    "production": {
+      "id": "http://data.silknow.org/production/fe48b671-2564-3d0c-853a-096d07b784ac",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Damask",
+        "Brocade (fabric)",
+        "Patterned fabric"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/ee6ebcd4-44e3-3737-807b-b0cc177e521e",
+    "identifier": "6592",
+    "production": {
+      "id": "http://data.silknow.org/production/5b8872cd-43f7-395b-b88e-5415b5cb5103",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Brocade (fabric)",
+        "Patterned fabric"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/71782514-f436-3252-93a9-66aa824f635c",
+    "identifier": "6956",
+    "production": {
+      "id": "http://data.silknow.org/production/f5343126-6799-312b-add3-5019d62ec43b",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Patterned fabric",
+        "Ciselé velvet"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/79d200b3-8d22-367a-98f9-f884c4d28acc",
+    "identifier": "17103",
+    "production": {
+      "id": "http://data.silknow.org/production/9d494f23-4b69-3a04-990e-a66b1537685a",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/13de0015-3bc0-3515-af17-e10e2070c15b",
+    "identifier": "17104",
+    "production": {
+      "id": "http://data.silknow.org/production/33f489f8-5800-30a4-8d10-d6efd4e9b882",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/4555b062-b87c-3059-9bee-dfb0d655033f",
+    "identifier": "17105",
+    "production": {
+      "id": "http://data.silknow.org/production/575cd94e-7bc9-3ee9-b21d-bdb7660cc038",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/9ba5e5b9-b665-3ddb-bb2b-76a022131c56",
+    "identifier": "17106",
+    "production": {
+      "id": "http://data.silknow.org/production/f3fd4234-4950-3abb-bc4a-22b7ee9748fa",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Lampas",
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/19602421-e274-3659-b8be-fa22cfcfb97d",
+    "identifier": "17107",
+    "production": {
+      "id": "http://data.silknow.org/production/da96e4ef-cfdd-3003-8d5d-5a84d3505ec5",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/18be702d-3ef6-3f51-a876-b37c191879b3",
+    "identifier": "17108",
+    "production": {
+      "id": "http://data.silknow.org/production/2c1adbae-b0ce-3215-84d1-3ee33aa2d2e6",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/8a48201c-2727-3d31-a105-dfba5c55bf87",
+    "identifier": "17109",
+    "production": {
+      "id": "http://data.silknow.org/production/cba7376c-4aac-3d03-94e0-c698e9b115c0",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/bf1ec2f4-9c0b-3c5d-8280-e1dfe08fbf79",
+    "identifier": "17110",
+    "production": {
+      "id": "http://data.silknow.org/production/f827e5fb-a3ac-336a-99c1-004d935fdbc4",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/9a141637-d4bd-39ad-aecf-6ae92d73d70b",
+    "identifier": "17111",
+    "production": {
+      "id": "http://data.silknow.org/production/a40fdee6-8f61-3e5c-9c14-d2abd364551f",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/554cd261-4c4d-3425-810c-8c3e6d086dec",
+    "identifier": "17112",
+    "production": {
+      "id": "http://data.silknow.org/production/ed1d00e7-f802-3c92-baa9-c5139bf96595",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/c8dde979-42ab-33dc-95cd-b23574d95f28",
+    "identifier": "17114",
+    "production": {
+      "id": "http://data.silknow.org/production/6fcba924-84da-387e-bd4f-dd9b129107fa",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/e1379458-814d-3683-acc0-2e510882a32b",
+    "identifier": "17115",
+    "production": {
+      "id": "http://data.silknow.org/production/c2b05ce0-47cd-31b9-a132-899d03aa4e91",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f0cab0bd-c808-3174-bf19-8fd8199403f4",
+    "identifier": "17117",
+    "production": {
+      "id": "http://data.silknow.org/production/9bbc4182-6218-3487-aade-cc5ec1e74f0d",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/42acbfd7-6772-3f3f-8f2a-c12d8469ab2a",
+    "identifier": "17118",
+    "production": {
+      "id": "http://data.silknow.org/production/2ca02c77-de2e-3293-8ebc-bdd3aae42904",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/d1eef275-2291-350f-9d18-0004990e7167",
+    "identifier": "17119",
+    "production": {
+      "id": "http://data.silknow.org/production/cb0d58d5-e20b-30c2-8257-a3d4cc3c4571",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f6cc473b-55e4-3221-b541-1f33b6451a83",
+    "identifier": "17120",
+    "production": {
+      "id": "http://data.silknow.org/production/f866079a-a6c4-3976-a53d-c01ec2e7c976",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/11d4671a-51f8-32fa-abf6-d2b7374699c2",
+    "identifier": "17783",
+    "production": {
+      "id": "http://data.silknow.org/production/e4a443e9-778a-32f6-b24a-eaf092619335",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Print",
+        "Satin (fabric)"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/42966829-b065-3bbb-94e7-28ad55098afd",
+    "identifier": "18200",
+    "production": {
+      "id": "http://data.silknow.org/production/581d1e5d-ab78-3f42-be25-44c56cb9ec2f",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/fcbf575e-0ad9-348e-84ab-55831a10dccc",
+    "identifier": "18202",
+    "production": {
+      "id": "http://data.silknow.org/production/6f7dc511-e6bb-3ed5-a4b4-ea0ffb478935",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Damask",
+        "Brocading weft"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/a4ceb955-9b0e-3582-a763-5226a61efe42",
+    "identifier": "18203",
+    "production": {
+      "id": "http://data.silknow.org/production/cfa83028-b8c2-3163-9ead-2197f7073d01",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/6783e695-4498-349b-b62e-3df978adfd94",
+    "identifier": "18204",
+    "production": {
+      "id": "http://data.silknow.org/production/ca9146f6-21eb-3e2d-900e-500a82dc815d",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Satin (fabric)",
+        "Brocading weft"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/d4c89a8e-095d-3309-bb21-368b1bc9d96b",
+    "identifier": "18205",
+    "production": {
+      "id": "http://data.silknow.org/production/925232a0-e310-3b26-a74c-5222c6bae0cc",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": [
+        "Damask",
+        "Brocading weft"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/4ce29329-3187-3e43-9d3d-acb11df9f5a8",
+    "identifier": "18207",
+    "production": {
+      "id": "http://data.silknow.org/production/322e77d8-b732-3271-bd3e-ece07c88027a",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/3b1e5fe1-4530-3486-8d20-ac57355bb789",
+    "identifier": "18209",
+    "production": {
+      "id": "http://data.silknow.org/production/13a78393-ed52-31a7-b7c7-109be8920119",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/8cfa6547-a58e-390d-87e8-aaf680ddae50",
+    "identifier": "18214",
+    "production": {
+      "id": "http://data.silknow.org/production/11c941ea-3781-3f7b-8033-9296de034c7b",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f2193e98-39fe-3046-b42f-abc913eb5951",
+    "identifier": "18215",
+    "production": {
+      "id": "http://data.silknow.org/production/95b24ead-293e-312f-87ba-5ffeeccd239b",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/26dfbe56-3387-31fe-9efd-d66db8f510dc",
+    "identifier": "18216",
+    "production": {
+      "id": "http://data.silknow.org/production/f82d07d0-37f1-3e0b-9d36-932393f64fd1",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/22a7cb96-7253-38f0-93a2-532c07d8d285",
+    "identifier": "18219",
+    "production": {
+      "id": "http://data.silknow.org/production/319b67f0-d1e2-30d4-8def-bd706c650651",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/a26c1644-ecba-35e8-91f9-54b2f6a51995",
+    "identifier": "18220",
+    "production": {
+      "id": "http://data.silknow.org/production/2c610a0d-879e-33ab-9289-3e6028849ad2",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/5d6a695f-eb5b-3e12-b208-fd987c3337b4",
+    "identifier": "18223",
+    "production": {
+      "id": "http://data.silknow.org/production/9abd8e91-f514-3b24-a299-688598a461d9",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocade (fabric)",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/ceb97159-87ef-3b1c-88cc-5414e93b6530",
+    "identifier": "18224",
+    "production": {
+      "id": "http://data.silknow.org/production/306248ad-5dce-3ebd-9ebf-f85b281ced63",
+      "location": {
+        "country": "France",
+        "id": "https://sws.geonames.org/2998324/",
+        "label": "Lille",
+        "lat": "50.63297",
+        "long": "3.05858"
+      },
+      "material": "Silk",
+      "technique": "Brocading weft",
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/4d884c38-24fc-3c75-b1cb-af3796e67bd2",
+    "identifier": "42.65.1",
+    "label": "Maniple fragment",
+    "production": {
+      "id": "http://data.silknow.org/production/2db7b09f-613b-3dd5-8d95-eea1ab27c542",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3164603/",
+        "label": "Venice",
+        "lat": "45.43713",
+        "long": "12.33265"
+      },
+      "material": "Silk",
+      "technique": "Velvet",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/2879e206-aa4d-3338-99ff-455c516689ed",
+    "identifier": "2002.494.77",
+    "label": "Fragment",
+    "production": {
+      "id": "http://data.silknow.org/production/6b2d1b7e-0eaa-3b96-9d6d-352c09631255",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3164603/",
+        "label": "Venice",
+        "lat": "45.43713",
+        "long": "12.33265"
+      },
+      "material": "Silk",
+      "technique": "Velvet",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/5c50d4de-eade-3b8d-9dac-5657c6ab9391",
+    "identifier": "2002.494.139",
+    "label": "Fragment",
+    "production": {
+      "id": "http://data.silknow.org/production/e5bc16bc-b07b-3978-a42d-40e3927c7589",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3164603/",
+        "label": "Venice",
+        "lat": "45.43713",
+        "long": "12.33265"
+      },
+      "material": "Silk",
+      "technique": "Velvet",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/8326d131-8f9c-343f-bb20-06ff615fea1a",
+    "identifier": "2002.494.557",
+    "label": "Fragment",
+    "production": {
+      "id": "http://data.silknow.org/production/d1844089-463a-3406-9813-1df72e73fb40",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3164603/",
+        "label": "Venice",
+        "lat": "45.43713",
+        "long": "12.33265"
+      },
+      "material": "Silk",
+      "technique": "Velvet",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/e165b444-aa84-35f6-81da-92541cd552c0",
+    "identifier": "6124",
+    "production": {
+      "id": "http://data.silknow.org/production/c302e657-c8f2-3a89-a14d-1e0b2528a818",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3164603/",
+        "label": "Venice",
+        "lat": "45.43713",
+        "long": "12.33265"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Satin (fabric)",
+        "Brocading weft",
+        "Brocade (fabric)",
+        "Façonne cut velvet"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/98469b45-bb70-3627-828e-cf3ef10ab8a6",
+    "identifier": "6543",
+    "production": {
+      "id": "http://data.silknow.org/production/47434d34-7671-365c-acc5-daba260b3dac",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3164603/",
+        "label": "Venice",
+        "lat": "45.43713",
+        "long": "12.33265"
+      },
+      "material": "Silk",
+      "technique": [
+        "Pile-on-pile velvet",
+        "Façonne cut velvet"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/b094a93b-cf7e-3336-9964-f45636f058fd",
+    "identifier": "24297",
+    "production": {
+      "id": "http://data.silknow.org/production/85d822a7-c1ae-3e76-a93c-facea3a92a13",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3174530/",
+        "label": "Lucca",
+        "lat": "43.84369",
+        "long": "10.50447"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Taffeta",
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": [
+        "fifteenth century (dates CE)",
+        "fourteenth century (dates CE)"
+      ]
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/09bb3379-640c-3d13-8c75-16fd0d752262",
+    "identifier": "25226",
+    "production": {
+      "id": "http://data.silknow.org/production/dbc2d63d-bb67-38fe-94dd-ce38933d0d0d",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3174530/",
+        "label": "Lucca",
+        "lat": "43.84369",
+        "long": "10.50447"
+      },
+      "material": [
+        "Silk",
+        "Metal thread",
+        "Gold thread",
+        "Silver thread"
+      ],
+      "technique": [
+        "Brocade (fabric)",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/ae752cc3-991c-3cdf-a6c0-339ffd5d0522",
+    "identifier": "25227",
+    "production": {
+      "id": "http://data.silknow.org/production/48be5abf-deba-33f4-b24e-5886792bc87d",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3174530/",
+        "label": "Lucca",
+        "lat": "43.84369",
+        "long": "10.50447"
+      },
+      "material": [
+        "Silk",
+        "Metal thread",
+        "Gold thread",
+        "Silver thread"
+      ],
+      "technique": [
+        "Brocade (fabric)",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/548308c7-55c7-3870-a6c9-61ab705385bb",
+    "identifier": "6342",
+    "production": {
+      "id": "http://data.silknow.org/production/628826db-6290-33dd-a335-2f3a922a7c28",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3174530/",
+        "label": "Lucca",
+        "lat": "43.84369",
+        "long": "10.50447"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Louisine",
+        "Patterned fabric"
+      ],
+      "time": [
+        "thirteenth century (dates CE)",
+        "fourteenth century (dates CE)"
+      ]
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/61abadf0-163b-3ecf-bb3c-b275cac9f1bf",
+    "identifier": "6922",
+    "production": {
+      "id": "http://data.silknow.org/production/0115e80b-09d2-3668-92b0-de816aad83e0",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3174530/",
+        "label": "Lucca",
+        "lat": "43.84369",
+        "long": "10.50447"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Brocade (fabric)",
+        "Patterned fabric"
+      ],
+      "time": [
+        "fifteenth century (dates CE)",
+        "fourteenth century (dates CE)"
+      ]
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/18660e2f-cad3-31fb-acc1-616986486bda",
+    "identifier": "6923",
+    "production": {
+      "id": "http://data.silknow.org/production/8a2adbee-0efc-3a5e-b62f-29bffcfc630c",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3174530/",
+        "label": "Lucca",
+        "lat": "43.84369",
+        "long": "10.50447"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Twill (fabric)",
+        "Taffeta",
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "fourteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/742fe184-76ab-30ac-b352-08fd397f81ac",
+    "identifier": "44.54.2",
+    "label": "Panel",
+    "production": {
+      "id": "http://data.silknow.org/production/5d753f4f-19ea-378e-941b-7bacee25b78e",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": "Silk",
+      "technique": "Velvet",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/e3a68fc8-0a8b-38da-91f7-45d1e0dc70b3",
+    "identifier": "13978",
+    "production": {
+      "id": "http://data.silknow.org/production/fbc1bfcf-f21a-380f-aafe-27a9750be3c1",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Brocade (fabric)",
+        "Façonne cut velvet"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/0c89afc5-6c38-33ed-9607-c47ae5f0e9be",
+    "identifier": "13982",
+    "production": {
+      "id": "http://data.silknow.org/production/c363156b-79e0-312e-aea1-5e3e779232ae",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Pile-on-pile velvet",
+        "Brocade (fabric)",
+        "Façonne cut velvet"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f16d593b-c5e1-3555-ba89-1fe0172a04bb",
+    "identifier": "18192",
+    "production": {
+      "id": "http://data.silknow.org/production/ff68e882-5792-3195-b207-a2d0e4313f8c",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Twill (fabric)",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/5f3f236d-7b1b-31b0-9130-009b3a277a8a",
+    "identifier": "24117",
+    "production": {
+      "id": "http://data.silknow.org/production/b927e06a-6b6f-3e23-97cc-b56cbea36b33",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": [
+        "Silk",
+        "Metal thread",
+        "Gold thread"
+      ],
+      "technique": [
+        "Lampas",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/3a476feb-4983-3285-9a20-c7ebd108bbae",
+    "identifier": "24118",
+    "production": {
+      "id": "http://data.silknow.org/production/1f02dfdb-aba9-3765-9da8-ae0708025c08",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Twill (fabric)",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/04dd8f3f-ce03-30b2-af41-66b46c9fe68f",
+    "identifier": "25611",
+    "production": {
+      "id": "http://data.silknow.org/production/b7281e87-5f5b-3023-9154-5c1378f27920",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": [
+        "Silk",
+        "Metal thread"
+      ],
+      "technique": [
+        "Brocade (fabric)",
+        "Façonne cut velvet",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/18a6e3b8-6733-372d-b345-04f1b2c568e0",
+    "identifier": "06.142",
+    "label": "Ribbon",
+    "production": {
+      "id": "http://data.silknow.org/production/9874b3f9-98f2-3c73-b23c-8c0c39e9c1dc",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": "Silk",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/c1af786a-f058-3f66-851f-6cec60e1de9a",
+    "identifier": "06.112",
+    "label": "Textile fragment",
+    "production": {
+      "id": "http://data.silknow.org/production/f95a838d-be34-3712-ba27-d2ac71a24503",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": "Silk",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/b98fc2a8-0fab-3810-98f7-a57a1cba7acf",
+    "identifier": "5067",
+    "production": {
+      "id": "http://data.silknow.org/production/71fe0b61-e00d-3ae9-80b6-f2587f829bda",
+      "location": {
+        "country": "Italy",
+        "id": "https://sws.geonames.org/3176959/",
+        "label": "Florence",
+        "lat": "43.77925",
+        "long": "11.24626"
+      },
+      "material": "Silk",
+      "technique": [
+        "Brocading weft",
+        "Brocade (fabric)"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f50520df-fa1d-35ad-a112-9646bfb32587",
+    "identifier": "5666",
+    "production": {
+      "id": "http://data.silknow.org/production/dc8f2150-a887-3800-92a3-6d42115553b4",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/82bb0cd5-851f-3048-b468-e46b3632188e",
+    "identifier": "3010",
+    "production": {
+      "id": "http://data.silknow.org/production/6204e96d-95d2-3090-855f-e9a74efe6ed9",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Taffeta",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/2bc978e5-a8e7-3a6f-8fd0-7736d9a935b1",
+    "identifier": "3017",
+    "production": {
+      "id": "http://data.silknow.org/production/7d528170-8bf3-327d-978d-5baf235b65b8",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Taffeta",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/17cabab8-3889-3040-8880-e7e6fb75dc1a",
+    "identifier": "3793",
+    "production": {
+      "id": "http://data.silknow.org/production/bc9b90ea-2f17-35f5-9531-9e32996ad66c",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "thirteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/274d2e1d-eab4-3598-9122-9aef239c4f2d",
+    "identifier": "5749",
+    "production": {
+      "id": "http://data.silknow.org/production/00f0cecc-2f94-391f-9dcc-7d98a1ad3178",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Twill (fabric)",
+        "Taffeta",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/3e9ccdd3-ca05-3768-8660-2ba6ced4d6fb",
+    "identifier": "5751",
+    "production": {
+      "id": "http://data.silknow.org/production/8a16e92f-6949-36a9-b57a-40a8bf6a0d93",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/fe55c162-bbf0-3b2d-b541-cc2aa33987c1",
+    "identifier": "6350",
+    "production": {
+      "id": "http://data.silknow.org/production/9f5ec8e7-a493-3375-af97-58284727148b",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "thirteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/d1f13af4-046c-3450-9f41-044e913df093",
+    "identifier": "6351",
+    "production": {
+      "id": "http://data.silknow.org/production/62a20429-73e2-3ef9-82fe-462ae5fcdf1b",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "thirteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/dde838b1-d760-38b6-96e4-18045f77caa1",
+    "identifier": "6495",
+    "production": {
+      "id": "http://data.silknow.org/production/7bcea6df-7d84-3d8b-9d69-bfb0aa047b8c",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "thirteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/ed773c73-a930-3f3f-a8c5-93b91eaabd7e",
+    "identifier": "6499",
+    "production": {
+      "id": "http://data.silknow.org/production/32fbf94e-5c77-3477-a9fa-cadf5a3caf52",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Taffeta"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/19b2ffcc-6c9c-3bb8-ad5b-b3caff4075c4",
+    "identifier": "6925",
+    "production": {
+      "id": "http://data.silknow.org/production/c04edb62-b00d-3974-b212-241e9380833f",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2517117/",
+        "label": "Granada",
+        "lat": "37.18817",
+        "long": "-3.60667"
+      },
+      "material": "Silk",
+      "technique": "Patterned fabric",
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/11b76900-355f-32e5-836f-a10932d7a244",
+    "identifier": "6338",
+    "production": {
+      "id": "http://data.silknow.org/production/e4ef8a6a-9edc-334e-8179-fb4fc19a3bbb",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2521886/",
+        "label": "Almer\u00eda",
+        "lat": "36.83814",
+        "long": "-2.45974"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "twelfth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/60e67b41-4db7-3822-b2d7-890dccafeca3",
+    "identifier": "5665",
+    "production": {
+      "id": "http://data.silknow.org/production/e0eb862a-8367-3745-a057-7b95fde52ba0",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2510409/",
+        "label": "Toledo",
+        "lat": "39.8581",
+        "long": "-4.02263"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Taffeta",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/2c142ced-4944-39e2-81fb-9d619918a81b",
+    "identifier": "3019",
+    "production": {
+      "id": "http://data.silknow.org/production/a5ff178d-5665-364b-8766-e45d16974cb1",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2510409/",
+        "label": "Toledo",
+        "lat": "39.8581",
+        "long": "-4.02263"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Taffeta",
+        "Patterned fabric"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/786a9f4c-5f43-35f2-bba9-410392e62ad2",
+    "identifier": "3767",
+    "production": {
+      "id": "http://data.silknow.org/production/8c67be30-3326-3fed-ac74-2f112f605ddb",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2510409/",
+        "label": "Toledo",
+        "lat": "39.8581",
+        "long": "-4.02263"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Satin (fabric)",
+        "Taffeta",
+        "Weft effect"
+      ],
+      "time": "fifteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f6d6286e-a37d-3dbe-be3c-34a962f699a9",
+    "identifier": "7010",
+    "production": {
+      "id": "http://data.silknow.org/production/3677d1ed-d349-3958-a72b-a42103c2b462",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/3123622/",
+        "label": "El Burgo de Osma",
+        "lat": "41.58619",
+        "long": "-3.06522"
+      },
+      "material": [
+        "Silk",
+        "Metal thread",
+        "Gold thread"
+      ],
+      "technique": "Taffeta",
+      "time": [
+        "twelfth century (dates CE)",
+        "thirteenth century (dates CE)"
+      ]
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/0bf7c21c-2b6f-3139-ab90-458a29565722",
+    "identifier": "7012",
+    "production": {
+      "id": "http://data.silknow.org/production/daa44ccc-26ad-3bbb-929e-8186acae1613",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/3123622/",
+        "label": "El Burgo de Osma",
+        "lat": "41.58619",
+        "long": "-3.06522"
+      },
+      "material": [
+        "Silk",
+        "Gold thread"
+      ],
+      "technique": "Patterned fabric",
+      "time": "thirteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/55cf87bb-19af-3746-9969-219e5c481536",
+    "identifier": "7014",
+    "production": {
+      "id": "http://data.silknow.org/production/bd47808f-bcfc-34be-ac16-17c563ac4e14",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/3123622/",
+        "label": "El Burgo de Osma",
+        "lat": "41.58619",
+        "long": "-3.06522"
+      },
+      "material": "Silk",
+      "technique": [
+        "Samite",
+        "Patterned fabric"
+      ],
+      "time": "thirteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/30439896-61dd-3099-b0ee-e6e2bcd651ea",
+    "identifier": "7016",
+    "production": {
+      "id": "http://data.silknow.org/production/6729cc1d-49f6-3268-a266-b637a8eafe7a",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/3123622/",
+        "label": "El Burgo de Osma",
+        "lat": "41.58619",
+        "long": "-3.06522"
+      },
+      "material": "Silk",
+      "technique": "Taffeta",
+      "time": [
+        "twelfth century (dates CE)",
+        "thirteenth century (dates CE)"
+      ]
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f9d989c6-9b86-357d-baad-a062452f5aa8",
+    "identifier": "7261",
+    "production": {
+      "id": "http://data.silknow.org/production/e6c8ce62-ead1-3d6d-b05c-fafce371a706",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2521886/",
+        "label": "Almer\u00eda",
+        "lat": "36.83814",
+        "long": "-2.45974"
+      },
+      "material": "Silk",
+      "technique": [
+        "Lampas",
+        "Brocading weft",
+        "Patterned fabric"
+      ],
+      "time": "twelfth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/1f1d7d43-aecb-3cfa-ac00-1d0476628699",
+    "identifier": "7009",
+    "production": {
+      "id": "http://data.silknow.org/production/33a1fea2-9ef1-3b3d-b4ea-3bbcb3faff26",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/3123622/",
+        "label": "El Burgo de Osma",
+        "lat": "41.58619",
+        "long": "-3.06522"
+      },
+      "material": [
+        "Silk",
+        "Metal thread",
+        "Gold thread"
+      ],
+      "time": [
+        "thirteenth century (dates CE)",
+        "twelfth century (dates CE)"
+      ]
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/b5c0fb61-e8bb-3023-81bf-f19ffa594563",
+    "identifier": "24894",
+    "production": {
+      "id": "http://data.silknow.org/production/be2c8776-b74c-365f-a538-659a988a6a1a",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2510409/",
+        "label": "Toledo",
+        "lat": "39.8581",
+        "long": "-4.02263"
+      },
+      "material": [
+        "Vegetable Fibre",
+        "Silk",
+        "Cotton"
+      ],
+      "technique": [
+        "Brocatelle",
+        "Patterned fabric"
+      ],
+      "time": "sixteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/d8eb6f3a-85d8-39dc-ad09-2f86c643fdeb",
+    "identifier": "34.29",
+    "label": "Panel",
+    "production": {
+      "id": "http://data.silknow.org/production/8193f628-cd48-3606-915f-d689ba5f6c83",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2510409/",
+        "label": "Toledo",
+        "lat": "39.8581",
+        "long": "-4.02263"
+      },
+      "material": "Silk",
+      "technique": "Weaving",
+      "time": "sixteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/34796c4d-e6d9-3acc-bcb5-3cb500980f80",
+    "identifier": "5916",
+    "production": {
+      "id": "http://data.silknow.org/production/47617740-1d31-3a0d-91c5-bd2586472850",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2514239/",
+        "label": "Majorca",
+        "lat": "39.6078",
+        "long": "3.01197"
+      },
+      "material": [
+        "Silk",
+        "Cotton"
+      ],
+      "technique": "Twill (fabric)",
+      "time": "sixteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/06b89aa9-7828-3fad-a44e-d2e7a9fa3777",
+    "identifier": "9489",
+    "production": {
+      "id": "http://data.silknow.org/production/2b1bdea3-4bd2-362c-a049-049fec723318",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2514239/",
+        "label": "Majorca",
+        "lat": "39.6078",
+        "long": "3.01197"
+      },
+      "material": [
+        "Silk",
+        "Flax"
+      ],
+      "technique": [
+        "Twill (fabric)",
+        "Satin (fabric)",
+        "Patterned fabric",
+        "Chin\u00e9 a la branche"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/dde4c824-7e35-35e2-93a3-5d0f4bdc20d2",
+    "identifier": "6784",
+    "production": {
+      "id": "http://data.silknow.org/production/bdc1b18a-5553-37db-a049-e91ec3bb6b31",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2514239/",
+        "label": "Majorca",
+        "lat": "39.6078",
+        "long": "3.01197"
+      },
+      "material": [
+        "Silk",
+        "Flax"
+      ],
+      "technique": [
+        "Chin\u00e9 a la branche",
+        "Satin (fabric)",
+        "Twill (fabric)",
+        "Patterned fabric"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/1a88acbf-2a5f-32ad-8343-1fcea7e40ef8",
+    "identifier": "6785",
+    "production": {
+      "id": "http://data.silknow.org/production/831554a6-c113-31de-a2b6-ddabbebc4011",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2514239/",
+        "label": "Majorca",
+        "lat": "39.6078",
+        "long": "3.01197"
+      },
+      "material": [
+        "Silk",
+        "Flax"
+      ],
+      "technique": [
+        "Chin\u00e9 a la branche",
+        "Satin (fabric)",
+        "Twill (fabric)",
+        "Patterned fabric"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/4e4e6d94-46ac-3b17-ac1f-f496d99d77ce",
+    "identifier": "7236",
+    "production": {
+      "id": "http://data.silknow.org/production/86592c2e-75ff-3f89-a22c-92420e62c23f",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2514239/",
+        "label": "Majorca",
+        "lat": "39.6078",
+        "long": "3.01197"
+      },
+      "material": [
+        "Vegetable Fibre",
+        "Silk"
+      ],
+      "technique": [
+        "Patterned fabric",
+        "Satin (fabric)"
+      ],
+      "time": "seventeenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/364bacab-6d19-3f19-a7ff-5e3e430e0a5b",
+    "identifier": "8241",
+    "production": {
+      "id": "http://data.silknow.org/production/07cc77be-4bf7-335b-aebc-7f29a4485ce1",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/3117735/",
+        "label": "Madrid",
+        "lat": "40.4165",
+        "long": "-3.70256"
+      },
+      "material": "Silk",
+      "technique": [
+        "Print",
+        "Taffeta"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  },
+  {
+    "id": "http://data.silknow.org/object/f0c3b589-8391-3529-a8e7-0078440d47f3",
+    "identifier": "27746",
+    "production": {
+      "id": "http://data.silknow.org/production/84d183b2-98c9-301c-8cce-b5aca08d3011",
+      "location": {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2514239/",
+        "label": "Majorca",
+        "lat": "39.6078",
+        "long": "3.01197"
+      },
+      "material": "Silk",
+      "technique": [
+        "Chin\u00e9 a la branche",
+        "Satin (fabric)"
+      ],
+      "time": "eighteenth century (dates CE)"
+    }
+  }
+]

@@ -8,6 +8,8 @@ public class GridCluster
     int hQuad;
     int vQuad;
     public string category="";
+    protected GridCluster parent = null;
+    protected List<GridCluster> childs = new List<GridCluster>();
 
     const int NO_VALUE = -500;
     List<MapPoint> points = new List<MapPoint>();
@@ -18,6 +20,8 @@ public class GridCluster
 
     int level = 0;
 
+    int numFilteredPoints = 0;
+
     public GridCluster(int h, int v, MapPoint point)
     {
         this.hQuad = h;
@@ -25,12 +29,55 @@ public class GridCluster
         //this.points.Add(point);
         addPoint(point);
         this.category = point.getCategory();
+        this.numFilteredPoints = 0;
+    }
+
+    public void setParent(GridCluster cluster)
+    {
+        this.parent = cluster;
+    }
+
+    public void addChild(GridCluster child)
+    {
+        if (!this.childs.Contains(child))
+            this.childs.Add(child);
+    }
+
+    public List<GridCluster> getChilds()
+    {
+        return childs;
+    }
+
+    public void addFilteredPoint()
+    {
+        numFilteredPoints++;
+
+        //if (center.getLabel().Trim().Equals("Cluster 2"))
+        //    Debug.Log("En cluster " + center.getLabel() + " hay " + numFilteredPoints + " de " + points.Count);
+
+        if (numFilteredPoints == points.Count)
+            center.setFiltered(true);
+    }
+
+    public void removeFilteredPoint()
+    {
+        if (numFilteredPoints > 0)
+        {
+            numFilteredPoints--;
+
+            if (center.isFiltered())
+                center.setFiltered(false);
+        }
     }
 
     public void reset()
     {
-        connectionsList.RemoveRange(0, connectionsList.Count);
-        points.RemoveRange(0,points.Count);
+        if (center!=null)
+            center.reset();
+        connectionsList.Clear();
+        points.Clear();
+        //connectionsList.RemoveRange(0, connectionsList.Count);
+        //points.RemoveRange(0,points.Count);
 
     }
 
@@ -129,7 +176,7 @@ public class GridCluster
                         if (clusterLevelFound)
                         {
                             connectionsList[levelCluster - 1]++;
-                            Debug.Log("Hay conexión con cluster " + (levelCluster - 1));
+                            //Debug.Log("Hay conexión con cluster " + (levelCluster - 1));
                         }
                     }
                 }
@@ -141,6 +188,12 @@ public class GridCluster
     public MapPoint getCenter()
     {
         return center;
+    }
+
+    public void setCenter(MapPoint center)
+    {
+        this.center = center;
+        center.setGridCluster(this);
     }
 
     public bool check(int h, int v, string category)
@@ -177,5 +230,10 @@ public class GridCluster
             position = i - 1;
 
         return position;
+    }
+
+    public List<MapPoint> getPoints()
+    {
+        return this.points;
     }
 }

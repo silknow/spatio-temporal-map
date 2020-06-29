@@ -28,12 +28,17 @@ public class ClusterManager {
         for (int i = 0; i < levels.Count; i++)
             levels[i].reset();
 
-        levels.RemoveRange(0, levels.Count);
+        //levels.RemoveRange(0, levels.Count);
+        levels.Clear();
 
-        for (int i = 0; i < points.Count; i++)
-            points[i].reset();
+        levels = new List<MapLevel>();
 
-        points.RemoveRange(0, points.Count);
+        //for (int i = 0; i < points.Count; i++)
+          //  points[i].reset();
+
+        points.Clear();
+        points = new List<MapPoint>();
+        //points.RemoveRange(0, points.Count);
 
     }
 
@@ -63,15 +68,37 @@ public class ClusterManager {
     public void update()
     {
         int i = 0;
+        MapLevel lastLevel=null;
 
-        Debug.Log("Actualizando para " + points.Count + "");
+        //Debug.Log("Actualizando para " + points.Count + "");
   
         for (i = 0; i < zoomIntervals; i++)
         {
-            Debug.Log("Creando nivel " + i);
+            //Debug.Log("Creando nivel " + i);
             MapLevel level = new MapLevel(this.zone, this.numQuadsHoriz, this.numQuadsVert, i);
             level.managePoints(this.points);
+
+            if (lastLevel!=null)
+                arrangeRelatives(level, lastLevel);
+
+            lastLevel = level;
             this.levels.Add(level);
+        }
+    }
+
+    protected void arrangeRelatives(MapLevel level, MapLevel lastLevel)
+    {
+        foreach (GridCluster clusterChild in lastLevel.getGridClusters())
+        {
+            MapPoint childPoint = clusterChild.getPoint(0);
+
+            GridCluster clusterParent = level.getClusterWithPoint(childPoint);
+
+            if (clusterParent != null)
+            {
+                clusterChild.setParent(clusterParent);
+                clusterParent.addChild(clusterChild);
+            }
         }
     }
 

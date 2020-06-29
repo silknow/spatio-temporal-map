@@ -24,12 +24,25 @@ public class MapLevel  {
         return numQuadsH * numQuadsV;
     }
 
+    public GridCluster getClusterWithPoint(MapPoint point)
+    {
+        foreach (GridCluster cluster in clusters)
+        {
+            if (cluster.getPoints().Contains(point))
+                return cluster;
+        }
+
+        return null;
+    }
+
     public void reset()
     {
         for (int i = 0; i < clusters.Count; i++)
             clusters[i].reset();
 
-        clusters.RemoveRange(0, clusters.Count);
+        clusters.Clear();
+
+        //clusters.RemoveRange(0, clusters.Count);
     }
 
     public List<MapPoint> getPointsOfQuad(int numQuad)

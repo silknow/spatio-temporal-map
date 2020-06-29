@@ -6,14 +6,17 @@ public class SilkMap : MonoBehaviour {
 
     public static SilkMap instance;
 
-    public Camera galleryCamera=null;
+    //public Camera galleryCamera=null;
     public Camera mapCamera=null;
     public Hashtable marker3DHash = new Hashtable();
     public MapMarker map = null;
     public bool changing = false;
+    public bool timeSliceDisplay = false;
 
     GameObject initialMap;
     GameObject newMap;
+    GameObject clonedGroupMap;
+    List<GameObject> mapList = new List<GameObject>();
 
     public static SilkMap Instance
     {
@@ -22,11 +25,7 @@ public class SilkMap : MonoBehaviour {
         get { return instance ?? (instance = new GameObject("SilkMap").AddComponent<SilkMap>()); }
     }
 
-    // Instance method, this method can be accesed through the singleton instance
-    public void setGalleryCamera(Camera camera)
-    {
-        this.galleryCamera = camera;
-    }
+   
 
     public void setMapCamera(Camera camera)
     {
@@ -38,18 +37,27 @@ public class SilkMap : MonoBehaviour {
         return this.mapCamera;
     }
 
+    /*
+    // Instance method, this method can be accesed through the singleton instance
+    public void setGalleryCamera(Camera camera)
+    {
+        this.galleryCamera = camera;
+    }
+
     public Camera getGalleryCamera()
     {
         return this.galleryCamera;
     }
+    */
 
     public void init()
     {
-       Debug.Log("SE LLAMA A SILKMAP..............");
-       this.mapCamera = Camera.allCameras[0];
-       this.galleryCamera = Camera.allCameras[1];
-       this.galleryCamera.enabled = false;
+       //Debug.Log("SE LLAMA A SILKMAP..............");
+        this.mapCamera = Camera.allCameras[0];
+       //this.galleryCamera = Camera.allCameras[1];
+       //this.galleryCamera.enabled = false;
        this.mapCamera.enabled = true;
+        //this.map.SetDimension(2);
 
         //OnlineMapsTile.OnAllTilesLoaded += createPlane;
         
@@ -58,6 +66,7 @@ public class SilkMap : MonoBehaviour {
 
     public void changeCam()
     {
+        /*
         if (this.mapCamera.enabled)
         {
             this.galleryCamera.enabled = true;
@@ -67,7 +76,7 @@ public class SilkMap : MonoBehaviour {
         {
             this.mapCamera.enabled = true;
             this.galleryCamera.enabled = false;
-        }
+        }*/
 
     }
 
@@ -159,6 +168,93 @@ public class SilkMap : MonoBehaviour {
 
     }
 
+    public void clearData()
+    {
+        this.mapList.Clear();
+    }
+
+    public void createPlane(int numDivisions)
+    {
+
+
+        if (clonedGroupMap==null)
+            clonedGroupMap = new GameObject();
+
+        timeSliceDisplay = true;
+
+        ClonedMap.Instance.cloneCurrent();
+        Vector2 desplazamiento = new Vector2();
+
+        //numDivisions = 3;
+
+        for (int i = 0; i < numDivisions; i++)
+        {
+            GameObject clon;
+
+            //if (i == 0)
+            //    clon = ClonedMap.Instance.getObjectMap();
+            //else
+            clon = Instantiate(ClonedMap.Instance.getObjectMap());
+
+            if (i < 0)
+            {
+                int level = map.getLevel();
+                List<MapPointMarker> clusterList = map.getClusterMarkersAtLevel(level);
+
+                for (int m = 0; m < clusterList.Count; m++)
+                {
+
+                    double longitud, latitud;
+                    clusterList[m].getMarker3D().GetPosition(out longitud, out latitud);
+                    Debug.Log("longitud, latitud = " + longitud + "," + latitud);
+                    // GameObject marker1 = Instantiate(clusterList[m].getMarker3D().prefab);
+                    Vector3 position = new Vector3((float)longitud * 2.0f, 0.0f, (float)latitud) * 2.0f;
+                    GameObject marker = Instantiate(clusterList[m].getMarker3D().prefab,
+                        position, new Quaternion(0.0f, 0.0f, 0.0f, 0.0f));
+                    marker.transform.parent = clon.transform;
+                    float scale = clusterList[m].getMarker3D().scale / 20.0f;
+                    marker.transform.localScale = new Vector3(scale, scale, scale);
+                    //marker.transform.localPosition = new Vector3((float)longitud, (float)latitud, 0.0f);
+                    //marker.transform.localRotation = new Quaternion(0.0f, 0.0f, 0.0f,0.0f);
+
+                }
+            }
+
+            desplazamiento = ClonedMap.Instance.getDesplazamiento();
+            clon.transform.Translate(new Vector3(desplazamiento.x, 0.0f, -desplazamiento.y));
+            //clon.transform.Rotate(new Vector3(0.0f, 180.0f, 0.0f));
+            clon.transform.parent = clonedGroupMap.transform;
+            clonedGroupMap.name = "dynamicClonedMap";
+            mapList.Add(clon);
+        }
+
+        ClonedMap.Instance.getObjectMap().SetActive(false);
+
+        clonedGroupMap.transform.Rotate(new Vector3(0.0f, 180.0f, 0.0f));
+        //groupMap.transform.Translate(new Vector3(0.0f, 0.0f, -desplazamiento.y * 10.0f));
+
+        initialMap = GameObject.Find("Map");
+        initialMap.SetActive(false);
+
+        mapCamera.transform.position = new Vector3(
+            clonedGroupMap.transform.position.x,
+            clonedGroupMap.transform.position.y - 9.0f,
+            clonedGroupMap.transform.position.z - desplazamiento.y * 3.5f);
+
+        mapCamera.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+        for (int i = 0; i < numDivisions; i++)
+        {
+            mapList[i].transform.Translate(ClonedMap.getTranslate(i, numDivisions));
+            mapList[i].transform.Rotate(ClonedMap.getRotate(i, numDivisions));
+        }
+
+        //cloneMap.transform.parent = GameObject.Find("Map").transform;
+
+        //ClonedMap.Instance.getObjectMap().SetActive(false);
+
+
+    }
     public void createPlane()
     {
 
@@ -277,10 +373,44 @@ public class SilkMap : MonoBehaviour {
 
     }
 
+
+    public void resetMap()
+    {
+        //map.reset();
+        // Resetea el valor de las propiedades
+        //map.GetPropertyManager().resetPropertyValues();
+
+        // Reset all filters
+        //map.resetFilters();
+
+        // Remove all relations
+        //map.removeAllRelations();
+    }
+
     public void reactivate()
     {
-        newMap.SetActive(false);
+        //newMap.SetActive(false);
+        //initialMap.SetActive(true);
+        if (clonedGroupMap != null)
+        {
+           //clonedGroupMap.SetActive(false);
+           foreach (Transform children in clonedGroupMap.transform)
+            {
+                Destroy(children.gameObject);
+            }
+            foreach (Transform childrenG in ClonedMap.Instance.getObjectMap().transform)
+            {
+                Destroy(childrenG.gameObject);
+            }
+
+            clearData();  
+
+        }
         initialMap.SetActive(true);
+        timeSliceDisplay = false;
+        ClonedMap.Instance.getObjectMap().SetActive(true);
+
+
     }
 
     public GameObject getPlane(OnlineMapsTile tile)

@@ -35,14 +35,35 @@ public class RelationShip {
         this.multiple = true;
     }
 
+    public void clear()
+    {
+        visible.Clear();
+        relatedWith.Clear();
+    }
+
     public RelationShip(MapPoint from, List<MapPoint> pointList, string name)
     {
         this.from = from;
         this.relatedWith = pointList;
         this.name = name;
         this.multiple = true;
-        for (int i = 0; i < pointList.Count; i++)
-            this.visible.Add(true);
+        for (int i = 0; i < pointList.Count; i++) 
+            if (pointList[i].isFiltered())
+                this.visible.Add(false);
+            else
+                this.visible.Add(false);
+
+    }
+
+    public void update()
+    {
+        int i = 0;
+
+        foreach (MapPoint p in relatedWith)
+        {
+            this.visible[i] = !p.isFiltered();
+            i++;
+        }
     }
 
     public MapPoint getFrom()
@@ -103,6 +124,11 @@ public class RelationShip {
             position = i - 1;
 
         return position;
+    }
+
+    public bool isVisibleRelationAt(int position)
+    {
+        return this.visible[position];
     }
 
     public bool isVisibleRelationWith(MapPoint point)

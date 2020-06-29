@@ -10,7 +10,7 @@ public class keyboardManager : MonoBehaviour {
     GameObject initialMap;
     GameObject newMap;
 
-
+    private static bool firstClone = true;
     private static int firstKeyMin = 0;
     private static int firstKeyMax = 0;
 
@@ -20,7 +20,7 @@ public class keyboardManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        print("Hello");
+//        print("Hello");
 
         if (first)
         {
@@ -60,9 +60,9 @@ public class keyboardManager : MonoBehaviour {
             //print("up arrow key is held down");
             //OnlineMapsCameraOrbit.instance.rotation.x = 0.0f;
             //print("up arrow key is held down");
-            if (SilkMap.Instance.getGalleryCamera().enabled)
-                updateGallery();
-            else
+            //if (SilkMap.Instance.getGalleryCamera().enabled)
+              //  updateGallery();
+            //else
                 OnlineMaps.instance.position = OnlineMaps.instance.position + new Vector2(0.0f, incPos);
         }
 
@@ -76,25 +76,25 @@ public class keyboardManager : MonoBehaviour {
 
         if (Input.GetKey(KeyCode.Escape)) {
 
-            if (SilkMap.Instance.getGalleryCamera().enabled)
-                SilkMap.Instance.changeCam();
+            //if (SilkMap.Instance.getGalleryCamera().enabled)
+              //  SilkMap.Instance.changeCam();
         }
 
         if (Input.GetKey(KeyCode.DownArrow))
         {
             print("up arrow key is held down");
             //OnlineMapsCameraOrbit.instance.rotation.x = 35.0f;
-            if (SilkMap.Instance.getGalleryCamera().enabled)
-                updateGallery();
-            else
+            //if (SilkMap.Instance.getGalleryCamera().enabled)
+            //    updateGallery();
+            //else
                 OnlineMaps.instance.position = OnlineMaps.instance.position + new Vector2(0.0f, -incPos);
         }
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            print("up arrow key is held down");
-            if (SilkMap.Instance.getGalleryCamera().enabled)
-                updateGallery();
-            else
+            //print("up arrow key is held down");
+            //if (SilkMap.Instance.getGalleryCamera().enabled)
+              //  updateGallery();
+            //else
                 OnlineMaps.instance.position = OnlineMaps.instance.position + new Vector2(-incPos, 0.0f);
             //OnlineMaps.instance.SetPositionAndZoom(-0.389f, 39.416f,10.0f);
             //OnlineMapsMarkerManager.CreateItem(-0.389f, 39.416f, "Valencia");
@@ -102,10 +102,10 @@ public class keyboardManager : MonoBehaviour {
         }
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            print("up arrow key is held down");
-            if (SilkMap.Instance.getGalleryCamera().enabled)
-                updateGallery();
-            else
+            //print("up arrow key is held down");
+            //if (SilkMap.Instance.getGalleryCamera().enabled)
+             //   updateGallery();
+            //else
                 OnlineMaps.instance.position = OnlineMaps.instance.position + new Vector2(incPos, 0.0f);
             //OnlineMaps.instance.SetPositionAndZoom(29.32f, 50.701f, 3.0f);
             //OnlineMapsMarker3DManager.instance.CreateFromExistGameObject(22f, 39.2f, GameObject.Find("Cube"));
@@ -142,13 +142,31 @@ public class keyboardManager : MonoBehaviour {
             OnlineMaps.instance.mapType = "osm"; //.mapnik"; 
 
         if (Input.GetKey(KeyCode.F2))
-           OnlineMaps.instance.mapType = "google.satellite";
+            OnlineMaps.instance.mapType = "google.satellite";
 
         if (Input.GetKey(KeyCode.F3))
-            OnlineMaps.instance.mapType = "arcgis.worldtopomap";
+        {
+            // OnlineMaps.instance.mapType = "arcgis.worldtopomap";
+
+            List<string> filteredPropNameList = SilkMap.instance.map.GetPropertyManager().GetFilteredPropertiesName();
+
+            Debug.Log("Hay " + filteredPropNameList.Count + " propiedades para filtrar");
+
+            foreach (string s in filteredPropNameList)
+            {
+                Debug.Log("La propiedad " + s + " tiene los siguientes posibles valores:");
+                List<string> propValues = SilkMap.instance.map.GetPropertyManager().GetPropertyByName(s).getPossibleValues();
+                foreach (string s1 in propValues)
+                    Debug.Log("Valor propiedad : " + s1);
+            }
+        }
 
         if (Input.GetKey(KeyCode.F4))
-            OnlineMaps.instance.mapType = "mapquest.satellite";
+        {
+
+
+           OnlineMaps.instance.mapType = "mapquest.satellite";
+        }
 
         if (Input.GetKey(KeyCode.F5))
             OnlineMaps.instance.mapType = "openmapsurfer";
@@ -176,7 +194,11 @@ public class keyboardManager : MonoBehaviour {
             //OnlineMapsMarker3DManager.instance.RemoveAll(true);
 
 
-            SilkMap.Instance.createPlane();
+           // if (firstClone)
+            //{
+                SilkMap.Instance.createPlane(3);
+              //  firstClone = false;
+            //}
 
 
 
