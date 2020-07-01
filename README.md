@@ -17,7 +17,7 @@ In order to compile and execute this project, some third party assets are nedded
 Standalone Release (Windows and MACOS) can be found in [Releases](https://github.com/silknow/spatio-temporal-map/releases) page. The WebGL interactive version is available on the [SILKNOW web site](https://silknow.eu/silknow/viz/WebGL/index.html)
 
 ### Sample Images
-For testing purpose, sample images of the map can be found 
+For testing purpose, sample images of the map can be found here: 
 [Map 2D](https://silknow.eu/silknow/viz/images/map2d.jpg)
 [Map 3D](https://silknow.eu/silknow/viz/images/map3d.jpg)
 [Map 2Db](https://silknow.eu/silknow/viz/images/map2d2.jpg)
