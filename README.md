@@ -18,7 +18,7 @@ Standalone Release (Windows and MACOS) can be found in [Releases](https://github
 
 ### Sample Images
 For testing purpose, sample images of the map can be found 
-[here](https://silknow.eu/silknow/viz/images/map2d.jpg)
-[here](https://silknow.eu/silknow/viz/images/map3d.jpg)
-[here](https://silknow.eu/silknow/viz/images/map2d2.jpg)
-[here](https://silknow.eu/silknow/viz/images/map3drel.jpg)
+[Map 2D](https://silknow.eu/silknow/viz/images/map2d.jpg)
+[Map 3D](https://silknow.eu/silknow/viz/images/map3d.jpg)
+[Map 2Db](https://silknow.eu/silknow/viz/images/map2d2.jpg)
+[Map 3D with relations](https://silknow.eu/silknow/viz/images/map3drel.jpg)
