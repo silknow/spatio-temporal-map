@@ -3,8 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Clustering;
 using UnityEngine.Events;
+using SilknowMap;
 
 public class InitApp : MonoBehaviour {
 
@@ -30,6 +32,8 @@ public class InitApp : MonoBehaviour {
 
     public GameObject prefabObject;
     public GameObject prefabCluster;
+    
+    public GameObject clonedMapGroup;
     
     // Event to be triggered when data is loaded to the map
     [Header("Event to be triggered when data is loaded to the map")]
@@ -163,6 +167,9 @@ public class InitApp : MonoBehaviour {
         map.fixZoomInterval(OnlineMaps.instance, 3, 14);
         map.fixPositionInterval(OnlineMaps.instance, 28.24f, -16.79f, 71.19f, 48.48f);
         map.setViewerPosition(23.42f, 46.2f);
+        Vector2 br = OnlineMaps.instance.bottomRightPosition;
+        Vector2 tl = OnlineMaps.instance.topLeftPosition;
+        int zoomi = OnlineMaps.instance.zoom;
         
         //map.addPoints(mapPoints);
         //map.update();
@@ -170,8 +177,11 @@ public class InitApp : MonoBehaviour {
         map.setViewerZoom(OnlineMaps.instance.zoom);
 
         SilkMap.Instance.map = map;
+        //ClonedMap.instance.setMap(map);
+        if (clonedMapGroup != null) 
+            SilkMap.instance.clonedGroupMap = clonedMapGroup;
         
-        map.showClusters();
+        //map.showClusters();
 
         map.SetDimension(2);
 
@@ -247,35 +257,26 @@ public class InitApp : MonoBehaviour {
     public void UpdatePropertyManager(Map map)
     {
         //map.GetPropertyManager().AddProperty("description.language", false, false, 0, 0, false, false,false);
-        map.GetPropertyManager().AddProperty("description", true, false, 0, 1, false, false,false);
-        map.GetPropertyManager().AddProperty("technique", true, true, 1, 2, false, false, true);
-        map.GetPropertyManager().AddProperty("material", true, true, 1, 3, false, false, true);
-        map.GetPropertyManager().AddProperty("place", true, false, 0, 4, false, true, true);
-        map.GetPropertyManager().AddProperty("img", true, false, 0, 5, true, false,false);
+        map.GetPropertyManager().AddProperty("description", true, false, 0, 1, false, false);
+        map.GetPropertyManager().AddProperty("technique", true, true, 1, 2, false, false, true, Color.blue);
+        map.GetPropertyManager().AddProperty("material", true, true, 2, 3, false, false, true, Color.red);
+        map.GetPropertyManager().AddProperty("time", true, true, 3, 4, false, false,false,Color.green);
+        map.GetPropertyManager().AddProperty("place", true, false, 0, 5, false, true, true, Color.grey);
+        map.GetPropertyManager().AddProperty("img", true, false, 0, 6, true, false);
      }
 
     public void LoadRestData(List<ManMadeObject> objectList)
     {
-        //print("loadrestdata");
-        //RemoveAllMarkers();
-        //Call to reset every property and filters.
-        //SilkMap.instance.resetMap();
-
-       
-
         float longitud, latitud;
         string[] category = { "silknow.org/#pthing", "silknow.org/#man" };
         mapPoints.Clear();
         map.reset();
-        //Debug.Log("Hay " + objectList.Count + " Puntos");
-        int cont = 0;
         foreach (var obj in objectList)
         {
             if (obj.production == null || obj.production.location == null)
                 continue;
             string lat = obj.production.location[0].lat;
             string lg = obj.production.location[0].@long;
-            cont++;
             if(string.IsNullOrEmpty(lat) || string.IsNullOrEmpty(lg))
                 continue;
             longitud = float.Parse(lg, CultureInfo.InvariantCulture);
@@ -284,46 +285,35 @@ public class InitApp : MonoBehaviour {
             // Cada MapPoint tiene una serie de propiedades, la posición, escala y altitud vienen dentro de un objeto
             // MapPointMarker de OnlineMaps 
             // Se añade la posicion (lat,long) y se asocia a un objeto 3d Cube, luego puede cambiarse
-           //var mapPoint = new MapPointMarker(OnlineMapsMarker3DManager.CreateItem(new Vector2(longitud, latitud), prefabObject));
             var mapPoint = new MapPointMarker(longitud, latitud, prefabObject,false);
             // Altitud del mar = 30.0f
             mapPoint.getMarker3D().altitude = 30.0f;
             // Scale =3.0f, luego se cambia
             mapPoint.getMarker3D().scale = 3.0f;
             
-
-
-
             // Se introducen el resto de propiedades (URI, categpry (clase), from y to (intervalo de tiempo)
             mapPoint.setURI(obj.id);
             mapPoint.setCategory(category[1]);
             mapPoint.setLabel(obj.label ?? obj.identifier);
+;
+            // Check for century Dictionary
+            if (APIManager.instance.timeValues.TryGetValue(obj.production.time[0], out var time))
+            {
+                mapPoint.setFrom(time.@from);
+                mapPoint.setTo(time.to);
+            }
 
-            if (mapPoint.getLabel().Equals("8824") || mapPoint.getLabel().Equals("8823"))
-                Debug.Log("Here we are");
-            // Si sólo sabemos un año from=to=ese año
-            mapPoint.setFrom(UnityEngine.Random.Range(1650, 1680));
-            mapPoint.setTo(UnityEngine.Random.Range(1700, 1750));
-            
-            
-            //Activar el Onclick del Mapa
+            //Set Properties values
             map.GetPropertyManager().SetPropertyValue("technique", mapPoint, obj.production.technique);
             map.GetPropertyManager().SetPropertyValue("material", mapPoint, obj.production.material);
             map.GetPropertyManager().SetPropertyValue("place", mapPoint, obj.production.location[0].country);
-          
-            int posPoint = mapPoints.Count - 1;
-            //mapPoint.getMarker3D().prefab.name = (-posPoint).ToString();
+            map.GetPropertyManager().SetPropertyValue("time", mapPoint, obj.production.time[0]);
 
+            mapPoint.setDimension(map.GetDimension());
             mapPoints.Add(mapPoint);
-
-
         }
-        //Debug.Log("Hay " + cont + " con coordenadas");
-        
-        
         map.addPoints(mapPoints);
-        
-        
+
         ResetMapParameters();
         map.update();
 
@@ -358,12 +348,35 @@ public class InitApp : MonoBehaviour {
     }
 
     public void ResetMapParameters (){
+        /*
         map.setGridingZoomData(3, 10, 4);
         map.setGridingQuadsHorizonal(64);
         map.fixZoomInterval(OnlineMaps.instance, 3, 14);
         map.fixPositionInterval(OnlineMaps.instance, 28.24f, -16.79f, 71.19f, 48.48f);
+      
+        */
         SilkMap.Instance.map = map;
-        map.showClusters();
+        CenterMapOnData();
+        //map.showClusters();
+    }
+    public void CenterMapOnData(){
+        Vector2 center;
+        int zoom;
+
+        var listOfMarkers = mapPoints.Select(t => (t as MapPointMarker).getMarker2D());
+
+        //Debug.LogFormat("OnlineMapsMarkerManager count : {0}",OnlineMapsMarkerManager.instance.items.Count);
+        // Get the center point and zoom the best for all markers.
+        OnlineMapsUtils.GetCenterPointAndZoom(listOfMarkers.ToArray(), out center, out zoom);
+
+        //Debug.LogFormat("Zoom Level: {0}",zoom);
+        //Debug.LogFormat("Center: {0} ; {1}",center.x,center.y);
+        // Change the position and zoom of the map.
+        
+        
+        map.fixZoomInterval(OnlineMaps.instance, 3, Mathf.Max(zoom,14));
+        map.setViewerZoom(zoom);
+        map.setViewerPosition(center.x,center.y);
     }
     public void ToggleDimension ()
     {

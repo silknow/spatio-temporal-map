@@ -33,5 +33,6 @@ public class MapClusterPopup : MonoBehaviour
     {
         var item = Instantiate(clusterItemPrefab, content);
         item.GetComponentInChildren<Text>().text = name;
+        item.GetComponentInChildren<ClusterPopupItem>().SetMarker(id);
     }
 }

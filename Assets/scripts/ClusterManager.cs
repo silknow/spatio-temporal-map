@@ -47,6 +47,11 @@ public class ClusterManager {
         return zoomIntervals;
     }
 
+    public bool hasData()
+    {
+        return points.Count > 0;
+    }
+
     public void setZoomData(float min, float max, int intervals)
     {
         this.zoomMin = min;
@@ -74,9 +79,10 @@ public class ClusterManager {
   
         for (i = 0; i < zoomIntervals; i++)
         {
-            //Debug.Log("Creando nivel " + i);
-            MapLevel level = new MapLevel(this.zone, this.numQuadsHoriz, this.numQuadsVert, i);
+            
+            MapLevel level = new MapLevel(this.zone, this.numQuadsHoriz, this.numQuadsVert, i);            
             level.managePoints(this.points);
+            //Debug.Log("Creando nivel " + i + " que tiene " +level.getGridClusters().Count);
 
             if (lastLevel!=null)
                 arrangeRelatives(level, lastLevel);
@@ -88,11 +94,11 @@ public class ClusterManager {
 
     protected void arrangeRelatives(MapLevel level, MapLevel lastLevel)
     {
-        foreach (GridCluster clusterChild in lastLevel.getGridClusters())
+        foreach (GridCluster clusterChild in level.getGridClusters())
         {
             MapPoint childPoint = clusterChild.getPoint(0);
 
-            GridCluster clusterParent = level.getClusterWithPoint(childPoint);
+            GridCluster clusterParent = lastLevel.getClusterWithPoint(childPoint);
 
             if (clusterParent != null)
             {

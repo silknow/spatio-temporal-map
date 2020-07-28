@@ -16,7 +16,7 @@ using UnityEngine;
  * 
  * The manager could be used to get the name of all the properties which will be displayed on the object information screen.
  * */
-public class PropertyManager : MonoBehaviour
+public class PropertyManager
 {
     List<Property> propertyList = new List<Property>();
 
@@ -27,7 +27,7 @@ public class PropertyManager : MonoBehaviour
      * Add the specification of a new property in the property manager.
      * Once this specification is added, the property could be used to assign values to MapPoint instances.
      * */
-    public Property AddProperty(string name,bool visible, bool filter, int positionFilter,int visiblePosition, bool image, bool link, bool relatable)
+    public Property AddProperty(string name,bool visible, bool filter, int positionFilter,int visiblePosition, bool image, bool link, bool relatable, Color color)
     {
 
         Property property = this.GetPropertyByName(name);
@@ -38,15 +38,21 @@ public class PropertyManager : MonoBehaviour
         {
             property = new Property(name, visible, filter, positionFilter, visiblePosition, image, link);
             property.SetRelatable(relatable);
+            property.setRelationColor(color);
             propertyList.Add(property);
         }
 
         return property;
     }
 
+    public Property AddProperty(string name, bool visible, bool filter, int positionFilter, int visiblePosition, bool image, bool link)
+    {
+        return AddProperty(name, visible,filter,positionFilter,visiblePosition,image,link,false,Color.black);
+    }
+
     /**
-     * Set the value <value> to the property <name> of the <point>
-     * */
+        * Set the value <value> to the property <name> of the <point>
+        * */
     public void SetPropertyValue(string name,  MapPoint point, string value)
     {
         List<string> valueList = new List<string>();

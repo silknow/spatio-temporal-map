@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using SilknowMap;
 
 public class ObjectDetailPanel : MonoBehaviour
 {
@@ -23,6 +25,21 @@ public class ObjectDetailPanel : MonoBehaviour
     public GameObject propertiesPanel;
     public GameObject imagesPanel;
 
+    public RawImage slideshowImage;
+    
+   
+    private List<Texture2D> objectImages = new List<Texture2D>();
+
+    private int currentImageIndex = -1;
+
+    private int numberOfObjectImgs = 0;
+    public int currentLoadedImgs = 0;
+
+    
+    
+    public GameObject buttonNextImg,buttonPrevImg;
+    
+    
     public void SetData(string uri)
     {
         APIManager.instance.StartCoroutine(APIManager.instance.GetObjectDetail(uri, ResponseCallback));
@@ -54,7 +71,8 @@ public class ObjectDetailPanel : MonoBehaviour
         {
             if (vProp.IsImage())
             {
-                SetImages(vProp);
+                //SetImages(vProp);
+                SetImagesSlideshow(vProp);
                 continue;
             }
 
@@ -72,6 +90,84 @@ public class ObjectDetailPanel : MonoBehaviour
         }
     }
 
+    private void SetImagesSlideshow(Property imgProp)
+    {
+        objectImages.Clear();
+        Resources.UnloadUnusedAssets();
+        imagesPanel.SetActive(false);
+
+        var listOfImageProperties = MapUIManager.instance.GetSelectedMarker().getPropertyValue(imgProp.GetName());
+
+        currentLoadedImgs = 0;
+        numberOfObjectImgs = listOfImageProperties.Count(img => img.Contains("silknow"));
+        
+        foreach (var imgUri in listOfImageProperties)
+        {
+            if (imgUri.Contains("silknow"))
+            {
+                StartCoroutine(downloadImageFromUri(imgUri, AddImageToSlideshow));
+            }
+        }
+        
+        buttonNextImg.SetActive(numberOfObjectImgs>1);
+        buttonPrevImg.SetActive(numberOfObjectImgs>1);
+    }
+    private void AddImageToSlideshow(Texture2D tex)
+    {
+        if (objectImages == null)
+            objectImages = new List<Texture2D>();
+        objectImages.Add(tex);
+        currentLoadedImgs++;
+        if (objectImages.Count == 1)
+        {
+            slideshowImage.texture = tex;
+            slideshowImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)tex.width / tex.height;
+            currentImageIndex = 0;
+        }
+
+        if (currentLoadedImgs == numberOfObjectImgs)
+        {
+            if(!imagesPanel.activeSelf)
+                imagesPanel.SetActive(true);
+        }
+            
+    }
+
+
+    public void NextImageSlideshow()
+    {
+        if (objectImages.Count < 2)
+            return;
+        if (currentImageIndex < (objectImages.Count - 1))
+        {
+            currentImageIndex++;
+        }
+        else
+        {
+            currentImageIndex = 0;
+        }
+
+        var tex = objectImages[currentImageIndex];
+        slideshowImage.texture = tex;
+        slideshowImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)tex.width / tex.height;
+    }
+    public void PreviousImageSlideshow()
+    {
+        if (objectImages.Count < 2)
+            return;
+        if (currentImageIndex > 0)
+        {
+            currentImageIndex--;
+        }
+        else
+        {
+            currentImageIndex = objectImages.Count -1;
+        }
+
+        var tex = objectImages[currentImageIndex];
+        slideshowImage.texture = tex;
+        slideshowImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)tex.width / tex.height;
+    }
     private void SetImages(Property imgProp)
     {
         //Clear all Images;

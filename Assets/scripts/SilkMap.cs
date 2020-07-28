@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SilkMap : MonoBehaviour {
 
@@ -13,9 +14,10 @@ public class SilkMap : MonoBehaviour {
     public bool changing = false;
     public bool timeSliceDisplay = false;
 
+
     GameObject initialMap;
     GameObject newMap;
-    GameObject clonedGroupMap;
+    public GameObject clonedGroupMap;
     List<GameObject> mapList = new List<GameObject>();
 
     public static SilkMap Instance
@@ -173,204 +175,47 @@ public class SilkMap : MonoBehaviour {
         this.mapList.Clear();
     }
 
-    public void createPlane(int numDivisions)
+
+    public GameObject createSnapShot(int from, int to)
     {
 
 
-        if (clonedGroupMap==null)
-            clonedGroupMap = new GameObject();
+       // if (clonedGroupMap == null)
+        //clonedGroupMap = ClonedMap.instance.getObjectMap();
 
-        timeSliceDisplay = true;
-
-        ClonedMap.Instance.cloneCurrent();
-        Vector2 desplazamiento = new Vector2();
-
-        //numDivisions = 3;
-
-        for (int i = 0; i < numDivisions; i++)
+        if (to == 1700)
+            timeSliceDisplay = true;
+        else
         {
-            GameObject clon;
-
-            //if (i == 0)
-            //    clon = ClonedMap.Instance.getObjectMap();
-            //else
-            clon = Instantiate(ClonedMap.Instance.getObjectMap());
-
-            if (i < 0)
+            if (timeSliceDisplay)
             {
-                int level = map.getLevel();
-                List<MapPointMarker> clusterList = map.getClusterMarkersAtLevel(level);
-
-                for (int m = 0; m < clusterList.Count; m++)
-                {
-
-                    double longitud, latitud;
-                    clusterList[m].getMarker3D().GetPosition(out longitud, out latitud);
-                    Debug.Log("longitud, latitud = " + longitud + "," + latitud);
-                    // GameObject marker1 = Instantiate(clusterList[m].getMarker3D().prefab);
-                    Vector3 position = new Vector3((float)longitud * 2.0f, 0.0f, (float)latitud) * 2.0f;
-                    GameObject marker = Instantiate(clusterList[m].getMarker3D().prefab,
-                        position, new Quaternion(0.0f, 0.0f, 0.0f, 0.0f));
-                    marker.transform.parent = clon.transform;
-                    float scale = clusterList[m].getMarker3D().scale / 20.0f;
-                    marker.transform.localScale = new Vector3(scale, scale, scale);
-                    //marker.transform.localPosition = new Vector3((float)longitud, (float)latitud, 0.0f);
-                    //marker.transform.localRotation = new Quaternion(0.0f, 0.0f, 0.0f,0.0f);
-
-                }
+                removeSnapShots();
+                timeSliceDisplay = false;                
             }
-
-            desplazamiento = ClonedMap.Instance.getDesplazamiento();
-            clon.transform.Translate(new Vector3(desplazamiento.x, 0.0f, -desplazamiento.y));
-            //clon.transform.Rotate(new Vector3(0.0f, 180.0f, 0.0f));
-            clon.transform.parent = clonedGroupMap.transform;
-            clonedGroupMap.name = "dynamicClonedMap";
-            mapList.Add(clon);
         }
 
-        ClonedMap.Instance.getObjectMap().SetActive(false);
+        GameObject snapShot = ClonedMap.Instance.cloneCurrent(from, to);
 
-        clonedGroupMap.transform.Rotate(new Vector3(0.0f, 180.0f, 0.0f));
-        //groupMap.transform.Translate(new Vector3(0.0f, 0.0f, -desplazamiento.y * 10.0f));
-
-        initialMap = GameObject.Find("Map");
-        initialMap.SetActive(false);
-
-        mapCamera.transform.position = new Vector3(
-            clonedGroupMap.transform.position.x,
-            clonedGroupMap.transform.position.y - 9.0f,
-            clonedGroupMap.transform.position.z - desplazamiento.y * 3.5f);
-
-        mapCamera.transform.rotation = Quaternion.Euler(0, 0, 0);
-
-        for (int i = 0; i < numDivisions; i++)
-        {
-            mapList[i].transform.Translate(ClonedMap.getTranslate(i, numDivisions));
-            mapList[i].transform.Rotate(ClonedMap.getRotate(i, numDivisions));
-        }
-
-        //cloneMap.transform.parent = GameObject.Find("Map").transform;
-
-        //ClonedMap.Instance.getObjectMap().SetActive(false);
-
-
+        return snapShot;
     }
-    public void createPlane()
+
+    public void removeSnapShots()
     {
+        //if (clonedGroupMap == null)
+        //clonedGroupMap = ClonedMap.instance.getObjectMap();
 
-               
-        GameObject firstChild=null;
-        OnlineMapsTile firstTile=null;
-        OnlineMapsTile lastTile=null;
-
-        Debug.Log("Hay tiles ..."+OnlineMaps.instance.tileManager.tiles.Count);
-        int fila = 0;
-        int i = 0;
-        int filaReal = 0;
-        int columnReal = 0;
-
-        while (fila < 6 && i < OnlineMaps.instance.tileManager.tiles.Count)
+        foreach (Transform child in ClonedMap.instance.getObjectMap().transform)
         {
-            for (int j = 0; j < 6; j++)
-            {
-                //Debug.Log("Fila = " + fila + "------- j = " + j);
-                if (fila > 0 && j > 0 && j < 5)
-                {
-                    OnlineMapsTile tile = OnlineMaps.instance.tileManager.tiles[i];
-                    GameObject cube = Instantiate(GameObject.Find("Cube2"));
-                    cube.transform.SetPositionAndRotation(cube.transform.position + new Vector3(-10.0f * filaReal, 30.0f, 10.0f * columnReal), cube.transform.rotation);
-                    columnReal++;
-
-                    if (fila == 1 && j == 1)
-                    {
-                        firstChild = cube;
-                        firstTile = tile;
-                    }
-
-                    if (fila == 5 && j == 4)
-                    {
-                        lastTile = tile;
-                    }
-
-                    if (tile != null)
-                    {
-                        Texture2D tex = tile.texture;
-                        tex.Apply();
-                        MeshRenderer renderer = cube.GetComponent<MeshRenderer>();
-                        renderer.material.mainTexture = tex;
-                    }
-                    else
-                        Debug.Log("TILE IS NULL");
-
-                    cube.transform.parent = GameObject.Find("SilkMap").transform;
-                }
-                i++;
-                
-            }
-
-            if (fila > 0)
-                filaReal++;
-            fila++;
-
-            columnReal = 0;
-
-
-
+            GameObject.Destroy(child.gameObject);
         }
 
-
-        Debug.Log("FIRST TILE ES " + firstTile.GetRect());
-        Debug.Log("LAST TILE ES " + lastTile.GetRect());
-
-        float xMin = firstTile.GetRect().xMin;
-        float yMin = firstTile.GetRect().yMin;
-        float xMax = lastTile.GetRect().xMin + lastTile.GetRect().width;
-        float yMax = lastTile.GetRect().yMin + lastTile.GetRect().height;
+        ClonedMap.instance.unStackPoints();
+    }
 
 
-        Rect rect = new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
-
-        GameObject.Find("SilkMap").transform.localScale = new Vector3(40.0f, 1.0f, 40.0f);
-
-        int level = map.getLevel();
-        List<MapPointMarker> clusterList = map.getClusterMarkersAtLevel(level);
-
-        for (int m=0;m<clusterList.Count;m++) { 
-
-            GameObject marker1 = Instantiate(clusterList[m].getMarker3D().prefab);
-            
-            float positionX = (-50.0f * (clusterList[m].getMarker3D().position.x + 90.0f)) / 225.0f;
-            float positionY = -20.0f;
-            float positionZ = (40.0f * (100.83f - (clusterList[m].getMarker3D().position.y+0.0f))) / 120.15f;
-
-            Vector3 position = new Vector3(positionX, positionY, positionZ);
-
-            marker1.transform.parent = GameObject.Find("SilkMap").transform;
-            marker1.transform.localPosition = new Vector3(positionX, positionY, positionZ);
-
-            float scaleCorrector = clusterList[m].getMarker3D().scale;
-            if (!marker1.name.Contains("Bobina"))
-            {
-                scaleCorrector = scaleCorrector / 20.0f;
-                marker1.transform.localScale = new Vector3(scaleCorrector, scaleCorrector, scaleCorrector);
-
-            }
-            else
-            {
-                scaleCorrector = marker1.transform.localScale.x;
-                marker1.transform.localScale = new Vector3(scaleCorrector*2.0f, scaleCorrector*50.0f, scaleCorrector*2.0f);
-                marker1.transform.localPosition = marker1.transform.localPosition + new Vector3(0.0f, 2.0f,0.0f);
-            }
-
-            
-
-        }
-
-
-
-
-
-
+    public GameObject createPlane(int from, int to)
+    {
+        return createSnapShot(from, to);
     }
 
 
@@ -406,7 +251,9 @@ public class SilkMap : MonoBehaviour {
             clearData();  
 
         }
-        initialMap.SetActive(true);
+
+        //initialMap.SetActive(true);
+        ClonedMap.instance.unStackPoints();
         timeSliceDisplay = false;
         ClonedMap.Instance.getObjectMap().SetActive(true);
 

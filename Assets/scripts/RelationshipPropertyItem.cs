@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Honeti;
 using UnityEngine;
@@ -9,6 +10,20 @@ public class RelationshipPropertyItem : NormalPropertyItem
     public GameObject relatablePropertyValuePrefab;
     private Property _property;
     public Toggle toggle;
+
+    private void OnEnable()
+    {
+        I18N.OnLanguageChanged += UpdateLanguageText;
+    }
+    private void OnDisable()
+    {
+        I18N.OnLanguageChanged -= UpdateLanguageText;
+    }
+
+    private void UpdateLanguageText(LanguageCode newLanguage)
+    {
+        propertyName.text = I18N.instance.getValue("^"+_property.GetName()).ToUpperInvariant() ?? _property.GetName().ToUpperInvariant();
+    }
     public override void SetPropertyData(Property prop)
     {
         _property = prop;

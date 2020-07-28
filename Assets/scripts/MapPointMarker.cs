@@ -6,10 +6,19 @@ public class MapPointMarker : MapPoint {
 
     OnlineMapsMarker3D marker3D;
     OnlineMapsMarker marker2D;
+    protected Vector3 mapPosition;
+    protected Vector3 mapScale;
+    protected Transform mapParentTransform;
+    protected Vector3 stackedPosition;
+    protected Vector3 stackedScale;
+    protected Transform stackedTransform;
+
 
     protected Dictionary<string, List<OnlineMapsDrawingLine>> graphicRelationsPerProperty = new Dictionary<string, List<OnlineMapsDrawingLine>>();
 
-    public MapPointMarker(OnlineMapsMarker3D marker) : base(marker.position.x,marker.position.y)
+    protected Dictionary<MapPoint, List<OnlineMapsDrawingLine>> graphicRelationsPerPoint = new Dictionary<MapPoint, List<OnlineMapsDrawingLine>>();
+
+    public MapPointMarker(OnlineMapsMarker3D marker) : base(marker.position.x, marker.position.y)
     {
         this.marker3D = marker;
         this.marker2D = OnlineMapsMarkerManager.CreateItem(new Vector2(marker.position.x, marker.position.y), "");
@@ -21,7 +30,7 @@ public class MapPointMarker : MapPoint {
     protected void OnMarkerClick(OnlineMapsMarkerBase marker)
     {
         //Debug.Log("TOC TOC on "+marker.label);
-        MapItemPopup.instance.OnMarkerClick(this);       
+        MapItemPopup.instance.OnMarkerClick(this);
         //this.showRelations("technique");
     }
 
@@ -32,11 +41,13 @@ public class MapPointMarker : MapPoint {
         box.size = new Vector3(0.75f, 0.75f, 0.75f);
     }
 
-   public MapPointMarker(float longitud, float latitud, GameObject prefabObject, bool cluster): base(longitud, latitud)
+    public MapPointMarker(float longitud, float latitud, GameObject prefabObject, bool cluster) : base(longitud, latitud)
     {
         //Debug.Log("Longi,Lat --> " + longitud+","+latitud);
-        marker3D = OnlineMapsMarker3DManager.CreateItem(new Vector2(longitud, latitud),prefabObject);
-        marker2D = OnlineMapsMarkerManager.CreateItem(new Vector2(longitud, latitud),"");
+        marker3D = OnlineMapsMarker3DManager.CreateItem(new Vector2(longitud, latitud), prefabObject);
+        marker3D.prefab.name = this.label;
+        marker3D.transform.name = this.label;
+        marker2D = OnlineMapsMarkerManager.CreateItem(new Vector2(longitud, latitud), "");
 
         this.cluster = cluster;
 
@@ -81,20 +92,27 @@ public class MapPointMarker : MapPoint {
             marker3D.enabled = false;
     }
 
-    
+
     protected override void graphicHide()
     {
-        if (marker3D!=null)
+        if (marker3D != null)
+        {
             marker3D.enabled = false;
-        //marker3D.prefab.SetActive(false);
-        if (marker2D!=null)
+            if (isStacked())
+                stackedPosition = this.getMarker3D().transform.position;  
+        }        //marker3D.prefab.SetActive(false);
+        if (marker2D != null)
             marker2D.enabled = false;
     }
 
     protected override void graphicShow()
     {
         if (marker3D != null && dimension == THREE_DIMENSION)
+        {
             marker3D.enabled = true;
+            if (isStacked())
+                setStackedPosition(stackedPosition, stackedTransform); 
+        }
         //marker3D.prefab.SetActive(true);
         if (marker2D != null && dimension == TWO_DIMENSION)
             marker2D.enabled = true;
@@ -120,7 +138,7 @@ public class MapPointMarker : MapPoint {
         return this.marker2D;
     }
 
-    private  void OnPointClick()
+    private void OnPointClick()
     {
         Debug.Log("HOLA");
     }
@@ -130,7 +148,9 @@ public class MapPointMarker : MapPoint {
         if (marker3D != null)
         {
             marker3D.prefab.name = this.label;
+            marker3D.prefab.transform.name = this.label;            
             marker3D.label = this.label;
+            marker3D.transform.name = this.label;
         }
 
         if (marker2D != null)
@@ -151,7 +171,7 @@ public class MapPointMarker : MapPoint {
         //if (isCluster())
     }
 
-    protected override  void updateGraphicRelations(string propertyName,bool show)
+    protected override void updateGraphicRelations(string propertyName, bool show)
     {
         /*
         List<Vector2> points = new List<Vector2>();
@@ -184,12 +204,28 @@ public class MapPointMarker : MapPoint {
                     points.Add(this.getVector2());
                     points.Add(p.getVector2());
 
-                    OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, Color.blue);
+                    Color color = map.GetPropertyManager().GetPropertyByName(propertyName).GetRelationColor();
+
+                    if (color == Color.blue)
+                        color.a = 0.3f;
+
+
+                    OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, color);
+
                     oLine.width = 1.0f;
+
                     oLine.visible = true;
-                    OnlineMapsDrawingElementManager.AddItem(oLine);
+
+
+                    oLine.renderQueueOffset = 0;
+                    OnlineMapsDrawingElementManager.instance.Add(oLine);
+                    //oLine.visible = true;
                     oLine.visible = !p.isFiltered();
                     lineList.Add(oLine);
+
+
+
+
                 }
 
                 graphicRelationsPerProperty.Add(propertyName, lineList);
@@ -197,6 +233,7 @@ public class MapPointMarker : MapPoint {
             else
             {
                 int pos = 0;
+
                 foreach (OnlineMapsDrawingLine line in graphicRelationsPerProperty[propertyName])
                 {
                     if (show)
@@ -205,11 +242,74 @@ public class MapPointMarker : MapPoint {
                         line.visible = false;
                     pos++;
                 }
-            }           
+            }
         }
-      
+
+
     }
 
+    protected override void updateGraphicRelations(MapPoint point, bool show) {
+
+
+        if (isCluster())
+        {
+            RelationShip relation = getGridCluster().getRelationPerPoint(point);
+
+            if (!graphicRelationsPerPoint.ContainsKey(point))
+            {
+                List<OnlineMapsDrawingLine> lineList = new List<OnlineMapsDrawingLine>();
+                foreach (MapPoint p in relation.getRelatedWith())
+                {
+                    List<Vector2> points = new List<Vector2>();
+
+                    points.Add(point.getVector2());
+                    points.Add(p.getVector2());
+
+                    OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, Color.blue);
+                    oLine.width = 1.0f;
+                    oLine.visible = true;
+                    oLine.renderQueueOffset = 0;
+                    OnlineMapsDrawingElementManager.AddItem(oLine);
+                    oLine.visible = !p.isFiltered();
+                    lineList.Add(oLine);
+                }
+
+                graphicRelationsPerPoint.Add(point, lineList);
+            }
+            else
+            {
+                int pos = 0;
+                foreach (OnlineMapsDrawingLine line in graphicRelationsPerPoint[point])
+                {
+                    if (show)
+                        line.visible = relation.isVisibleRelationAt(pos);
+                    else
+                        line.visible = false;
+                    pos++;
+                }
+            }
+        }
+    }
+
+
+    public override void removeGraphicRelations(MapPoint point)
+    {
+        if (graphicRelationsPerPoint.ContainsKey(point))
+        {
+            //Debug.Log("Esconde relaciones 2");
+            List<OnlineMapsDrawingLine> lineList = graphicRelationsPerPoint[point];
+            //Debug.Log("Esconde relaciones 3 hay " + lineList.Count);
+
+            foreach (OnlineMapsDrawingLine line in lineList)
+            {
+                //line.visible = false;
+                OnlineMapsDrawingElementManager.RemoveItem(line, true);
+                line.Dispose();
+            }
+
+            graphicRelationsPerPoint.Remove(point);
+        }
+    }
 
     public override void removeGraphicRelations(string propertyName)
     {
@@ -232,16 +332,53 @@ public class MapPointMarker : MapPoint {
 
     public override void graphicReset()
     {
-        if (marker2D!=null)
+        if (marker2D != null)
             marker2D.Dispose();
 
-        if (marker3D!=null)
+        if (marker3D != null)
             marker3D.Dispose();
 
         marker2D = null;
         marker3D = null;
     }
 
+    public void setStackedPosition(Vector3 position, Transform parentTransform)
+    {
+
+        if (map.GetDimension() == 2)
+            this.getMarker3D().enabled = true;
+
+        
+        stackedPosition = position;
+        stackedTransform = parentTransform;
+        mapParentTransform = this.getMarker3D().transform.parent;
+        mapPosition = this.getMarker3D().transform.position;
+
+        this.getMarker3D().transform.SetPositionAndRotation(position, this.getMarker3D().prefab.transform.rotation);
+        this.getMarker3D().transform.parent = parentTransform;
+
+        setStacked(true);
+    }
+
+    public void setStackedScale(Vector3 scale)
+    {
+        mapScale = this.getMarker3D().transform.localScale;
+        stackedScale = scale;
+        this.getMarker3D().transform.localScale = scale;
+    }
+
+    public void unStack()
+    {
+        //this.getMarker3D().transform.SetPositionAndRotation(mapPosition, this.getMarker3D().prefab.transform.rotation);
+        //this.getMarker3D().transform.parent = mapParentTransform;
+        this.getMarker3D().enabled = false;
+        if (map.GetDimension()==3)
+            this.getMarker3D().enabled = true;
+        setStacked(false);
+    }
 
 
+
+    
 }
+

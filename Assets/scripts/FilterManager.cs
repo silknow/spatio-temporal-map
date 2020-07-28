@@ -9,10 +9,28 @@ public class FilterManager
     Dictionary<string,Filter> filterDictionary = new Dictionary<string,Filter>();
     bool activeFilter;
     bool comparationMode = Filter.OR_COMPARATION;
+    TimeFrame timeFrame;
+
 
     public FilterManager()
     {
         this.activeFilter = false;
+    }
+
+
+    public void activateTimeFrame(int from, int to)
+    {
+        if (timeFrame == null)
+            timeFrame = new TimeFrame(from, to);
+        timeFrame.Reset();
+        timeFrame.setFrom(from);
+        timeFrame.setTo(to);
+    }
+
+    public void removeTimeFrame()
+    {
+        if(timeFrame!=null)
+            timeFrame.Reset();
     }
 
     public void setComparationMode(bool comparationMode)
@@ -94,7 +112,12 @@ public class FilterManager
         Dictionary<MapPoint,int> filteredDictionary = new Dictionary<MapPoint,int>();
 
         foreach (MapPoint p in points)
-            p.setFiltered(false);
+        {
+            if (timeFrame != null)
+                timeFrame.checkInFrame(p);
+            else
+                p.setFiltered(false);
+        }
 
         //Debug.Log("ACTIVOS FILTROS " + filterDictionary.Keys.Count);
 
@@ -152,6 +175,9 @@ public class FilterManager
     {
         filterDictionary.Clear();
         foreach (MapPoint p in points)
-            p.setFiltered(false);
+            if (timeFrame != null)
+                timeFrame.checkInFrame(p);
+            else
+                p.setFiltered(false);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ClonedMap : MonoBehaviour
@@ -18,8 +19,26 @@ public class ClonedMap : MonoBehaviour
 
     protected OnlineMapsTile tileTopLeft;
     protected OnlineMapsTile tileBottomRight;
+    protected MapSnapshot snapShot;
 
     protected Vector2 mapTileResolution = new Vector2();
+
+    protected Vector2 topLeftMap = new Vector2();
+    protected Vector2 bottomRightMap = new Vector2();
+    protected List<MapPointMarker> stackedPoints = new List<MapPointMarker>();
+
+
+    Map map;
+    protected List<OnlineMapsTile> listTiles = new List<OnlineMapsTile>();
+    protected Dictionary<int, List<OnlineMapsTile>> tilesCandidates = new Dictionary<int, List<OnlineMapsTile>>();
+    int height = 0;
+    int width = 0;
+    float validPercentageTile = 0.35f;
+    int numColumns = 0;
+    int numRows = 0;
+    OnlineMapsTile topLeftCorner;
+    OnlineMapsTile bottomRightCorner;    
+    GameObject snapShotMesh;
 
     public static ClonedMap Instance
     {
@@ -37,8 +56,18 @@ public class ClonedMap : MonoBehaviour
         {
             instance = this;
             this.objectMap = Instantiate(clonedMap, new Vector3(0, 0, 0), Quaternion.identity);
+            this.objectMap.name = "MapSnapshots";
+            this.map = SilkMap.instance.map;
+           
+
         }
         //Debug.Log("object map vale " + objectMap);
+    }
+
+
+    public void setMap(Map map)
+    {
+        this.map = map;
     }
 
     public void init()
@@ -58,52 +87,45 @@ public class ClonedMap : MonoBehaviour
         //cloneCurrent();
     }
 
-    public void updateCorners(List<OnlineMapsTile> listTiles)
+    public GameObject take(int height, int width, int from, int to)
     {
-        //OnlineMapsTile tileTopLeft;
-        //OnlineMapsTile tileBottomRight;
+        double sw = Screen.width;
+        double sh = Screen.height;
+        Vector2 topLeftScreen = new Vector2(0, height);
+        Vector2 bottomRightScreen = new Vector2(width, 0);
 
-        if (listTiles.Count > 0)
-        {
-            tileTopLeft = listTiles[0];
-            tileBottomRight = listTiles[0];
+        bottomRight = OnlineMaps.instance.bottomRightPosition;
+        topLeft = OnlineMaps.instance.topLeftPosition;
 
-            foreach (OnlineMapsTile tile in listTiles)
-            {
-                if (tile.x <= tileTopLeft.x && tile.y >= tileTopLeft.y)
-                    tileTopLeft = tile;
+        listTiles.Clear();
+        this.height = height;
+        this.width = width;
+        loadTilesAtLevel((int)map.getZoom());
 
-                if (tile.x >= tileBottomRight.x && tile.y <= tileBottomRight.y)
-                    tileBottomRight = tile;
-            }
+        GameObject groupObject = new GameObject();
+        groupObject.name = "shot0";
+        
+        createGameObject(groupObject, from, to);
 
-            Debug.Log("tileTopLeft " + tileTopLeft.x + "," + tileTopLeft.y);
-            Debug.Log("tileBottomRight " + tileBottomRight.x + "," + tileBottomRight.y);
-        }
+        groupObject.transform.parent = objectMap.transform;
+
+        return groupObject;
     }
 
-    public void cloneCurrent()
+
+    protected void loadTilesAtLevel(int level)
     {
-
         int i = 0;
-        int numTiles = OnlineMaps.instance.tileManager.tiles.Count;
+        int numTiles = OnlineMaps.instance.tileManager.tiles.Count;        
 
-        Debug.Log("num tiles = " + numTiles);
+        numRows = 0;
 
-        //this.objectMap = Instantiate(clonedMap, new Vector3(0, 0, 0), Quaternion.identity);
-
-        Vector2 origin = new Vector2(0, Screen.height);
-        Vector2 end = new Vector2(Screen.width, 0);
-
-        int maxRows = 0;
-        Dictionary<int, List<OnlineMapsTile>> tilesCandidates = new Dictionary<int, List<OnlineMapsTile>>();
-
+        // Load the candidate tiles and know the number of rows of the snapshot
         while (i < numTiles)
         {
             OnlineMapsTile tile = OnlineMaps.instance.tileManager.tiles[i];
 
-            //if (tile.zoom == OnlineMaps.instance.zoom && inScreen(tile))
-            if (inScreen(tile))
+            if (tile.zoom == level && inScreen(tile) && tile.status == OnlineMapsTileStatus.loaded)
             {
                 if (!tilesCandidates.ContainsKey(tile.x))
                 {
@@ -113,73 +135,312 @@ public class ClonedMap : MonoBehaviour
 
                 tilesCandidates[tile.x].Add(tile);
 
-                if (tilesCandidates[tile.x].Count > maxRows)
-                    maxRows = tilesCandidates[tile.x].Count;
+                if (tilesCandidates[tile.x].Count > numRows)
+                    numRows = tilesCandidates[tile.x].Count;
             }
 
             i++;
         }
 
-        mapTileResolution.x = 0;
-        mapTileResolution.y = maxRows;
+        numColumns = 0;
 
-        Debug.Log("resolution = " + maxRows);
-
-
-        List<OnlineMapsTile> listTiles = new List<OnlineMapsTile>();
-
+        // Put in listTiles the definitive tile list, and get the numColumns property
         foreach (int key in tilesCandidates.Keys)
         {
             List<OnlineMapsTile> candidateList = tilesCandidates[key];
-            if (candidateList.Count == maxRows)
+            if (candidateList.Count == numRows)
             {
                 listTiles.AddRange(candidateList);
-                mapTileResolution.x++;
+                numColumns++;
             }
         }
 
-        Debug.Log("num tiles = " + listTiles.Count);
+        tilesCandidates.Clear();
+
+        updateCorners();
+    }
+
+    protected bool inScreen(OnlineMapsTile tile)
+    {
+        bool inside = true;
+
+        // Reject all the tiles out of the screen (0,height),(width,0)
+        if (tile.bottomRight.x < topLeft.x || tile.bottomRight.y > topLeft.y)
+            return false;
+
+        if (tile.topLeft.y < bottomRight.y || tile.topLeft.x > bottomRight.x)
+            return false;
+
+        // Reject all the tiles inside the screen, which its area inside is minor than valid percentage
+
+        // Calculate the initial area of the tile
+        double tileWidth = tile.bottomRight.x - tile.topLeft.x;
+        double tileHeight = tile.topLeft.y - tile.bottomRight.y;
+        double iniArea = Mathf.Abs((float)(tileWidth * tileHeight));
+
+        // Get the width and height inside the  screen
+        bool outLimit = false;
+
+        if (tile.topLeft.x < topLeft.x) {
+            tileWidth = tile.bottomRight.x - topLeft.x;
+            outLimit = true;
+        }
+
+        if (tile.bottomRight.x > bottomRight.x) { 
+            tileWidth = bottomRight.x - tile.topLeft.x;
+            outLimit = true;
+        }
+
+        if (tile.topLeft.y > topLeft.y) { 
+            tileHeight = topLeft.y - tile.bottomRight.y;
+            outLimit = true;
+        }
+
+        if (tile.bottomRight.y < bottomRight.y) { 
+            tileHeight = (tile.topLeft.y-bottomRight.y);
+            outLimit = true;
+        }
+
+        // Check if area is minor than valid percentage
+        if (outLimit && (tileHeight * tileWidth <= this.validPercentageTile * iniArea))
+            return false;
 
 
-        //this.objectMap = Instantiate(clonedMap) as GameObject;
+        return inside;
+    }
 
-        updateCorners(listTiles);
+    public void updateCorners()
+    {
 
-        i = 0;
-
-        
-        //objectMap.transform.SetPositionAndRotation(
-          //  new Vector3(desplazamiento, 0.0f, 0.0f), 
-            //new Quaternion(0.0f, 0.0f, 0.0f, 0.0f));
-
-        while (i < listTiles.Count)
+        if (listTiles.Count > 0)
         {
-            OnlineMapsTile tile = listTiles[i];
+            topLeftCorner = listTiles[0];
+            bottomRightCorner = listTiles[0];
 
-            GameObject cube = Instantiate(tileBase, new Vector3(0, 0, 0), Quaternion.identity);
-            cube.transform.SetPositionAndRotation(cube.transform.position +
-              new Vector3(-10.0f * (tile.x - tileTopLeft.x) , 
-                            -1.0f, 
-                            10.0f * (tile.y - tileBottomRight.y)+5.0f), cube.transform.rotation);
-            if (tile != null)
+            foreach (OnlineMapsTile tile in listTiles)
             {
-                Texture2D tex = tile.texture;
-                tex.Apply();
-                MeshRenderer renderer = cube.GetComponent<MeshRenderer>();
-                renderer.material.mainTexture = tex;
+                if (tile.topLeft.x <= topLeftCorner.x && tile.topLeft.y >= topLeftCorner.y)
+                    topLeftCorner = tile;
+
+                if (tile.bottomRight.x >= bottomRightCorner.x && tile.bottomRight.y <= bottomRightCorner.y)
+                    bottomRightCorner = tile;
             }
-            else
-                Debug.Log("TILE IS NULL");
-            
-            cube.transform.parent = objectMap.transform;
-            i++;
+
+
         }
+        Debug.Log("fin");
+    }
 
-        //objectMap.transform.Translate(new Vector3(desplazamiento, 0.0f, 0.0f));
+    protected void createGameObject(GameObject groupObject, int from, int to)
+    {
+        //destroyGameObject();
 
-        
+        if (listTiles.Count > 0)
+        {
+
+            Vector2 centerMap = new Vector2(topLeft.x+(bottomRight.x - topLeft.x) / 2, 
+                                            topLeft.y + (bottomRight.y-topLeft.y) / 2);
+
+            foreach (OnlineMapsTile tile in listTiles)
+            {
+                //OnlineMapsTile tile = listTiles[i];
+
+                snapShotMesh = Instantiate(tileBase, new Vector3(0, 0, 0), Quaternion.identity);
+
+                Mesh planeMesh = snapShotMesh.GetComponent<MeshFilter>().mesh;
+                Bounds bounds = planeMesh.bounds;
+                float boundsX = bounds.size.x;
+                float boundsZ = bounds.size.z;
+
+                float currentTileWidth = Mathf.Abs((float)(tile.bottomRight.x - tile.topLeft.x));
+                float currentTileHeight = Mathf.Abs((float)(tile.topLeft.y - tile.bottomRight.y));
+
+                float scaleX = currentTileWidth / boundsX;
+                float scaleZ = currentTileHeight / boundsZ;
+
+                snapShotMesh.transform.SetPositionAndRotation(snapShotMesh.transform.position +
+                    new Vector3((-(float)(tile.topLeft.x+ currentTileWidth / 2.0))+centerMap.x,
+                    -1.0f,
+                    (-(float)(tile.topLeft.y- currentTileHeight / 2.0))+centerMap.y), snapShotMesh.transform.rotation);
+   
+                snapShotMesh.transform.localScale = new Vector3(scaleX, 1.0f, scaleZ);
+
+                if (tile != null)
+                {
+                    Texture2D tex = tile.texture;
+                    tex.Apply();
+                    MeshRenderer renderer = snapShotMesh.GetComponent<MeshRenderer>();
+                    renderer.material.mainTexture = tex;
+                }
+                else
+                    Debug.Log("TILE IS NULL");
+
+                putMarkers(tile, groupObject,centerMap,from, to);
+
+                snapShotMesh.transform.parent = groupObject.transform;
+            }
+        }
+    }
+
+    
+
+    protected void destroyGameObject()
+    {
+        List<GameObject> modelElements = new List<GameObject>();
+
+        for (int i = 0; i < objectMap.transform.childCount; i++)
+            modelElements.Add(objectMap.transform.GetChild(i).gameObject);
+
+        foreach (GameObject gObject in modelElements)
+            Destroy(gObject);
+    }
+
+
+    protected void putMarkers(OnlineMapsTile tile, GameObject parent, Vector2 centerMap, int from, int to)
+    {
+        if (!map.pointsViewing())
+            putClusterMarkers(tile, parent, centerMap, from, to);
+        else
+            putPointMarkers(tile, parent, centerMap, from, to);
 
     }
+
+    protected void putClusterMarkers(OnlineMapsTile tile, GameObject parent,Vector2 centerMap, int from, int to)
+    {
+        int level = map.getLevel();
+
+        
+        List<MapPointMarker> clusterList = ((MapMarker)(map)).getClusterMarkersAtLevel(level);
+
+        if (clusterList == null)
+            return;
+
+        for (int m = 0; m < clusterList.Count; m++)
+        {
+
+            List<MapPoint> pointList = clusterList[m].getClusteredPoints();
+            int numData = 0;
+
+            foreach (MapPoint pointC in pointList)
+                if (pointC.getFrom() >= from && pointC.getTo() <= to)
+                    numData++;
+
+            if (numData > 0)
+            {
+                double longitud, latitud;
+
+                MapPointMarker gPoint = clusterList[m];
+
+                gPoint.getMarker3D().GetPosition(out longitud, out latitud);
+
+                if (longitud >= tile.topLeft.x && longitud <= tile.bottomRight.x)
+                    if (latitud <= tile.topLeft.y && latitud >= tile.bottomRight.y)
+                    {
+                        
+                        /*
+                        GameObject marker = Instantiate(clusterList[m].getMarker3D().prefab,
+                            new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
+                        marker.transform.SetPositionAndRotation(marker.transform.position +
+                                               new Vector3((-(float)(longitud)) + centerMap.x,
+                                                            -1.0f,
+                                                           (-(float)(latitud)) + centerMap.y), marker.transform.rotation);
+
+                        marker.transform.parent = parent.transform;
+
+                        float scale = clusterList[m].getMarker3D().scale /4.0f;
+                        marker.transform.localScale = new Vector3(scale, scale, scale);*/
+
+
+                        
+                        gPoint.setStackedPosition(new Vector3((-(float)(gPoint.getX())) + centerMap.x,
+                                                        -1.0f,
+                                                    (-(float)(gPoint.getY())) + centerMap.y), parent.transform);
+                        float scale = gPoint.getMarker3D().scale /6.0f;
+                        gPoint.setStackedScale(new Vector3(scale, scale, scale));
+
+                        stackedPoints.Add(gPoint);
+
+                    }
+            }
+
+        }
+    }
+
+    protected void putPointMarkers(OnlineMapsTile tile, GameObject parent, Vector2 centerMap, int from, int to)
+    {
+        int level = map.getLevel();
+
+
+        List<MapPoint> pointList = map.pointsInTime(from, to);
+
+        Debug.Log("Los puntos de " + from + " hasta " + to + " son :");
+
+        if (pointList == null)
+            return;
+
+       foreach (MapPoint p in pointList)
+       {
+            MapPointMarker gPoint = (MapPointMarker)p;
+
+            
+
+            float longitud = gPoint.getX();
+            float latitud = gPoint.getY();
+
+            if (tile.topLeft.x<=longitud && tile.bottomRight.x>=longitud &&
+                tile.topLeft.y>=latitud  && tile.bottomRight.y<=latitud) {
+
+                Debug.Log(p.getLabel()+ "("+ gPoint.getMarker3D().transform.name+") - "+p.getFrom()+"-"+p.getTo());
+
+                /*
+                
+                GameObject marker = Instantiate(gPoint.getMarker3D().prefab,
+                               new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
+                marker.transform.SetPositionAndRotation(marker.transform.position +
+                                                new Vector3((-(float)(gPoint.getX())) + centerMap.x,
+                                                                -1.0f,
+                                                            (-(float)(gPoint.getY())) + centerMap.y), marker.transform.rotation);
+
+                marker.transform.parent = parent.transform;
+
+
+                float scale = gPoint.getMarker3D().scale / 100.0f;
+                marker.transform.localScale = new Vector3(scale, scale, scale);*/
+
+
+
+                gPoint.setStackedPosition(new Vector3((-(float)(gPoint.getX())) + centerMap.x,
+                                                                -1.0f,
+                                                            (-(float)(gPoint.getY())) + centerMap.y), parent.transform);
+                float scale = gPoint.getMarker3D().scale / 100.0f;
+                gPoint.setStackedScale(new Vector3(scale, scale, scale));
+
+                stackedPoints.Add(gPoint);
+
+            }
+        }
+    }
+
+    public void unStackPoints()
+    {
+        foreach (MapPointMarker p in stackedPoints)
+            p.unStack();
+
+        stackedPoints.Clear();
+    }
+
+
+    public GameObject cloneCurrent(int from, int to)
+    {
+        return this.take(SilkMap.instance.mapCamera.pixelHeight, SilkMap.instance.mapCamera.pixelWidth, from, to);
+    }
+
+    
+    public void setValidPercentageTile(float percentage) => this.validPercentageTile = percentage;
+
+    public float getValidPercentageTile() => this.validPercentageTile;
+
+    public int getNumTiles() => listTiles.Count;
 
     public Vector2 getDesplazamiento()
     {
@@ -202,36 +463,15 @@ public class ClonedMap : MonoBehaviour
 
     public int getTileWidth()
     {
-        return tileBottomRight.x - tileTopLeft.x + 1;
+        return bottomRightCorner.x - topLeftCorner.x + 1;
     }
 
     public int getTileHeight()
     {
-        return tileTopLeft.y - tileBottomRight.y + 1;
+        return topLeftCorner.y - bottomRightCorner.y + 1;
     }
 
-    public bool inScreen(OnlineMapsTile tile)
-    {
-        bool inside = true;
-
-        Vector2 topLeft = OnlineMapsControlBase3D.instance.GetScreenPosition(tile.topLeft);
-        Vector2 bottomRight = OnlineMapsControlBase3D.instance.GetScreenPosition(tile.bottomRight);
-
-        if (bottomRight.x < 0)
-            return false;
-
-        if (topLeft.y < 0)
-            return false;
-
-        if (topLeft.x > Screen.width)
-            return false;
-
-        if (bottomRight.y > Screen.height)
-            return false;
-
-
-        return inside;
-    }
+   
 
     public static Vector3 getTranslate(int division, int numDivisions)
     {

@@ -196,7 +196,7 @@ public class keyboardManager : MonoBehaviour {
 
            // if (firstClone)
             //{
-                SilkMap.Instance.createPlane(3);
+                //SilkMap.Instance.createPlane(3);
               //  firstClone = false;
             //}
 

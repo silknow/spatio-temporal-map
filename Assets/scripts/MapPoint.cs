@@ -16,6 +16,19 @@ public class MapPoint
 
     protected int dimension = TWO_DIMENSION;
 
+    public bool stacked = false;
+
+    protected void setStacked(bool status)
+    {
+        this.stacked = status;
+    }
+
+
+    public bool isStacked()
+    {
+        return this.stacked;
+    }
+
     // x,y,z position in map coordinates
     protected float x;
     protected float y;
@@ -84,6 +97,11 @@ public class MapPoint
     public void setMap(Map map)
     {
         this.map = map;
+    }
+
+    public Map getMap()
+    {
+        return map;
     }
 
     /**
@@ -290,8 +308,6 @@ public class MapPoint
 
     public void show()
     {
-        //if (getLabel().Equals("8824"))
-         //   Debug.Log("localizado " + isFiltered());
 
         if (filtered)
         {
@@ -304,6 +320,10 @@ public class MapPoint
         {
             hidden = false;
             graphicShow();
+            if (isCluster())
+                gridCluster.showRelations();
+            else
+                showAllRelations();
         }
     }
 
@@ -340,7 +360,10 @@ public class MapPoint
         }
 
         if (relationsPerProperty.Keys.Count == 0)
+        {
             map.removePointWithRelation(this);
+            this.getDirectCluster().removeRelationsPerPoint(this);
+        }
     }
 
     public void hideRelations(string propertyName)
@@ -356,6 +379,8 @@ public class MapPoint
             //relationsPerProperty.Remove(propertyName);
 
             updateGraphicRelations(propertyName,false);
+
+            //this.getDirectCluster().hideRelationsPerPoint(this);
         }
 
         
@@ -366,6 +391,30 @@ public class MapPoint
     public bool propertyRelationsShown(string propertyName)
     {
         return relationsPerProperty.ContainsKey(propertyName);
+    }
+
+    protected GridCluster getDirectCluster()
+    {
+        foreach (GridCluster cluster in clusterList)
+            if (cluster.getLevel() == 1)
+                return cluster;
+
+        return null;
+    }
+
+    protected List<GridCluster> clustersOfPoints(List<MapPoint> pointListToCheck)
+    {
+        List<GridCluster> clustersRelated = new List<GridCluster>();
+
+        foreach (MapPoint p in pointListToCheck)
+        {
+            GridCluster directCluster = p.getDirectCluster();
+
+            if (!clustersRelated.Contains(directCluster))
+                clustersRelated.Add(directCluster);
+        }
+
+        return clustersRelated;
     }
 
     public void showRelations(string propertyName)
@@ -385,6 +434,11 @@ public class MapPoint
             relation = new RelationShip(this, relatedPoints, propertyName);
 
             relationsPerProperty.Add(propertyName, relation);
+
+            List<GridCluster> relatedClusters = clustersOfPoints(relatedPoints);
+            this.getDirectCluster().addRelationsPerPoint(this, relatedClusters);
+            //setClusterRelations(this.getDirectCluster(), relatedClusters);
+            map.addPointWithRelation(this);
         }
 
         relation = this.relationsPerProperty[propertyName];
@@ -392,8 +446,16 @@ public class MapPoint
 
         updateGraphicRelations(propertyName,true);
 
-        map.addPointWithRelation(this);
+        
+
+        //this.getDirectCluster().showRelationsPerPoint(this);
     }
+
+    /*
+    protected void setClusterRelations(GridCluster cluster, List<GridCluster> relatedClusters)
+    {
+        cluster.addRelationPerPoint(this, relatedClusters);
+    }*/
 
     public void hide()
     {
@@ -403,20 +465,27 @@ public class MapPoint
         if (!hidden)
         {
             hidden = true;
-            graphicHide();      
+            graphicHide();
+            if (isCluster())
+                gridCluster.hideRelations();
+            else
+                hideAllRelations();
         }
     }
 
     public void setFiltered(bool filtered)
     {
-        this.filtered = filtered;
+        if (this.filtered != filtered)
+        {
+            this.filtered = filtered;
 
-        if (this.filtered)
-            foreach (GridCluster gCluster in this.clusterList)
-                gCluster.addFilteredPoint();
-        else
-            foreach (GridCluster gCluster in this.clusterList)
-                gCluster.removeFilteredPoint();
+            if (this.filtered)
+                foreach (GridCluster gCluster in this.clusterList)
+                    gCluster.addFilteredPoint();
+            else
+                foreach (GridCluster gCluster in this.clusterList)
+                    gCluster.removeFilteredPoint();
+        }
 
     }
 
@@ -450,14 +519,38 @@ public class MapPoint
     {
     }
 
+    protected virtual void updateGraphicRelations(MapPoint point, bool show)
+    {
+
+    }
+
+    public void showClusterRelations(MapPoint point)
+    {
+        updateGraphicRelations(point, true);
+    }
+
+    public void hideClusterRelations(MapPoint point)
+    {
+        updateGraphicRelations(point, false);
+    }
 
     public virtual void removeGraphicRelations(string propertyName)
     {
     }
 
+    public virtual void removeGraphicRelations(MapPoint point)
+    {
+
+    }
+
+    public void removeClusterRelations(MapPoint point)
+    {
+
+    }
 
 
-        public void setFrom(int from)
+
+    public void setFrom(int from)
     {
         this.from = from;
     }

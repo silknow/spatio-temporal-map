@@ -55,7 +55,7 @@ public class ButtonManager : MonoBehaviour
                 button4Times.SetActive(false);
             }
 
-        SilkMap.Instance.createPlane(2);
+        //SilkMap.Instance.createPlane(2);
     }
 
     public void onButton3Times()
@@ -71,7 +71,7 @@ public class ButtonManager : MonoBehaviour
                 button4Times.SetActive(false);
             }
 
-        SilkMap.Instance.createPlane(3);
+        //SilkMap.Instance.createPlane(3);
     }
 
     public void onButton4Times()
@@ -87,7 +87,7 @@ public class ButtonManager : MonoBehaviour
                 button4Times.SetActive(false);
             }
 
-        SilkMap.Instance.createPlane(3);
+        //SilkMap.Instance.createPlane(3);
     }
 
     public void onButtonLupaMas()

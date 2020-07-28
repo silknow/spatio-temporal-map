@@ -17,6 +17,7 @@ public class Map {
     protected FilterManager filterManager;
     protected Dictionary<Vector2, List<MapPoint>> positionsGroup = new Dictionary<Vector2, List<MapPoint>>();
     protected List<MapPoint> pointsWithRelation = new List<MapPoint>();
+    protected bool stacked = false;
 
     const int NO_LEVEL_VISUALIZED = -1; 
     
@@ -29,6 +30,12 @@ public class Map {
         visualizedQuads = false;
         viewerPosition = new Vector3();
         zoom = -1;        
+    }
+
+
+    public bool hasData()
+    {
+        return points.Count > 0;
     }
 
     public void reset()
@@ -52,6 +59,33 @@ public class Map {
         //removeAllClusters();
     }
 
+
+    public void setStacked(bool status)
+    {
+        this.stacked = status;
+    }
+
+
+    public bool getStacked()
+    {
+        return this.stacked;
+    }
+
+    public List<MapPoint> pointsInTime(int from, int to)
+    {
+        List<MapPoint> pointsResult = new List<MapPoint>();
+
+        foreach (MapPoint p in points) {
+            if (p.getFrom() >= from && p.getTo() <= to)
+               pointsResult.Add(p);
+
+            if (p.getLabel().Equals("7236"))
+                Debug.Log("El punto es de " + p.getFrom() + " hasta " + p.getTo());
+        }
+
+        return pointsResult;
+    }
+
     public void removeAllClusters()
     {
         removeAllGraphicClusters();
@@ -63,6 +97,16 @@ public class Map {
     public PropertyManager GetPropertyManager()
     {
         return propertyManager;
+    }
+
+    public bool pointsViewing()
+    {
+        int level = clusterManager.getLevel(zoom);
+
+        if (level < clusterManager.getNumLevels() - 2)
+            return false;
+        else
+            return true;
     }
 
     public void SetDimension(int dimension)
@@ -192,7 +236,7 @@ public class Map {
     {
         List<string> valuesToRemove;
 
-        Debug.Log("llama a remove 3 " + propertyName);
+        //Debug.Log("llama a remove 3 " + propertyName);
 
         if (filterManager != null)
         {
@@ -372,11 +416,22 @@ public class Map {
 
     public void updateClustering()
     {
-
-        
         clusterManager.addPoints(points);
         clusterManager.update();
+    }
 
+    public void activateTimeFrame(int from, int to)
+    {
+        filterManager.activateTimeFrame(from, to);
+        filterManager.applyFilters(points);
+        showClusters();
+    }
+
+    public void removeTimeFrame()
+    {
+        filterManager.removeTimeFrame();
+        filterManager.applyFilters(points);
+        showClusters();
     }
 
     public void showClusters()

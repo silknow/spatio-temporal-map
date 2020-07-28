@@ -38,7 +38,8 @@ public class FiltersPanel : MonoBehaviour
     {
         foreach (var toggle in body.GetComponentsInChildren<Toggle>())
         {
-            toggle.isOn = false;
+            if(toggle.isOn)
+                toggle.isOn = false;
         }
     }
 }

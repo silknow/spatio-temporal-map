@@ -19,7 +19,6 @@ public class MapMarker : Map {
     protected Hashtable connectionsLinesPerLevel = new Hashtable();
     private bool drawTheClustersQuad = false;
 
-
     public GameObject clusterPrefab;
 
     public MapMarker()
@@ -129,19 +128,6 @@ public class MapMarker : Map {
     }
 
 
-    protected void baseLine()
-    {
-        pointsBase = new List<Vector2>();
-
-        pointsBase.Add(new Vector2(0,0));
-        pointsBase.Add(new Vector2(10,10));
-
-        OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(pointsBase, Color.blue);
-        oLine.width = 1.0f;
-        oLine.visible = true;
-        OnlineMapsDrawingElementManager.AddItem(oLine);
-    }
-
     public void update()
     {
         int level;
@@ -151,20 +137,22 @@ public class MapMarker : Map {
         cylinderModel.transform.position = cylinderModel.transform.position + new Vector3(0.0f, 50.0f, 0.0f);
         */
 
-        if (pointsBase == null)
-            baseLine();
+        if (clusterManager.hasData())
+            return;
 
         updateClustering();
 
-        
 
         distributeGroupsOnCircle();
 
+        
         for (level = 0; level < clusterManager.getNumLevels(); level++)
         {
             this.clusterMarkers.Add(new List<MapPointMarker>());
             this.clusterLines.Add(new List<OnlineMapsDrawingLine>());
             // Each level , a list lines per cluster
+
+            
             List<List<OnlineMapsDrawingLine>> levelConnections = new List<List<OnlineMapsDrawingLine>>();
             for (int a = 0; a < clusterManager.getGridClustersAtLevel(level).Count; a++)
                 levelConnections.Add(new List<OnlineMapsDrawingLine>());
@@ -176,95 +164,102 @@ public class MapMarker : Map {
         {
             List<GridCluster> clusters = clusterManager.getGridClustersAtLevel(level);
 
-//            Debug.Log("En el nivel " + level + " hay " + clusters.Count + " cluster ");
+            //            Debug.Log("En el nivel " + level + " hay " + clusters.Count + " cluster ");
 
-            for (int i = 0; i < clusters.Count; i++)
+            if (clusters.Count > 0 && !clusters[0].getCenter().isCluster())
             {
 
-                /* PABLO: CAMBIADO A PREFAB
-                GameObject cube;
-
-                if (clusters[i].getCategory().Equals("silknow.org/#pthing"))
-                    cube = sphereModel;
-                else
-                    cube = cylinderModel;
-                */
-                // Creating cluster marker
-                MapPointMarker mapPoint = new MapPointMarker(clusters[i].getCenter().getX(), clusters[i].getCenter().getY(), clusterPrefab, true);
-                ///MapPointMarker mapPoint = new MapPointMarker(OnlineMapsMarker3DManager.CreateItem(
-                       // new Vector2(clusters[i].getCenter().getX(), clusters[i].getCenter().getY()), clusterPrefab));
-                //mapPoint.getMarker3D().label = "Cluster " + i;
-                mapPoint.setLabel("Cluster " + i);
-                mapPoint.setClusteredPoints(clusters[i].getPoints());
-                mapPoint.setCluster(true);
-                mapPoint.getMarker3D().altitude = 30.0f;
-                mapPoint.getMarker3D().altitudeType = OnlineMapsAltitudeType.absolute;
-                mapPoint.getMarker3D().scale = getScale(clusters[i], this.points.Count);
-
-               
-
-                int id = level * 1000 + i;
-                mapPoint.getMarker3D().instance.name = id.ToString();
-
-                clusters[i].setCenter(mapPoint);
-
-                if (clusters[i].getCategory().Equals("silknow.org/#pthing"))
+                for (int i = 0; i < clusters.Count; i++)
                 {
-                    SphereCollider sphereCollider = mapPoint.getMarker3D().instance.GetComponent<SphereCollider>();
-                    sphereCollider.radius = 1;
-                    //mapPoint.getMarker3D().scale = mapPoint.getMarker3D().scale * 100.0f;
-                }
-                else
-                {
-                    CapsuleCollider capsuleCollider = mapPoint.getMarker3D().instance.GetComponent<CapsuleCollider>();
-                    capsuleCollider.radius = 0.5f;
-                    capsuleCollider.height = 1.5f;
-                    capsuleCollider.direction = 1;
-                    mapPoint.getMarker3D().altitude = 70.0f;
-                    //mapPoint.getMarker3D().transform.position = mapPoint.getMarker3D().transform.position + new Vector3(0.0f, 60.0f, 0.0f);
-                    //mapPoint.getMarker3D().al
+
+                    /* PABLO: CAMBIADO A PREFAB
+                    GameObject cube;
+
+                    if (clusters[i].getCategory().Equals("silknow.org/#pthing"))
+                        cube = sphereModel;
+                    else
+                        cube = cylinderModel;
+                    */
+                    // Creating cluster marker
+                    MapPointMarker mapPoint = new MapPointMarker(clusters[i].getCenter().getX(), clusters[i].getCenter().getY(), clusterPrefab, true);
+                    mapPoint.setGridCluster(clusters[i]);
+
+                    //MapPointMarker mapPoint = new MapPointMarker(OnlineMapsMarker3DManager.CreateItem(
+                    // new Vector2(clusters[i].getCenter().getX(), clusters[i].getCenter().getY()), clusterPrefab));
+                    //mapPoint.getMarker3D().label = "Cluster " + i;
+                    mapPoint.setLabel("Cluster " + i);
+                    mapPoint.setClusteredPoints(clusters[i].getPoints());
+                    mapPoint.setCluster(true);
+                    mapPoint.getMarker3D().altitude = 30.0f;
+                    mapPoint.getMarker3D().altitudeType = OnlineMapsAltitudeType.absolute;
+                    mapPoint.getMarker3D().scale = getScale(clusters[i], this.points.Count);
+                    mapPoint.setMap(this);
+
+
+
+                    int id = level * 1000 + i;
+                    mapPoint.getMarker3D().instance.name = id.ToString();
+
+                    clusters[i].setCenter(mapPoint);
+
+                    if (clusters[i].getCategory().Equals("silknow.org/#pthing"))
+                    {
+                        SphereCollider sphereCollider = mapPoint.getMarker3D().instance.GetComponent<SphereCollider>();
+                        sphereCollider.radius = 1;
+                        //mapPoint.getMarker3D().scale = mapPoint.getMarker3D().scale * 100.0f;
+                    }
+                    else
+                    {
+                        CapsuleCollider capsuleCollider = mapPoint.getMarker3D().instance.GetComponent<CapsuleCollider>();
+                        capsuleCollider.radius = 0.5f;
+                        capsuleCollider.height = 1.5f;
+                        capsuleCollider.direction = 1;
+                        mapPoint.getMarker3D().altitude = 70.0f;
+                        //mapPoint.getMarker3D().transform.position = mapPoint.getMarker3D().transform.position + new Vector3(0.0f, 60.0f, 0.0f);
+                        //mapPoint.getMarker3D().al
+
+                    }
+
+                    mapPoint.hide();
+                    clusterMarkers[level].Add(mapPoint);
+
+                    // Creating cluster lines
+                    /*
+                    List<Vector2> points = new List<Vector2>();
+                    Rect clusterZone = clusters[i].getZone();
+
+                    points.Add(new Vector2(clusterZone.xMin, clusterZone.yMax));
+                    points.Add(new Vector2(clusterZone.xMin + clusterZone.width, clusterZone.yMax));
+                    points.Add(new Vector2(clusterZone.xMin + clusterZone.width, clusterZone.yMin));
+                    points.Add(new Vector2(clusterZone.xMin, clusterZone.yMin));
+                    points.Add(new Vector2(clusterZone.xMin, clusterZone.yMax));
+
+                    OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, Color.red);
+                    oLine.width = 2.0f;
+                    oLine.visible = true;
+                    OnlineMapsDrawingElementManager.AddItem(oLine);
+                    oLine.visible = false;
+                    clusterLines[level].Add(oLine);
+                    */
+
+
+                    if (level == 0)
+                    {
+                        clusters[i].initConnectionsList(clusters.Count);
+                        clusters[i].updateConnections(clusters);
+
+                        List<List<OnlineMapsDrawingLine>> levelConnections = (List<List<OnlineMapsDrawingLine>>)connectionsLinesPerLevel[level];
+
+                        for (int clusterCon = 0; clusterCon < clusters.Count; clusterCon++)
+                            if (clusters[i].getConnections()[clusterCon] == 0)
+                                levelConnections[i].Add(null);
+                            else
+                                levelConnections[i].Add(addConnection(clusters[i], clusters[clusterCon], clusters[i].getConnections()[clusterCon]));
+
+
+                    }
 
                 }
-
-                mapPoint.hide();
-                clusterMarkers[level].Add(mapPoint);
-
-                // Creating cluster lines
-                /*
-                List<Vector2> points = new List<Vector2>();
-                Rect clusterZone = clusters[i].getZone();
-
-                points.Add(new Vector2(clusterZone.xMin, clusterZone.yMax));
-                points.Add(new Vector2(clusterZone.xMin + clusterZone.width, clusterZone.yMax));
-                points.Add(new Vector2(clusterZone.xMin + clusterZone.width, clusterZone.yMin));
-                points.Add(new Vector2(clusterZone.xMin, clusterZone.yMin));
-                points.Add(new Vector2(clusterZone.xMin, clusterZone.yMax));
-
-                OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, Color.red);
-                oLine.width = 2.0f;
-                oLine.visible = true;
-                OnlineMapsDrawingElementManager.AddItem(oLine);
-                oLine.visible = false;
-                clusterLines[level].Add(oLine);
-                */
-
-
-                if (level == 0)
-                {
-                    clusters[i].initConnectionsList(clusters.Count);
-                    clusters[i].updateConnections(clusters);
-
-                    List<List<OnlineMapsDrawingLine>> levelConnections = (List<List<OnlineMapsDrawingLine>>)connectionsLinesPerLevel[level];
-
-                    for (int clusterCon = 0; clusterCon < clusters.Count; clusterCon++)
-                        if (clusters[i].getConnections()[clusterCon] == 0)
-                            levelConnections[i].Add(null);
-                        else
-                            levelConnections[i].Add(addConnection(clusters[i], clusters[clusterCon], clusters[i].getConnections()[clusterCon]));
-
-
-                }
-
             }
 
         }
@@ -323,6 +318,11 @@ public class MapMarker : Map {
 
     private void OnMapClick()
     {
+
+        //Vector3 mousePosition = Input.mousePosition;
+
+        // Converts the screen coordinates to geographic.
+        //Vector3 mouseGeoLocation = OnlineMapsControlBase.instance.GetCoords(mousePosition);
         //double lng, lat;
 
         /*
@@ -483,14 +483,18 @@ public class MapMarker : Map {
 
                 List<GridCluster> clusters = clusterManager.getGridClustersAtLevel(level);
 
-
+                //Debug.Log("Se muestran los clusters "+clusterList.Count);
                 for (int i = 0; i < clusterList.Count; i++)
                 {
                     clusterList[i].getMarker3D().scale = scaleCorrection(clusters[i], this.points.Count, zoom);
                     if (!clusters[i].getCategory().Equals("silknow.org/#pthing"))
                         clusterList[i].getMarker3D().scale *= 2.0f;
 
+                    if (clusterList[i].getGridCluster()!=null)
+                        clusterList[i].getGridCluster().getCenter().show();
                     clusterList[i].show();
+                    
+                    //clusterList[i].getGridCluster().showRelations();
                     //clusterLineList[i].visible = true;
                 }
 
@@ -505,7 +509,7 @@ public class MapMarker : Map {
 
                 foreach (MapPoint p in pointsWithRelation)
                 {
-                    p.hideAllRelations();
+                    //p.hideAllRelations();
                 }
             }
         }
@@ -531,7 +535,7 @@ public class MapMarker : Map {
 
             foreach (MapPoint p in pointsWithRelation)
             {
-                p.showAllRelations();
+                //p.showAllRelations();
             }
         }
     }
@@ -554,7 +558,11 @@ public class MapMarker : Map {
 
                 for (int i = 0; i < clusterList.Count; i++)
                 {
+                    if (clusterList[i].getGridCluster() != null)
+                        clusterList[i].getGridCluster().getCenter().hide();
                     clusterList[i].hide();
+                    
+                    //clusterList[i].getGridCluster().hideRelations();
                     //clusterLineList[i].visible = false;
                 }
 
@@ -574,7 +582,10 @@ public class MapMarker : Map {
 
     public List<MapPointMarker> getClusterMarkersAtLevel(int level)
     {
-        return this.clusterMarkers[level];
+        if (this.clusterMarkers.Count > 0)
+            return this.clusterMarkers[level];
+        else
+            return null;
     }
 
     private void drawQuad(List<MapPoint> quadPoints, int q)
@@ -650,7 +661,7 @@ public class MapMarker : Map {
         if (dimension == MapPoint.TWO_DIMENSION)
         {
             Camera.main.orthographic = true;
-            Camera.main.orthographicSize = 287;
+            Camera.main.orthographicSize = 365;
             OnlineMapsCameraOrbit.instance.rotation = new Vector2(0, 0);
         }
         else
@@ -659,7 +670,10 @@ public class MapMarker : Map {
             OnlineMapsCameraOrbit.instance.rotation = new Vector2(35, 0);
         }
 
+        update();
+
     }
+ 
 
 
 }

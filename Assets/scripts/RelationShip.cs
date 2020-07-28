@@ -28,6 +28,12 @@ public class RelationShip {
         return this.multiple;
     }
 
+    public void remove()
+    {
+        relatedWith.Clear();
+        visible.Clear();
+    }
+
     public void addPoint(MapPoint point)
     {
         this.relatedWith.Add(point);
@@ -148,6 +154,15 @@ public class RelationShip {
     {
         for (int i = 0; i < relatedWith.Count; i++)
             visible[i] = false;
+    }
+
+    public void show()
+    {
+        int i = 0;
+        foreach (MapPoint relatedPoint in relatedWith) {
+            visible[i] = !relatedPoint.isFiltered();
+            i++;
+        }
     }
 
     public void hideRelatationWithPoint(MapPoint point)

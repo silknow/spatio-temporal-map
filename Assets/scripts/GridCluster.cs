@@ -10,6 +10,7 @@ public class GridCluster
     public string category="";
     protected GridCluster parent = null;
     protected List<GridCluster> childs = new List<GridCluster>();
+    protected Dictionary<MapPoint, RelationShip> relationsPerPoint = new Dictionary<MapPoint, RelationShip>();
 
     const int NO_VALUE = -500;
     List<MapPoint> points = new List<MapPoint>();
@@ -46,6 +47,109 @@ public class GridCluster
     public List<GridCluster> getChilds()
     {
         return childs;
+    }
+
+    public RelationShip getRelationPerPoint(MapPoint point)
+    {
+        RelationShip relation = null;
+
+        if (relationsPerPoint.ContainsKey(point))
+            relation = relationsPerPoint[point];
+
+        return relation;
+    }
+
+    public void addRelationsPerPoint(MapPoint point, List<GridCluster> relatedClusters)
+    {
+        if (!relationsPerPoint.ContainsKey(point))
+        {
+            List<MapPoint> clusterCenters = new List<MapPoint>();
+            foreach (GridCluster cluster in relatedClusters)
+                clusterCenters.Add(cluster.getCenter());
+            RelationShip relation = new RelationShip(this.getCenter(), clusterCenters, point.getLabel());
+            relationsPerPoint.Add(point, relation);
+
+            propagateRelationWith(point,relatedClusters);
+        }
+    }
+
+    public GridCluster getParent()
+    {
+        return parent;
+    }
+
+    protected void propagateRelationWith(MapPoint point, List<GridCluster> relatedClusters)
+    {
+        if (this.parent!=null)
+        {
+            //Debug.Log("El padre NO es NULL");
+            /*if (parent.getCenter().isCluster())
+                Debug.Log("El padre SI es un cluster");
+            else
+                Debug.Log("El padre NO es un cluster");
+            */
+            List <GridCluster> parentRelatedClusters = new List<GridCluster>();
+            foreach (GridCluster cluster in relatedClusters)
+                if (!parentRelatedClusters.Contains(cluster.parent) && cluster.parent != parent)
+                    parentRelatedClusters.Add(cluster.parent);
+            parent.addRelationsPerPoint(point, parentRelatedClusters);
+        } 
+        /*else
+            Debug.Log("El padre SI es NULL");*/
+    }
+
+
+    public void showRelations()
+    {
+        foreach (MapPoint p in relationsPerPoint.Keys)        
+            showRelationsPerPoint(p);        
+    }
+
+    public void hideRelations()
+    {
+        foreach (MapPoint p in relationsPerPoint.Keys)
+            hideRelationsPerPoint(p);
+    }
+
+    public void showRelationsPerPoint(MapPoint point)
+    {
+        Debug.Log("llamando a SHOW relations per point");
+        if (relationsPerPoint.ContainsKey(point))
+        {
+            RelationShip relation = relationsPerPoint[point];
+
+            relation.show();
+
+            center.showClusterRelations(point);
+        }
+    }
+
+    public void hideRelationsPerPoint(MapPoint point)
+    {
+        Debug.Log("llamando a HIDE relations per point");
+        if (relationsPerPoint.ContainsKey(point))
+        {
+            RelationShip relation = relationsPerPoint[point];
+            relation.hide();
+            center.hideClusterRelations(point);
+        }
+
+    }
+
+
+    public void removeRelationsPerPoint(MapPoint point)
+    {
+        if (relationsPerPoint.ContainsKey(point))
+        {
+            RelationShip relation = relationsPerPoint[point];
+            relation.remove();
+            relationsPerPoint.Remove(point);
+
+            center.removeGraphicRelations(point);
+
+            if (this.parent != null)
+                this.parent.removeRelationsPerPoint(point);
+        }
     }
 
     public void addFilteredPoint()
