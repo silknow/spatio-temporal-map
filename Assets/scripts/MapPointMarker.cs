@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
+using static MapMarker;
 
 public class MapPointMarker : MapPoint {
 
@@ -12,7 +14,10 @@ public class MapPointMarker : MapPoint {
     protected Vector3 stackedPosition;
     protected Vector3 stackedScale;
     protected Transform stackedTransform;
-
+    protected Texture texture;
+    public MarkerInstance markerInstance;
+    public MarkerInstance stackedMarkerInstance;
+    
 
     protected Dictionary<string, List<OnlineMapsDrawingLine>> graphicRelationsPerProperty = new Dictionary<string, List<OnlineMapsDrawingLine>>();
 
@@ -26,19 +31,29 @@ public class MapPointMarker : MapPoint {
 
     }
 
+    protected void setTexture(Texture texture)
+    {
+        this.texture = texture;
+    }
 
     protected void OnMarkerClick(OnlineMapsMarkerBase marker)
     {
         //Debug.Log("TOC TOC on "+marker.label);
+        //if (isGroupPoint())
+        //    Debug.Log("Es un grupo");
+        
         MapItemPopup.instance.OnMarkerClick(this);
+        //SilkMap.instance.refreshStack();
         //this.showRelations("technique");
     }
 
     protected void createCollider()
     {
-        BoxCollider box = marker3D.instance.GetComponent<BoxCollider>();
+        //BoxCollider box = marker3D.instance.GetComponent<BoxCollider>();
+        BoxCollider box = marker3D.instance.AddComponent<BoxCollider>();
         box.center = new Vector3(0.0f, 0.75f, 0.0f);
         box.size = new Vector3(0.75f, 0.75f, 0.75f);
+
     }
 
     public MapPointMarker(float longitud, float latitud, GameObject prefabObject, bool cluster) : base(longitud, latitud)
@@ -64,6 +79,62 @@ public class MapPointMarker : MapPoint {
             marker3D.enabled = false;*/
 
     }
+
+
+    public void assignTexture(Texture2D texture)
+    {
+        foreach (Transform child in marker3D.instance.transform)
+        {
+            GameObject obj = child.gameObject;
+
+            if (child.name.Equals("picture"))
+            {
+                child.GetComponent<Renderer>().material.mainTexture = texture;
+            }
+
+        }
+
+        //Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, true);
+        //if (texture != null)
+        marker2D.texture = texture; //TextureToTexture2D(texture);
+        //else
+        //    marker2D.texture = null;
+
+    }
+
+    public Texture getTexture()
+    {
+        foreach (Transform child in marker3D.instance.transform)
+        {
+            GameObject obj = child.gameObject;
+
+            if (child.name.Equals("picture"))
+            {
+                return child.GetComponent<Renderer>().material.mainTexture;
+            }
+
+        }
+
+        return null;
+    }
+
+    private Texture2D TextureToTexture2D(Texture texture)
+    {
+        Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+        RenderTexture currentRT = RenderTexture.active;
+        RenderTexture renderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 32);
+        Graphics.Blit(texture, renderTexture);
+
+        RenderTexture.active = renderTexture;
+        texture2D.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        texture2D.Apply();
+
+        RenderTexture.active = currentRT;
+        RenderTexture.ReleaseTemporary(renderTexture);
+        return texture2D;
+    }
+
+
 
     private void initData()
     {
@@ -92,14 +163,17 @@ public class MapPointMarker : MapPoint {
             marker3D.enabled = false;
     }
 
-
     protected override void graphicHide()
     {
         if (marker3D != null)
         {
             marker3D.enabled = false;
             if (isStacked())
-                stackedPosition = this.getMarker3D().transform.position;  
+            {
+                stackedPosition = this.getMarker3D().transform.position;
+                //if (isFiltered())
+                    stackedGameObject.SetActive(false);
+            }
         }        //marker3D.prefab.SetActive(false);
         if (marker2D != null)
             marker2D.enabled = false;
@@ -107,15 +181,23 @@ public class MapPointMarker : MapPoint {
 
     protected override void graphicShow()
     {
-        if (marker3D != null && dimension == THREE_DIMENSION)
+        if (marker3D != null && (map.GetDimension() == THREE_DIMENSION || isStacked()))
         {
             marker3D.enabled = true;
             if (isStacked())
-                setStackedPosition(stackedPosition, stackedTransform); 
+            {
+                //refreshStackedPosition(stackedPosition, stackedTransform);
+                stackedGameObject.SetActive(true);
+            }
         }
         //marker3D.prefab.SetActive(true);
-        if (marker2D != null && dimension == TWO_DIMENSION)
+        if (marker2D != null && map.GetDimension() == TWO_DIMENSION)
             marker2D.enabled = true;
+    }
+
+    public void forceShow()
+    {
+        graphicShow();
     }
 
     protected override void updateGraphicsCoordinates()
@@ -342,6 +424,12 @@ public class MapPointMarker : MapPoint {
         marker3D = null;
     }
 
+    public override void graphicUpdatePosition()
+    {
+        marker3D.position = new Vector2(this.x, this.y);
+        marker2D.position = new Vector2(this.x, this.y);
+    }
+
     public void setStackedPosition(Vector3 position, Transform parentTransform)
     {
 
@@ -351,10 +439,31 @@ public class MapPointMarker : MapPoint {
         
         stackedPosition = position;
         stackedTransform = parentTransform;
+
         mapParentTransform = this.getMarker3D().transform.parent;
         mapPosition = this.getMarker3D().transform.position;
+        
+        position.y = 0.0f;
 
         this.getMarker3D().transform.SetPositionAndRotation(position, this.getMarker3D().prefab.transform.rotation);
+        this.getMarker3D().transform.parent = parentTransform;
+
+        setStacked(true);
+    }
+
+    public void refreshStackedPosition(Vector3 position, Transform parentTransform)
+    {
+
+        if (map.GetDimension() == 2)
+            this.getMarker3D().enabled = true;
+
+        position.y = 0.0f;
+
+        if (this.getLabel().Equals("Cluster 4"))
+            Debug.Log("aqui");
+
+        this.getMarker3D().transform.SetPositionAndRotation(position, this.getMarker3D().prefab.transform.rotation);
+        this.getMarker3D().transform.localPosition = position;
         this.getMarker3D().transform.parent = parentTransform;
 
         setStacked(true);
@@ -369,8 +478,6 @@ public class MapPointMarker : MapPoint {
 
     public void unStack()
     {
-        //this.getMarker3D().transform.SetPositionAndRotation(mapPosition, this.getMarker3D().prefab.transform.rotation);
-        //this.getMarker3D().transform.parent = mapParentTransform;
         this.getMarker3D().enabled = false;
         if (map.GetDimension()==3)
             this.getMarker3D().enabled = true;

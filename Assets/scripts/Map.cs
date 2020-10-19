@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 public class Map {
 
@@ -17,7 +18,11 @@ public class Map {
     protected FilterManager filterManager;
     protected Dictionary<Vector2, List<MapPoint>> positionsGroup = new Dictionary<Vector2, List<MapPoint>>();
     protected List<MapPoint> pointsWithRelation = new List<MapPoint>();
+    protected List<string> positionNames = new List<string>();
     protected bool stacked = false;
+    protected bool maintainPoints = false;
+
+    public const int MAX_POINTS_PER_GROUP=20;
 
     const int NO_LEVEL_VISUALIZED = -1; 
     
@@ -32,45 +37,108 @@ public class Map {
         zoom = -1;        
     }
 
+    /**
+     * Get the number of points in the map
+     * */
+    public int getNumPoints()
+    {
+        return points.Count;
+    }
 
+    public List<string> GetPositionNames()
+    {
+        return this.positionNames;
+    }
+
+    public List<MapPoint> GetPoints()
+    {
+        return points;
+    }
+
+
+    /**
+     * This method defines if the next time the map is reset
+     * the points of the map will be removed or are still maintained.
+     * This is used for change the position of the points, but maintaining the structure
+     * of filters, property, and the rest of data
+     * 
+     * @param maintain (if true the point data are maintained, if false, they are removed)
+     * */
+    public void setMaintainPoints(bool maintain)
+    {
+        this.maintainPoints = maintain;
+    }
+
+    public void addPositionName(string name)
+    {
+        this.positionNames.Add(name);
+    }
+
+    /**
+     * Returns true if the map contains points to be displayed
+     * */
     public bool hasData()
     {
         return points.Count > 0;
     }
 
+    public void activePosition(string name)
+    {
+        foreach (MapPoint p in points)
+            p.activePosition(name);
+    }
+
+    /**
+     * Reset the map content, remove the data structure and leave the map ready
+     * for a new point data set
+     * */
     public void reset()
     {
         //Debug.Log("llamando reset");
         clusterManager.reset();
         //clusterManager = new ClusterManager();
 
-        for (int i = 0; i < points.Count; i++)
-            points[i].reset();
+        if (!maintainPoints)
+        {
+            for (int i = 0; i < points.Count; i++)
+                points[i].reset();
 
-        points.Clear();
+            points.Clear();
+            propertyManager.resetPropertyValues();
+
+            setMaintainPoints(false);
+        }
+
         //points.RemoveRange(0, points.Count);
         OnlineMapsMarker3DManager.RemoveAllItems();
         OnlineMapsMarkerManager.RemoveAllItems();
 
         positionsGroup.Clear();
-        propertyManager.resetPropertyValues();
         resetFilters();
         removeAllRelations();
         //removeAllClusters();
     }
 
-
+    /**
+     * Set the map in stacked mode
+     **/
     public void setStacked(bool status)
     {
         this.stacked = status;
     }
 
-
+    
+    /** 
+     * Gets true if the map is in stacked mode
+     * */
     public bool getStacked()
     {
         return this.stacked;
     }
 
+    /**
+     * Gets a list with the points what its time data is between the data specified in the parameters
+     * */
     public List<MapPoint> pointsInTime(int from, int to)
     {
         List<MapPoint> pointsResult = new List<MapPoint>();
@@ -86,19 +154,32 @@ public class Map {
         return pointsResult;
     }
 
+    /**
+     * Remove all cluster data managed by the map
+     * */
     public void removeAllClusters()
     {
         removeAllGraphicClusters();
     }
 
+    /**
+     * Remove all cluster graphic structure
+     * */
     public virtual void removeAllGraphicClusters() { 
     }
 
+    /**
+     * get the propertymanager instance associate with the map
+     * */
     public PropertyManager GetPropertyManager()
     {
         return propertyManager;
     }
 
+    /**
+     * This method gets if the point data could be displayed, or only are displayed the cluster data
+     * It is true if the current zoom level is less than the number of levels of the cluster manager
+     **/
     public bool pointsViewing()
     {
         int level = clusterManager.getLevel(zoom);
@@ -300,27 +381,36 @@ public class Map {
         {
             List<MapPoint> pointList = positionsGroup[v];
 
-            level = 0;
-            pointAtLevel = 1;
-            pointsPerLevel = Math.Pow(2, level);
-
-            for (int i= 0;i < pointList.Count;i++) 
+            if (pointList.Count <= MAX_POINTS_PER_GROUP)
             {
-                if (pointAtLevel > pointsPerLevel)
-                {
-                    pointAtLevel = 1;
-                    level++;
-                    pointsPerLevel = Math.Pow(2, level);
-                    incAng = 6.28f / pointsPerLevel;
-                }
-                
-                double x = v.x + Math.Cos(pointAtLevel * incAng) * incR * level;
-                double y = v.y + Math.Sin(pointAtLevel * incAng) * incR * level;
-           
-                pointList[i].setXY(Convert.ToSingle(x), Convert.ToSingle(y));
 
-                pointAtLevel++;                
-            }            
+                level = 0;
+                pointAtLevel = 1;
+                pointsPerLevel = Math.Pow(2, level);
+
+                for (int i = 0; i < pointList.Count; i++)
+                {
+                    if (pointAtLevel > pointsPerLevel)
+                    {
+                        pointAtLevel = 1;
+                        level++;
+                        pointsPerLevel = Math.Pow(2, level);
+                        incAng = 6.28f / pointsPerLevel;
+                    }
+
+                    double x = v.x + Math.Cos(pointAtLevel * incAng) * incR * level;
+                    double y = v.y + Math.Sin(pointAtLevel * incAng) * incR * level;
+
+                    pointList[i].setXY(Convert.ToSingle(x), Convert.ToSingle(y));
+
+                    pointAtLevel++;
+                }
+            }
+            else
+            {
+                GridCluster gCluster = new GridCluster(pointList);
+                clusterManager.addPointGroup(gCluster);
+            }
         }
 
     }
@@ -418,6 +508,34 @@ public class Map {
     {
         clusterManager.addPoints(points);
         clusterManager.update();
+        updateRelationData();
+    }
+
+    public void updateRelationData()
+    {
+        if (propertyManager!=null)
+        {
+            List<string> propertyList = propertyManager.GetRelatablePropertiesName();
+
+            foreach (MapPoint p in points)
+                foreach (string propertyName in propertyList)
+                {
+                    List<string> valuesOrigin = p.getPropertyValue(propertyName);
+                    int numMatchs = 0;
+
+                    foreach (MapPoint pDest in points)
+                        if (pDest!=p)
+                        {
+                            List<string> valuesDest = pDest.getPropertyValue(propertyName);
+              
+                            if (valuesOrigin.Any(x => valuesDest.Any(y => y.Equals(x))))
+                                numMatchs++;
+                        }
+
+                    p.setRelatedDataFor(propertyName, numMatchs);
+                }
+        }
+            
     }
 
     public void activateTimeFrame(int from, int to)

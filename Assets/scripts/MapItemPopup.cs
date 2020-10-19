@@ -54,24 +54,13 @@ using UnityEngine.UI;
         /// <param name="marker">The marker on which clicked</param>
         public void OnMarkerClick(MapPointMarker marker)
         {
+           
             targetMarker = marker;
+            //print("OnMarker click on "+targetMarker.getLabel());
             // Set active marker reference
-
-
-            if (!targetMarker.isCluster())
+            if(targetMarker.isGroupPoint())
             {
-                // Show the popup
-                clusterPopup.SetActive(false);
-                selectedPopup = itemTitlePopup;
-                selectedPopup.SetActive(true);
                 
-                // Set title and address
-                title.text = marker.getLabel();
-                MapUIManager.instance.SetSelectedMarker(targetMarker);
-                
-            }
-            else
-            {
                 // Show the popup
                 itemTitlePopup.SetActive(false);
                 selectedPopup = clusterPopup;
@@ -87,6 +76,27 @@ using UnityEngine.UI;
                 
                 selectedPopup.SetActive(true);
                
+            }
+            else if (!targetMarker.isCluster())
+            {
+                // Show the popup
+                clusterPopup.SetActive(false);
+                selectedPopup = itemTitlePopup;
+                selectedPopup.SetActive(true);
+                
+                // Set title and address
+                title.text = marker.getLabel();
+                MapUIManager.instance.SetSelectedMarker(targetMarker);
+                
+                selectedPopup.GetComponent<RelationsLegendPopup>().ClearRows();
+                selectedPopup.GetComponent<RelationsLegendPopup>().PopulateLegend();
+
+                
+            }
+            
+            else
+            {
+                targetMarker = null;
             }
 
             UpdatePopupPosition();
@@ -125,16 +135,20 @@ using UnityEngine.UI;
           
             // If no marker is selected then exit.
             if (targetMarker == null) return;
-
+            
             var selectedMarker = targetMarker.getDimension() == MapPoint.THREE_DIMENSION
                 ? targetMarker.getMarker3D() as OnlineMapsMarkerBase
                 : targetMarker.getMarker2D();
             
-
+            // PABLO - REVISAR 
+            var isGroupPoints = false;
+            if(targetMarker.getGridCluster() != null)
+                isGroupPoints = targetMarker.getGridCluster().isGroupPoints();
             // Hide the popup if the marker is outside the map view
-            if (!selectedMarker.inMapView)
+            if (!selectedMarker.inMapView && !isGroupPoints)
             {
                 if (selectedPopup.activeSelf) selectedPopup.SetActive(false);
+                
             }
             else if (!selectedPopup.activeSelf) selectedPopup.SetActive(true);
 

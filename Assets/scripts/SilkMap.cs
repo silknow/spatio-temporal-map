@@ -176,6 +176,10 @@ public class SilkMap : MonoBehaviour {
     }
 
 
+    public void refreshStack()
+    {
+        ClonedMap.Instance.updateVisualization();
+    }
     public GameObject createSnapShot(int from, int to)
     {
 
@@ -183,6 +187,7 @@ public class SilkMap : MonoBehaviour {
        // if (clonedGroupMap == null)
         //clonedGroupMap = ClonedMap.instance.getObjectMap();
 
+        /*
         if (to == 1700)
             timeSliceDisplay = true;
         else
@@ -192,7 +197,7 @@ public class SilkMap : MonoBehaviour {
                 removeSnapShots();
                 timeSliceDisplay = false;                
             }
-        }
+        }*/
 
         GameObject snapShot = ClonedMap.Instance.cloneCurrent(from, to);
 

@@ -16,18 +16,16 @@ public class MapPoint
 
     protected int dimension = TWO_DIMENSION;
 
+    protected GameObject stackedGameObject = null;
+
+    protected Dictionary<string, Vector2> positionValues = new Dictionary<string, Vector2>();
+
     public bool stacked = false;
 
-    protected void setStacked(bool status)
-    {
-        this.stacked = status;
-    }
+    protected Dictionary<string, int> relatedData = new Dictionary<string, int>();
 
+    protected bool knownLocation = true;
 
-    public bool isStacked()
-    {
-        return this.stacked;
-    }
 
     // x,y,z position in map coordinates
     protected float x;
@@ -52,6 +50,8 @@ public class MapPoint
 
     protected int id;
 
+    public bool groupPoint = false;    
+
     // If filtered is active, the point must no be displayed
     protected bool filtered=false;
 
@@ -75,9 +75,6 @@ public class MapPoint
     protected Map map;
 
    
-
-
-
     public string Model { get; set; }
 
 
@@ -102,6 +99,86 @@ public class MapPoint
     public Map getMap()
     {
         return map;
+    }
+
+    public bool isKnownLocation()
+    {
+        return knownLocation;
+    }
+
+    public void setKnownLocation(bool known)
+    {
+        this.knownLocation = known;        
+    }
+
+    public bool isVisible()
+    {
+        return !hidden;
+    }
+
+
+    public bool isGroupPoint()
+    {
+        if (isCluster() && getClusteredPoints()!=null && getClusteredPoints().Count>0)
+            return getClusteredPoints()[0].groupPoint;
+        else
+            return false;
+        //return groupPoint;
+    }
+
+    public void setGroupPoint(bool groupPoint)
+    {
+        this.groupPoint = groupPoint;
+    }
+
+    public void setStacked(bool status)
+    {
+        this.stacked = status;
+
+        if (!stacked && stackedGameObject != null)
+            MonoBehaviour.Destroy(stackedGameObject);
+    }
+
+    public void setRelatedDataFor(string propertyName, int numMatchs)
+    {
+        if (relatedData.ContainsKey(propertyName))
+            relatedData[propertyName] = numMatchs;
+        else
+            relatedData.Add(propertyName, numMatchs);
+    }
+
+
+    public void addPositionValue(string positionName, Vector2 values)
+    {
+        positionValues.Add(positionName, values);
+    }
+
+    public void setStackedGameObject(GameObject gameObject)
+    {
+        this.stackedGameObject = gameObject;
+        setStacked(true);
+    }
+
+    public GameObject getStackedGameObject()
+    {
+        return this.stackedGameObject;
+    }
+
+    public void activePosition(string name)
+    {
+        this.x = positionValues[name].x;
+        this.y = positionValues[name].y;
+
+        graphicUpdatePosition();
+    }
+
+    public virtual void graphicUpdatePosition()
+    {
+    }
+
+    public bool isStacked()
+    {
+        return this.stacked;
     }
 
     /**
@@ -309,7 +386,7 @@ public class MapPoint
     public void show()
     {
 
-        if (filtered)
+        if (filtered || groupPoint)
         {
             hide();
             return;
@@ -487,6 +564,15 @@ public class MapPoint
                     gCluster.removeFilteredPoint();
         }
 
+    }
+
+
+    public int getNumObjectsWithProperty(string propertyName)
+    {
+        if (relatedData.ContainsKey(propertyName))
+            return relatedData[propertyName];
+        else
+            return 0;
     }
 
     public bool isFiltered()

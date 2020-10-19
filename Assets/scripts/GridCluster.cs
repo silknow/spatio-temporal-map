@@ -11,6 +11,7 @@ public class GridCluster
     protected GridCluster parent = null;
     protected List<GridCluster> childs = new List<GridCluster>();
     protected Dictionary<MapPoint, RelationShip> relationsPerPoint = new Dictionary<MapPoint, RelationShip>();
+    public bool groupPoints = false;
 
     const int NO_VALUE = -500;
     List<MapPoint> points = new List<MapPoint>();
@@ -31,6 +32,29 @@ public class GridCluster
         addPoint(point);
         this.category = point.getCategory();
         this.numFilteredPoints = 0;
+    }
+
+    public int getNumVisiblePoints()
+    {
+        return getNumPoints() - numFilteredPoints;
+    }
+
+    public GridCluster(List <MapPoint> pointsGroup)
+    {
+        foreach (MapPoint p in pointsGroup)
+        {
+            addPoint(p);
+            p.setGroupPoint(true);
+        }
+
+        center.setXY(pointsGroup[0].getX(), pointsGroup[0].getY());
+
+        this.groupPoints = true;
+    }
+
+    public bool isGroupPoints()
+    {
+        return this.groupPoints;
     }
 
     public void setParent(GridCluster cluster)
@@ -113,7 +137,7 @@ public class GridCluster
 
     public void showRelationsPerPoint(MapPoint point)
     {
-        Debug.Log("llamando a SHOW relations per point");
+        //Debug.Log("llamando a SHOW relations per point");
         if (relationsPerPoint.ContainsKey(point))
         {
             RelationShip relation = relationsPerPoint[point];
@@ -126,7 +150,7 @@ public class GridCluster
 
     public void hideRelationsPerPoint(MapPoint point)
     {
-        Debug.Log("llamando a HIDE relations per point");
+        //Debug.Log("llamando a HIDE relations per point");
         if (relationsPerPoint.ContainsKey(point))
         {
             RelationShip relation = relationsPerPoint[point];

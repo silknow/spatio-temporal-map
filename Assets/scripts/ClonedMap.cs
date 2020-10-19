@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ClonedMap : MonoBehaviour
 {
@@ -61,8 +64,14 @@ public class ClonedMap : MonoBehaviour
            
 
         }
+
+
+
+
         //Debug.Log("object map vale " + objectMap);
     }
+
+
 
 
     public void setMap(Map map)
@@ -112,6 +121,14 @@ public class ClonedMap : MonoBehaviour
         return groupObject;
     }
 
+
+    public void updateVisualization()
+    {
+        foreach (MapPointMarker p in stackedPoints)
+        {
+            p.forceShow();
+        }
+    }
 
     protected void loadTilesAtLevel(int level)
     {
@@ -228,24 +245,33 @@ public class ClonedMap : MonoBehaviour
 
 
         }
-        Debug.Log("fin");
     }
 
     protected void createGameObject(GameObject groupObject, int from, int to)
     {
         //destroyGameObject();
 
+        GameObject groupCanvasObject = new GameObject();
+        groupCanvasObject.name = "Canvas";
+        groupCanvasObject.transform.parent = groupObject.transform;
+
+        groupCanvasObject.AddComponent<Canvas>();
+        //groupCanvasObject.transform.parent = groupObject.transform;
+
+
         if (listTiles.Count > 0)
         {
 
-            Vector2 centerMap = new Vector2(topLeft.x+(bottomRight.x - topLeft.x) / 2, 
-                                            topLeft.y + (bottomRight.y-topLeft.y) / 2);
+            Vector2 centerMap = new Vector2(topLeft.x + (bottomRight.x - topLeft.x) / 2f,
+                                            topLeft.y + (bottomRight.y - topLeft.y) / 2f);
+
+            List<Vector3> centerTileList = new List<Vector3>();
 
             foreach (OnlineMapsTile tile in listTiles)
             {
                 //OnlineMapsTile tile = listTiles[i];
 
-                snapShotMesh = Instantiate(tileBase, new Vector3(0, 0, 0), Quaternion.identity);
+                snapShotMesh = Instantiate(tileBase, new Vector3(0, 0, 0), Quaternion.identity, groupObject.transform);
 
                 Mesh planeMesh = snapShotMesh.GetComponent<MeshFilter>().mesh;
                 Bounds bounds = planeMesh.bounds;
@@ -258,11 +284,16 @@ public class ClonedMap : MonoBehaviour
                 float scaleX = currentTileWidth / boundsX;
                 float scaleZ = currentTileHeight / boundsZ;
 
-                snapShotMesh.transform.SetPositionAndRotation(snapShotMesh.transform.position +
-                    new Vector3((-(float)(tile.topLeft.x+ currentTileWidth / 2.0))+centerMap.x,
-                    -1.0f,
-                    (-(float)(tile.topLeft.y- currentTileHeight / 2.0))+centerMap.y), snapShotMesh.transform.rotation);
-   
+                /*snapShotMesh.transform.SetPositionAndRotation(snapShotMesh.transform.position +
+                    new Vector3((-(float)(tile.topLeft.x + currentTileWidth / 2.0)) + centerMap.x,
+                    0.0f,
+                    (-(float)(tile.topLeft.y - currentTileHeight / 2.0)) + centerMap.y), snapShotMesh.transform.rotation);*/
+                snapShotMesh.transform.localPosition = new Vector3(
+                    (-(float) (tile.topLeft.x + currentTileWidth / 2.0f)) + centerMap.x,
+                    0.0f,
+                    (-(float) (tile.topLeft.y - currentTileHeight / 2.0f)) + centerMap.y);
+                
+
                 snapShotMesh.transform.localScale = new Vector3(scaleX, 1.0f, scaleZ);
 
                 if (tile != null)
@@ -275,14 +306,131 @@ public class ClonedMap : MonoBehaviour
                 else
                     Debug.Log("TILE IS NULL");
 
-                putMarkers(tile, groupObject,centerMap,from, to);
 
-                snapShotMesh.transform.parent = groupObject.transform;
+
+                //putMarkers(tile, groupCanvasObject, groupObject, centerMap,from, to);
+
+                Vector3 pPos = snapShotMesh.transform.position;
+                //pPos.x = pPos.x * scaleX;
+                //pPos.z = pPos.z * scaleZ;
+                centerTileList.Add(pPos);
+
             }
+
+
+            // Obtiene las bounds del grupo con el snapshot
+            Bounds boundsG = getBounds(groupObject);
+            //Bounds boundsG = CalculateLocalBounds(groupObject);
+
+
+            // Crea cubo que va en la parte inferior
+            // Pasando la lista de centros de cada tile y las bounds 
+            GameObject cube = createBase(centerTileList, boundsG, groupObject.transform);
+            cube.name = groupObject.name + " Base";
+
+            // Lo añadoal grupo de snapshot
+            cube.transform.parent = groupObject.transform;
+
+
+            Canvas myCanvas = groupCanvasObject.GetComponent<Canvas>();
+            myCanvas.renderMode = RenderMode.WorldSpace;
+            RectTransform canvasRect = myCanvas.GetComponent<RectTransform>();
+            //canvasRect.localRotation = Quaternion.Euler(-90,0,0);
+            //canvasRect.localPosition = boundsG.center;
+            canvasRect.transform.parent = groupObject.transform;
+            canvasRect.SetPositionAndRotation(cube.transform.position, Quaternion.identity);
+            canvasRect.Rotate(new Vector3(-90, 0, 0));
+            canvasRect.sizeDelta = new Vector3(boundsG.size.x, boundsG.size.z, boundsG.size.y);
+    
+
+            foreach (OnlineMapsTile tile in listTiles)
+                putMarkers(tile, groupCanvasObject, groupObject, centerMap, from, to, -boundsG.size.x * 0.0015f);
         }
+
     }
 
-    
+    Bounds getBounds(GameObject objeto)
+    {
+        Bounds bounds;
+        Renderer childRender;
+        bounds = getRenderBounds(objeto);
+        if (bounds.extents.x == 0)
+        {
+            bounds = new Bounds(objeto.transform.position, Vector3.zero);
+            foreach (Transform child in objeto.transform)
+            {
+                childRender = child.GetComponent<Renderer>();
+                if (childRender)
+                {
+                    bounds.Encapsulate(childRender.bounds);
+                }
+                else
+                {
+                    bounds.Encapsulate(getBounds(child.gameObject));
+                }
+            }
+        }
+
+        return bounds;
+    }
+
+    Bounds getRenderBounds(GameObject objeto)
+    {
+        Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+        Renderer render = objeto.GetComponent<Renderer>();
+        if (render != null)
+        {
+            return render.bounds;
+        }
+        return bounds;
+    }
+
+    /**
+     * Crea un cubo, cuyo centro está está el centro de los puntos pasados en el primer parámetro
+     * y la escala viene definida por los bounds de los tiles, que están en el segundo parámetro
+     * */
+    protected GameObject createBase(List<Vector3> centerTileList, Bounds bounds, Transform parent)
+    {
+
+        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //cube.transform.parent = parent;
+
+        /*
+        // Obtener el punto (minX,maxX) y (minZ,maxZ) que comprenden las tiles.
+        float minX = centerTileList[0].x, maxX = centerTileList[0].y;
+        float minZ = centerTileList[0].z, maxZ= centerTileList[0].z;
+        float centerY = centerTileList[0].y;
+
+        foreach (Vector3 center in centerTileList)
+        {
+            if (center.x < minX) minX  =center.x;
+            if (center.x > maxX) maxX = center.x;
+            if (center.z < minZ) minZ = center.z;
+            if (center.z > maxZ) maxZ = center.z;
+        }
+
+        // Obtiene las coordenadas x,y del centro de las tiles
+        float cubeCenterX = minX + (maxX - minX) / 2.0f;
+        float cubeCenterZ = minZ + (maxZ - minZ) / 2.0f;
+
+        //cube.transform.position = new Vector3(cubeCenterX, centerY, cubeCenterZ);
+
+        //cube.transform.Translate(new Vector3(0, -bounds.center.x / 90, 0));
+
+        // Obtiene la escala en x y z del cubo a partir de las bounds
+        //float scaleX = (maxX-minX) / bounds.size.x;        
+        //float scaleZ = (maxZ-minZ) / bounds.size.z;
+        */
+        cube.transform.localScale = new Vector3(bounds.size.x, bounds.size.x*0.008f, bounds.size.z);
+        cube.transform.SetPositionAndRotation(new Vector3(bounds.center.x, bounds.center.y - cube.transform.localScale.y*0.501f, bounds.center.z), Quaternion.identity);
+
+        //cube.transform.localPosition = -cube.transform.localScale.y*0.501f*cube.transform.up;
+
+        var sc = parent.gameObject.AddComponent<StackedMapInstance>();
+        sc.cube = cube.transform;
+
+        return cube;
+    }
 
     protected void destroyGameObject()
     {
@@ -296,16 +444,16 @@ public class ClonedMap : MonoBehaviour
     }
 
 
-    protected void putMarkers(OnlineMapsTile tile, GameObject parent, Vector2 centerMap, int from, int to)
+    protected void putMarkers(OnlineMapsTile tile, GameObject parentCanvas, GameObject parent, Vector2 centerMap, int from, int to, float desp)
     {
         if (!map.pointsViewing())
-            putClusterMarkers(tile, parent, centerMap, from, to);
+            putClusterMarkers(tile, parentCanvas, parent, centerMap, from, to, desp);
         else
-            putPointMarkers(tile, parent, centerMap, from, to);
+            putPointMarkers(tile, parent, centerMap, from, to, desp);
 
     }
 
-    protected void putClusterMarkers(OnlineMapsTile tile, GameObject parent,Vector2 centerMap, int from, int to)
+    protected void putClusterMarkers(OnlineMapsTile tile, GameObject parentCanvas, GameObject parent, Vector2 centerMap, int from, int to, float desp)
     {
         int level = map.getLevel();
 
@@ -337,20 +485,67 @@ public class ClonedMap : MonoBehaviour
                     if (latitud <= tile.topLeft.y && latitud >= tile.bottomRight.y)
                     {
                         
-                        /*
+                        //------------------
                         GameObject marker = Instantiate(clusterList[m].getMarker3D().prefab,
                             new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
                         marker.transform.SetPositionAndRotation(marker.transform.position +
                                                new Vector3((-(float)(longitud)) + centerMap.x,
-                                                            -1.0f,
+                                                            desp,
                                                            (-(float)(latitud)) + centerMap.y), marker.transform.rotation);
 
                         marker.transform.parent = parent.transform;
 
-                        float scale = clusterList[m].getMarker3D().scale /4.0f;
-                        marker.transform.localScale = new Vector3(scale, scale, scale);*/
 
 
+                        marker.name = gPoint.getLabel();
+
+                        /*
+                        GameObject markerCluster = Instantiate(clusterList[m].markerInstance.gameObject,
+                            new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
+                        markerCluster.transform.SetPositionAndRotation(markerCluster.transform.position +
+                                               new Vector3((-(float)(longitud)) + centerMap.x,
+                                                            -1.0f,
+                                                           (-(float)(latitud)) + centerMap.y), markerCluster.transform.rotation);
+                        markerCluster.transform.parent = parent.transform;
+                        */
+
+
+
+
+                        
+                        Canvas canvasSlice = parentCanvas.GetComponent<Canvas>();
+
+                        GameObject markerCluster = GameObject.Instantiate(clusterList[m].markerInstance.gameObject, canvasSlice.transform) as GameObject;
+                        markerCluster.transform.SetPositionAndRotation(marker.transform.localPosition, marker.transform.rotation);
+                        //markerCluster.transform.parent = parent.transform;
+
+                        RectTransform rectTransform = markerCluster.transform as RectTransform;
+                        markerCluster.transform.localScale = new Vector3(0.1f,0.1f,0.1f);
+                        markerCluster.transform.localRotation = Quaternion.Euler(new Vector3(-60, 180, 0));
+                        markerCluster.transform.localPosition += Vector3.up * 0.6f;
+
+                        string titleData = numData.ToString();
+                        SetText(rectTransform, "Title", titleData);
+
+
+
+                            float scale = (clusterList[m].getMarker3D().scale / 10.0f) * numData;
+                            //4.0f;
+                        marker.transform.localScale = new Vector3(scale, scale, scale);
+
+                        gPoint.setStackedGameObject(marker);
+                        stackedPoints.Add(gPoint);
+
+                        if (gPoint.isFiltered() || !gPoint.isVisible())
+                            marker.SetActive(false);
+                        else
+                            marker.SetActive(true);
+
+
+
+                        //------------------
+
+                        /*
                         
                         gPoint.setStackedPosition(new Vector3((-(float)(gPoint.getX())) + centerMap.x,
                                                         -1.0f,
@@ -359,6 +554,7 @@ public class ClonedMap : MonoBehaviour
                         gPoint.setStackedScale(new Vector3(scale, scale, scale));
 
                         stackedPoints.Add(gPoint);
+                        */
 
                     }
             }
@@ -366,7 +562,14 @@ public class ClonedMap : MonoBehaviour
         }
     }
 
-    protected void putPointMarkers(OnlineMapsTile tile, GameObject parent, Vector2 centerMap, int from, int to)
+    private void SetText(RectTransform rt, string childName, string value)
+    {
+
+        var title = rt.GetComponentInChildren<Text>();
+        if (title != null) title.text = value;
+    }
+
+    protected void putPointMarkers(OnlineMapsTile tile, GameObject parent, Vector2 centerMap, int from, int to, float desp)
     {
         int level = map.getLevel();
 
@@ -392,23 +595,52 @@ public class ClonedMap : MonoBehaviour
 
                 Debug.Log(p.getLabel()+ "("+ gPoint.getMarker3D().transform.name+") - "+p.getFrom()+"-"+p.getTo());
 
-                /*
+                //--------------
                 
                 GameObject marker = Instantiate(gPoint.getMarker3D().prefab,
                                new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
                 marker.transform.SetPositionAndRotation(marker.transform.position +
                                                 new Vector3((-(float)(gPoint.getX())) + centerMap.x,
-                                                                -1.0f,
+                                                                desp,
                                                             (-(float)(gPoint.getY())) + centerMap.y), marker.transform.rotation);
 
-                marker.transform.parent = parent.transform;
 
+                foreach (Transform child in marker.transform)
+                {
+                    GameObject obj = child.gameObject;
+
+                    if (child.name.Equals("picture"))
+                    {
+                        child.GetComponent<Renderer>().material.mainTexture = gPoint.getTexture();
+                    }
+
+                }
+
+                marker.transform.parent = parent.transform;
+                
+                
 
                 float scale = gPoint.getMarker3D().scale / 100.0f;
-                marker.transform.localScale = new Vector3(scale, scale, scale);*/
+                marker.transform.localScale = new Vector3(scale, scale, scale);
+                
+
+                marker.AddComponent(typeof(EventTrigger));
+                EventTrigger trigger = marker.GetComponent<EventTrigger>();
+                EventTrigger.Entry entry = new EventTrigger.Entry();
+                entry.eventID = EventTriggerType.PointerClick;
+                entry.callback.AddListener((eventData) => { onClick(); });
+                trigger.triggers.Add(entry);
 
 
 
+
+
+                gPoint.setStackedGameObject(marker);
+                stackedPoints.Add(gPoint);
+
+                //--------------------
+
+                /*
                 gPoint.setStackedPosition(new Vector3((-(float)(gPoint.getX())) + centerMap.x,
                                                                 -1.0f,
                                                             (-(float)(gPoint.getY())) + centerMap.y), parent.transform);
@@ -416,15 +648,22 @@ public class ClonedMap : MonoBehaviour
                 gPoint.setStackedScale(new Vector3(scale, scale, scale));
 
                 stackedPoints.Add(gPoint);
+                */
 
             }
         }
     }
 
+    public void onClick()
+    {
+        Debug.Log("Stacked click");
+    }
+
     public void unStackPoints()
     {
         foreach (MapPointMarker p in stackedPoints)
-            p.unStack();
+            p.setStacked(false);
+            //p.unStack();
 
         stackedPoints.Clear();
     }
@@ -528,4 +767,25 @@ public class ClonedMap : MonoBehaviour
 
         return rot;
     }
+
+    private Bounds CalculateLocalBounds(GameObject objeto)
+    {
+        Quaternion currentRotation = objeto.transform.rotation;
+        objeto.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+
+        Bounds bounds = new Bounds(objeto.transform.position, Vector3.zero);
+
+        foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
+        {
+            bounds.Encapsulate(renderer.bounds);
+        }
+
+        Vector3 localCenter = bounds.center - objeto.transform.position;
+        bounds.center = localCenter;
+
+        objeto.transform.rotation = currentRotation;
+
+        return bounds;
+    }
 }
+

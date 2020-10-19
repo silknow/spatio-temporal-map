@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using SilknowMap;
@@ -27,7 +28,7 @@ public class APIManager : Singleton<APIManager>
     public void Awake()
     {
 
-        endpoint = PlayerPrefs.GetString("API_endpoint") ?? "http://grlc.eurecom.fr/api-git/silknow/api/";
+        endpoint = string.IsNullOrEmpty(PlayerPrefs.GetString("API_endpoint")) ? "http://grlc.eurecom.fr/api-git/silknow/api/" :PlayerPrefs.GetString("API_endpoint") ;
         
         timeValues = new Dictionary<string, TimeElement>();
         PopulateTimeDictionary();
@@ -119,8 +120,7 @@ public class APIManager : Singleton<APIManager>
         }
 
         uri = String.Concat(uri, firstElement ? "?endpoint=http%3A%2F%2Fdata.silknow.org%2Fsparql" : "&endpoint=http%3A%2F%2Fdata.silknow.org%2Fsparql");
-
-        Debug.Log(uri);
+        
         
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
@@ -133,7 +133,6 @@ public class APIManager : Singleton<APIManager>
             else
             {
                 var response = webRequest.downloadHandler.text;
-                print(response);
                 List<ManMadeObject> manMadeObjectList;
                 try
                 {
@@ -145,7 +144,15 @@ public class APIManager : Singleton<APIManager>
                     print("errorParsing");
                     yield break;
                 }
+
+                if (manMadeObjectList.Count < 1)
+                {
+                    print("empty response");
+                    yield break;
+                }
+
                 objectList = manMadeObjectList;
+               
                 initAppRef.LoadRestData(objectList);
                 
             }
@@ -233,7 +240,7 @@ public class APIManager : Singleton<APIManager>
     }
     public void TestFranceTextiles()
     {
-        StartCoroutine(GetObjectList(country:"France"));
+        StartCoroutine(GetObjectList(country:"Spain"));
     }
     public void TestLoadTextilesFromHTML()
     {
@@ -255,6 +262,7 @@ public class APIManager : Singleton<APIManager>
     
     public void StartDumpingJSON(string numberOfPages)
     {
+        //print("StartDumpingJSON Total numberOfPages: "+numberOfPages);
         _sendingInfo = true;
         objectList.Clear();
         MapUIManager.instance.ShowProgressBar(Int32.Parse(numberOfPages));
@@ -264,21 +272,24 @@ public class APIManager : Singleton<APIManager>
     {
         if(!_sendingInfo)
             return;
-      
         var manMadeObjectList = JsonConvert.DeserializeObject<List<ManMadeObject>>(json);
+        //print("AppendJSONData Incoming JSON count: "+manMadeObjectList.Count);
         objectList  = objectList.Concat(manMadeObjectList).ToList();
+        //print("AppendJSONData Total JSON count: "+objectList.Count);
     }
 
     public void EndDumpingJSON()
     {
+        //print("EndDumpingJSON");
         _sendingInfo = false;
         initAppRef.LoadRestData(objectList);
         MapUIManager.instance.HideProgressBar();
+        //print("EndDumpingJSON Total JSON count: "+objectList.Count);
         objectList.Clear();
     }
     public void CancelDumpingJSON()
     {
-        Debug.Log("Cancel Dumping JSON");
+        //Debug.Log("Cancel Dumping JSON");
         _sendingInfo = false;
         MapUIManager.instance.HideProgressBar();
         objectList.Clear();
@@ -302,6 +313,7 @@ public class APIManager : Singleton<APIManager>
     {
         var lang = I18N.instance.gameLang == LanguageCode.EN ? "ES" : "EN";
         I18N.instance.setLanguage(lang);
+        OnlineMaps.instance.language = I18N.instance.gameLang.ToString().ToLower(CultureInfo.InvariantCulture);
     }
     public void SetAPIEndpoint(string apiEndpoint)
     {
@@ -309,6 +321,14 @@ public class APIManager : Singleton<APIManager>
         {
             PlayerPrefs.SetString("API_endpoint",apiEndpoint);
             endpoint = apiEndpoint;
+        }
+       
+    }
+    public void SetLanguage(string lang)
+    {
+        if (!string.IsNullOrEmpty(lang))
+        {
+            I18N.instance.setLanguage(lang);
         }
        
     }

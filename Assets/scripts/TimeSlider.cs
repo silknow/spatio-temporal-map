@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using Honeti;
+using NumberConversions;
 using UnityEngine;
 using UnityEngine.UI;
 using SilknowMap;
@@ -11,6 +14,7 @@ public class TimeSlider : MonoBehaviour
     public Slider slider;
 
     public Text sliderText;
+    public GameObject missingDataText;
     [SerializeField]
     private List<TimeElement> currentValues;
     // Start is called before the first frame update
@@ -18,20 +22,34 @@ public class TimeSlider : MonoBehaviour
     {
         slider.onValueChanged.RemoveAllListeners();
         slider.onValueChanged.AddListener(HandleValueChanged);
-        sliderText.text = slider.value.ToString();
+        sliderText.text = I18N.instance.gameLang == LanguageCode.EN
+            ? NumericConversions.AddOrdinal((int) slider.value)
+            : NumericConversions.ArabicToRoman((int) slider.value);
         if(currentValues == null) 
             currentValues = new List<TimeElement>();
     }
 
     public void initSliderOnShow()
     {
+        if (currentValues.Count < 1)
+        {
+            missingDataText.SetActive(true);
+            slider.gameObject.SetActive(false);
+            return;
+        }
+        missingDataText.SetActive(false);
+        slider.gameObject.SetActive(true);
+
         HandleValueChanged(slider.value);
     }
     
     private void HandleValueChanged(float value)
     {
         UpdateTimeFrame(value);
-        sliderText.text = slider.value.ToString();
+        //sliderText.text = slider.value.ToString(CultureInfo.InvariantCulture);
+        sliderText.text = I18N.instance.gameLang == LanguageCode.EN
+            ? NumericConversions.AddOrdinal((int) slider.value)
+            : NumericConversions.ArabicToRoman((int) slider.value);
     }
 
     private void UpdateTimeFrame(float value)
@@ -53,11 +71,14 @@ public class TimeSlider : MonoBehaviour
     public void SetPropertyValues(Property timeProp)
     {
         var values = timeProp.getPossibleValues();
-        
+
         if(currentValues == null)
             currentValues = new List<TimeElement>();
         else
             currentValues.Clear();
+        
+        if (values.Count < 1)
+            return;
         
         foreach (var val in values)
         {

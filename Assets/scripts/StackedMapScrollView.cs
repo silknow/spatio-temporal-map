@@ -46,7 +46,7 @@ public class StackedMapScrollView : MonoBehaviour
             if(selectedItemInfo!= null)
                 selectedItemInfo.text = $"Selected item info: index {index}";
             
-            print(index);
+            //print(index);
             OnIndexChange.Invoke(index);
         }
 
@@ -57,7 +57,6 @@ public class StackedMapScrollView : MonoBehaviour
 
         public void ReGenerateUI(List<string> items)
         {
-            print(items.Count);
             var cellData = Enumerable.Range(0, items.Count)
                 .Select(i => new Example04CellDto {Message = items[i]})
                 .ToList();

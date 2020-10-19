@@ -4,36 +4,43 @@ using UnityEngine;
 
 public class MapMarkerSpriteRenderer : MonoBehaviour
 {
-   [SerializeField] private SpriteRenderer _sprite;
+   private RectTransform _rectTransform;
+   private MapPointMarker _mapPointMarker;
    private void Start()
    {
       OnlineMaps.instance.OnChangePosition += UpdateSpritePosition;
       OnlineMaps.instance.OnChangeZoom += UpdateSpritePosition;
 
+      _rectTransform = GetComponent<RectTransform>();
       // Initial update line.
       UpdateSpritePosition();
+     
    }
 
-   private void Update()
+   public void InitRelationShipIndicator(MapPointMarker mapPointMarker)
    {
-      // If size changed, then update line.
-      //if (Mathf.Abs(size - _size) > float.Epsilon) UpdateSpritePosition();
+      _mapPointMarker = mapPointMarker;
+      var relations = _mapPointMarker.getRelations();
    }
-
    private void UpdateSpritePosition()
    {
       if (OnlineMapsMarkerManager.instance.Count == 0)
       {
-         _sprite.gameObject.SetActive(false);
+         gameObject.SetActive(false);
          return;
       }
 
-      var firstMarker = OnlineMapsMarkerManager.instance.items[0];
-      _sprite.gameObject.SetActive( firstMarker.inMapView);
-      var position = OnlineMapsTileSetControl.instance.GetWorldPosition(firstMarker.position);
+      var firstMarker = SilkMap.instance.map.getPointPerUri("http://data.silknow.org/object/6497936a-8400-3747-a116-766bfad9b8a7") as MapPointMarker;
+      if (firstMarker == null)
+      {
+         print("no encuentro marker");
+         return;
+      }
+      var dim = firstMarker.getDimension();
+      var isInMapview = dim == 2 ? firstMarker.getMarker2D().InMapView() : firstMarker.getMarker3D().InMapView(); 
+      gameObject.SetActive( isInMapview);
+      var position = OnlineMapsTileSetControl.instance.GetWorldPosition(firstMarker.getVector2());
+      _rectTransform.localPosition = new Vector3(position.x, -position.z,0f);
 
-      position += new Vector3(0,0.15f,0);
-      _sprite.transform.position = position;
-      
    }
 }

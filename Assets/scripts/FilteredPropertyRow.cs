@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Honeti;
 using UnityEngine;
@@ -27,6 +28,13 @@ public class FilteredPropertyRow : MonoBehaviour
 
         }
     }
+
+    private void OnEnable()
+    {
+        var s = "^"+property.GetName();
+        propertyName.text = s;
+    }
+
     void ToggleValueChanged(Toggle change, string property, string value)
     { 
 

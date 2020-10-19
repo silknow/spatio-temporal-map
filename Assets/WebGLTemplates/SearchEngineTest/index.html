@@ -9,11 +9,16 @@
 	<script>
 		var gameInstance = UnityLoader.instantiate("gameContainer", "%UNITY_WEBGL_BUILD_URL%");
 		var scaleToFit;
+		var cancelLoadingData = false;
 		try {
 			scaleToFit = !!JSON.parse("%UNITY_CUSTOM_SCALE_TO_FIT%");
 		} catch (e) {
 			scaleToFit = true;
 		}
+		window.addEventListener('CancelLoadingData', function (elem) {
+			console.log("CANCELAR ENVIO DE MENSAJES");
+			cancelLoadingData = true;
+		}, false);
 		window.onresize = function () {
 			var canvas = gameInstance.Module.canvas;
 			var container = gameInstance.container;
@@ -48,7 +53,11 @@
 			var tech = $("select#technique").val();
 			var mat = $("select#material").val();
 			var time = $("select#time").val();
+			var page = 1;
 
+			gameInstance.SendMessage('APIManager', "StartDumpingJSON", ""+10);
+			
+			
 			var next = new URL("http://grlc.eurecom.fr/api-git/silknow/api/obj_map"),
 				params = { country: loc, technique: tech,material: mat, time: time, endpoint: "http://data.silknow.org/sparql" }
 
@@ -58,22 +67,42 @@
 			});
 			
 			while (next) {
+				if(cancelLoadingData) {
+					page = 10;
+					break;
+				}
 				let response = await fetch(next);
 				let data = await response.json();
-				results.push(data)
+				//results.push(data)
+				if(Object.entries(data).length !== 0) {
+					var oJSON  = [];
+					data.forEach(element => {
+						oJSON = oJSON.concat(element)
+					});
+					gameInstance.SendMessage('APIManager', "AppendJSONData", JSON.stringify(oJSON));
+				}
+				gameInstance.SendMessage('MapUIManager', "UpdateProgressBar", ""+page);
 				let links = response.headers.get('link').split(',');
 				next = links.find(l => l.split('; ', 2)[1] == 'rel=next')
-				if (next) next = next.split(';', 2)[0].replace(/[<>]/g, '')
+				if (next) next = next.split(';', 2)[0].replace(/[<>]/g, '');
+				page++;
+			}
+			if(cancelLoadingData)
+			{
+				cancelLoadingData = false;
+				return;
 			}
 
-			
+			/*
 			console.log(results)
 			var oJSON  = [];
 			results.forEach(element => {
 				oJSON = oJSON.concat(element)
 			});
 			console.log(oJSON);
-			gameInstance.SendMessage('APIManager', "LoadJSONFromHTML", JSON.stringify(oJSON))
+			*/
+			 
+			gameInstance.SendMessage('APIManager', "EndDumpingJSON");
 			return results;
 		}
 		function OnFormSubmit() {
@@ -105,6 +134,10 @@
 					console.error(error);
 				});
 			return false;
+		}
+		function ChangeLanguage ()
+		{
+			gameInstance.SendMessage("APIManager", "SetLanguage", "ES");
 		}
 
 	</script>
@@ -172,6 +205,9 @@
 	<body onload="window.onresize();">
 		<div class="container">
 			<form onsubmit="return false;">
+				<div class="row">
+					<button class="btn btn-info wrn-btn" onclick="ChangeLanguage()"> ChangeLanguage</button>
+				</div>
 				<div class="row">
 					<div class="col-lg-12">
 						<div class="row">

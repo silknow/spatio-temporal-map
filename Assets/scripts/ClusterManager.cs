@@ -6,6 +6,7 @@ public class ClusterManager {
 
     List<MapPoint> points = new List<MapPoint>();
     List<MapLevel> levels = new List<MapLevel>();
+    List<GridCluster> pointGroups = new List<GridCluster>();
 
     private Rect zone;
     private float zoomMin;
@@ -38,8 +39,32 @@ public class ClusterManager {
 
         points.Clear();
         points = new List<MapPoint>();
+
+        pointGroups.Clear();
+        pointGroups = new List<GridCluster>();
+
         //points.RemoveRange(0, points.Count);
 
+    }
+
+    public void addPointGroup(GridCluster gCluster)
+    {
+        pointGroups.Add(gCluster);
+    }
+
+    public List<GridCluster> getPointGroupClusters()
+    {
+        return this.pointGroups;
+    }
+
+    public List<MapPoint> getPointGroupsPoints()
+    {
+        List<MapPoint> pointGroupsPoints = new List<MapPoint>();
+
+        foreach (GridCluster gCluster in this.pointGroups)     
+            pointGroupsPoints.Add(gCluster.getCenter());
+
+        return pointGroupsPoints;        
     }
 
     public int getNumLevels()

@@ -19,6 +19,7 @@ public class MapUIManager : Singleton<MapUIManager>
     public GameObject detailsPanelGameObject;
     public GameObject timeSliderGameObject;
     public GameObject progressBarGameObject;
+    public GameObject loadingDataGameObject;
     [Space]
 
     public GameObject UICanvas;
@@ -28,8 +29,10 @@ public class MapUIManager : Singleton<MapUIManager>
     public GameObject StackedMapCamera;
     public GameObject StackedMapVirtualCamera;
 
+    public GameObject ExitTimeVisualizationButton;
+    public GameObject FooterButtonBar;
+
     public MapViewingMode mapviewingMode = MapViewingMode.FLAT;
-    
     private MapPointMarker _selectedMarker = null;
     // Start is called before the first frame update
     void Start()
@@ -71,7 +74,6 @@ public class MapUIManager : Singleton<MapUIManager>
     }
     public void HideTimeVisualizationPanel()
     {
-        
         timeVisualizationPanelGameObject.SetActive(false);
     }
     public void ToggleFiltersPanel()
@@ -126,6 +128,7 @@ public class MapUIManager : Singleton<MapUIManager>
         HideTimeVisualizationPanel();
         HideTimeSlider();
         HideFiltersPanel();
+        HideLoadingData();
     }
     public void ShowTimeSlider()
     {
@@ -155,13 +158,36 @@ public class MapUIManager : Singleton<MapUIManager>
     {
         mapviewingMode = mapviewingMode == MapViewingMode.FLAT ? MapViewingMode.STACKED : MapViewingMode.FLAT;
         FlatMapCamera.SetActive(mapviewingMode == MapViewingMode.FLAT);
-        UICanvas.SetActive(mapviewingMode == MapViewingMode.FLAT);
+        //UICanvas.SetActive(mapviewingMode == MapViewingMode.FLAT);
         if (mapviewingMode == MapViewingMode.STACKED)
         {
             StackedMapVirtualCamera.GetComponent<CameraFollowMap>().PopulateListOfMaps(maps.Select(m => m.transform).ToList());
         }
         StackedMapCamera.SetActive(mapviewingMode == MapViewingMode.STACKED);
         StackedMapCanvas.SetActive(mapviewingMode == MapViewingMode.STACKED);
+
+        //Hide TimeVisualizationPanel
+        if (mapviewingMode == MapViewingMode.STACKED && timeVisualizationPanelGameObject.activeSelf)
+        {
+            timeVisualizationPanelGameObject.SetActive(false);
+        }
+        
+        //If MapviewingModed.STACKED -> disable all buttons except filters.
+        
+        ExitTimeVisualizationButton.SetActive(mapviewingMode == MapViewingMode.STACKED);
+
+        foreach (var btn in FooterButtonBar.GetComponentsInChildren<Button>())
+        {
+            if (btn.gameObject.name != "Filter" && mapviewingMode == MapViewingMode.STACKED)
+            {
+                btn.interactable = false;
+            }
+            else
+            {
+                btn.interactable = true;
+            }
+        }
+        
     }
     
     public void ShowProgressBar(int maxValue)
@@ -173,11 +199,19 @@ public class MapUIManager : Singleton<MapUIManager>
     }
     public void UpdateProgressBar(string value)
     {
-        Debug.Log("Update progressbar Page: "+value);
+        //Debug.Log("Update progressbar Page: "+value);
         progressBarGameObject.GetComponentInChildren<Slider>().value = Int32.Parse(value);
     }
     public void HideProgressBar()
     {
         progressBarGameObject.SetActive(false);
+    }
+    public void ShowLoadingData()
+    {
+        loadingDataGameObject.SetActive(true);
+    }
+    public void HideLoadingData()
+    {
+        loadingDataGameObject.SetActive(false);
     }
 }

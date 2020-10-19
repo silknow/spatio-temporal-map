@@ -16,7 +16,7 @@ public class ApiManagerEditor : UnityEditor.Editor
             apm.OnButtonTestClick();
            
         }
-        if (GUILayout.Button("Test France Textiles"))
+        if (GUILayout.Button("Test Spain Textiles"))
         {            
             apm.TestFranceTextiles();
            
@@ -30,15 +30,25 @@ public class ApiManagerEditor : UnityEditor.Editor
             apm.TestObjectDetail();
            
         }
-        if (GUILayout.Button("Stacked Map 3"))
-        {            
-            apm.OnStackedMap(3);
-           
-        }
         if (GUILayout.Button("Flat Map"))
         {            
             apm.OnFlatMap();
            
+        }
+        if (GUILayout.Button("Toggle Language "))
+        {            
+            apm.ToggleLanguage();
+           
+        }
+        if (GUILayout.Button("Apply Damask Filter"))
+        {            
+            SilkMap.instance.map.addFilter("technique", "Damask");
+            SilkMap.instance.map.applyFilters();
+        }
+        if (GUILayout.Button("Remove Damask Filter"))
+        {            
+            SilkMap.instance.map.removeFilter("technique", "Damask");
+            SilkMap.instance.map.applyFilters();
         }
     }
 }

@@ -379,6 +379,7 @@ GameObject:
   - component: {fileID: 6462783852885198287}
   - component: {fileID: 6462783852885198286}
   - component: {fileID: 2372385277113843424}
+  - component: {fileID: 3819441309460914682}
   m_Layer: 5
   m_Name: FilteredPropertyRow
   m_TagString: Untagged
@@ -496,6 +497,26 @@ MonoBehaviour:
   propertyToggle: {fileID: 6640886506828032830, guid: d4258d99bfe014a4c83bd4644f35edaa,
     type: 3}
   toggleParent: {fileID: 6462783852540618540}
+--- !u!114 &3819441309460914682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6462783852885198283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1679637790, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 100
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &6462783852917297092
 GameObject:
   m_ObjectHideFlags: 0

@@ -31,6 +31,8 @@ public class FilterManager
     {
         if(timeFrame!=null)
             timeFrame.Reset();
+
+        timeFrame = null;
     }
 
     public void setComparationMode(bool comparationMode)

@@ -21,9 +21,127 @@ public class MapMarker : Map {
 
     public GameObject clusterPrefab;
 
+    public GameObject customMarkerGameObject;
+    public Canvas customMarkerCanvas;
+    
+
+
+    
+
+    public RectTransform container;
+    private List<MarkerInstance> markers = new List<MarkerInstance>();
+    private Canvas canvas;
+    private OnlineMapsTileSetControl control;
+
     public MapMarker()
     {
         OnlineMapsControlBase.instance.OnMapClick += OnMapClick;
+        OnlineMaps.instance.OnMapUpdated += OnMapUpdated;
+
+        control = OnlineMapsTileSetControl.instance;
+        //canvas = container.GetComponentInParent<Canvas>();
+    }
+
+    private Camera worldCamera
+    {
+        get
+        {
+            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay) return null;
+            return canvas.worldCamera;
+        }
+    }
+
+    public void OnMapUpdated()
+    {
+        SilkMap.instance.refreshStack();
+        if (markers!=null)
+            UpdateMarkers();
+    }
+
+    private void UpdateMarkers()
+    {
+
+        foreach (MarkerInstance marker in markers) UpdateMarker(marker);
+    }
+
+    private void UpdateMarker(MarkerInstance marker)
+    {
+        double px = marker.data.longitude;
+        double py = marker.data.latitude;
+
+        Vector2 screenPosition = control.GetScreenPosition(px, py);
+
+        if (screenPosition.x < 0 || screenPosition.x > Screen.width ||
+            screenPosition.y < 0 || screenPosition.y > Screen.height)
+        {
+            marker.gameObject.SetActive(false);
+            return;
+        }
+
+        if (marker.mapMarker != null && marker.mapMarker.isVisible())
+        {
+            string newTitle = marker.mapMarker.getGridCluster().getNumVisiblePoints().ToString();
+            if (!newTitle.Equals(marker.data.title)) {
+                marker.data.title = newTitle;
+                SetText(marker.transform, "Title", newTitle);
+            }
+
+            if (SilkMap.instance.map.GetDimension() == 3)
+            {
+                /*
+                marker.transform.localPosition = marker.mapMarker.getMarker3D().transform.localPosition;
+                if (marker.transform.localRotation.eulerAngles.x == 90)
+                    marker.transform.Rotate(new Vector3(-45, 0, 0));
+                    */
+                var position = OnlineMapsTileSetControl.instance.GetWorldPosition(marker.mapMarker.getVector2());
+                marker.transform.localPosition = new Vector3(position.x, -position.z,3f);
+                marker.transform.localRotation = Quaternion.Euler(new Vector3(-45, 180, 0));
+            }
+            else
+            {
+                /*
+                Vector2 newPosition = OnlineMapsControlBase.instance.GetPosition(new Vector2(marker.mapMarker.getX(), marker.mapMarker.getY()));
+                marker.transform.localPosition = new Vector3(-newPosition.x, marker.transform.localPosition.y+0.5f, newPosition.y);
+                if (marker.transform.localRotation.eulerAngles.x == 45)
+                    marker.transform.Rotate(new Vector3(45, 0, 0));
+                    */
+
+
+                var position = OnlineMapsTileSetControl.instance.GetWorldPosition(marker.mapMarker.getVector2());
+                marker.transform.localPosition = new Vector3(position.x, -position.z,0f);
+                marker.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
+            }
+
+            if (!marker.gameObject.activeSelf)
+                marker.gameObject.SetActive(true);
+
+            
+
+
+            /*
+            Vector2 screenPosition = control.GetScreenPosition(px, py);
+
+            if (screenPosition.x < 0 || screenPosition.x > Screen.width ||
+                screenPosition.y < 0 || screenPosition.y > Screen.height)
+            {
+                marker.gameObject.SetActive(false);
+                return;
+            }
+
+            RectTransform markerRectTransform = marker.transform;
+
+            if (!marker.gameObject.activeSelf) marker.gameObject.SetActive(true);
+
+            Camera worldCamera = null;
+            if (customMarkerCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
+                worldCamera = canvas.worldCamera;
+
+            Vector2 point;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(markerRectTransform as RectTransform, screenPosition, worldCamera, out point);
+            markerRectTransform.localPosition = point;*/
+        }
+        else
+            marker.gameObject.SetActive(false);
     }
 
     public void fixZoomInterval(OnlineMaps oMaps, float min, float max)
@@ -48,12 +166,23 @@ public class MapMarker : Map {
 
     public new void reset()
     {
+        if (markers != null)
+        {
+            foreach (MarkerInstance markerI in markers)
+                GameObject.DestroyImmediate(markerI.gameObject);
+
+            markers.Clear();
+        }
+
         for (int i=0;i<points.Count;i++)
         {
             MapPointMarker point = (MapPointMarker)points[i];
-            
-            point.getMarker3D().DestroyInstance();
-            point.getMarker2D().DestroyInstance();
+
+            if (point.isCluster() || !maintainPoints)
+            {
+                point.getMarker3D().DestroyInstance();
+                point.getMarker2D().DestroyInstance();
+            }
         }
 
         for (int i=0;i<clusterMarkers.Count;i++)
@@ -131,6 +260,7 @@ public class MapMarker : Map {
     public void update()
     {
         int level;
+        int c = 1;
         /*
         GameObject sphereModel = GameObject.Find("yarngroup");
         GameObject cylinderModel = GameObject.Find("Bobina2");
@@ -144,6 +274,12 @@ public class MapMarker : Map {
 
 
         distributeGroupsOnCircle();
+
+        foreach (GridCluster gCluster in clusterManager.getPointGroupClusters())
+        {
+            MapPointMarker point = getClusterMarker(gCluster, -c);
+            c++;
+        }
 
         
         for (level = 0; level < clusterManager.getNumLevels(); level++)
@@ -171,78 +307,14 @@ public class MapMarker : Map {
 
                 for (int i = 0; i < clusters.Count; i++)
                 {
-
-                    /* PABLO: CAMBIADO A PREFAB
-                    GameObject cube;
-
-                    if (clusters[i].getCategory().Equals("silknow.org/#pthing"))
-                        cube = sphereModel;
-                    else
-                        cube = cylinderModel;
-                    */
                     // Creating cluster marker
-                    MapPointMarker mapPoint = new MapPointMarker(clusters[i].getCenter().getX(), clusters[i].getCenter().getY(), clusterPrefab, true);
-                    mapPoint.setGridCluster(clusters[i]);
 
-                    //MapPointMarker mapPoint = new MapPointMarker(OnlineMapsMarker3DManager.CreateItem(
-                    // new Vector2(clusters[i].getCenter().getX(), clusters[i].getCenter().getY()), clusterPrefab));
-                    //mapPoint.getMarker3D().label = "Cluster " + i;
-                    mapPoint.setLabel("Cluster " + i);
-                    mapPoint.setClusteredPoints(clusters[i].getPoints());
-                    mapPoint.setCluster(true);
-                    mapPoint.getMarker3D().altitude = 30.0f;
-                    mapPoint.getMarker3D().altitudeType = OnlineMapsAltitudeType.absolute;
-                    mapPoint.getMarker3D().scale = getScale(clusters[i], this.points.Count);
-                    mapPoint.setMap(this);
+                    MapPointMarker point = getClusterMarker(clusters[i], level * 1000 + i);
 
-
-
-                    int id = level * 1000 + i;
-                    mapPoint.getMarker3D().instance.name = id.ToString();
-
-                    clusters[i].setCenter(mapPoint);
-
-                    if (clusters[i].getCategory().Equals("silknow.org/#pthing"))
-                    {
-                        SphereCollider sphereCollider = mapPoint.getMarker3D().instance.GetComponent<SphereCollider>();
-                        sphereCollider.radius = 1;
-                        //mapPoint.getMarker3D().scale = mapPoint.getMarker3D().scale * 100.0f;
-                    }
-                    else
-                    {
-                        CapsuleCollider capsuleCollider = mapPoint.getMarker3D().instance.GetComponent<CapsuleCollider>();
-                        capsuleCollider.radius = 0.5f;
-                        capsuleCollider.height = 1.5f;
-                        capsuleCollider.direction = 1;
-                        mapPoint.getMarker3D().altitude = 70.0f;
-                        //mapPoint.getMarker3D().transform.position = mapPoint.getMarker3D().transform.position + new Vector3(0.0f, 60.0f, 0.0f);
-                        //mapPoint.getMarker3D().al
-
-                    }
-
-                    mapPoint.hide();
-                    clusterMarkers[level].Add(mapPoint);
-
-                    // Creating cluster lines
-                    /*
-                    List<Vector2> points = new List<Vector2>();
-                    Rect clusterZone = clusters[i].getZone();
-
-                    points.Add(new Vector2(clusterZone.xMin, clusterZone.yMax));
-                    points.Add(new Vector2(clusterZone.xMin + clusterZone.width, clusterZone.yMax));
-                    points.Add(new Vector2(clusterZone.xMin + clusterZone.width, clusterZone.yMin));
-                    points.Add(new Vector2(clusterZone.xMin, clusterZone.yMin));
-                    points.Add(new Vector2(clusterZone.xMin, clusterZone.yMax));
-
-                    OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, Color.red);
-                    oLine.width = 2.0f;
-                    oLine.visible = true;
-                    OnlineMapsDrawingElementManager.AddItem(oLine);
-                    oLine.visible = false;
-                    clusterLines[level].Add(oLine);
-                    */
-
-
+                    clusterMarkers[level].Add(point);
+                    
+                    
+                    
                     if (level == 0)
                     {
                         clusters[i].initConnectionsList(clusters.Count);
@@ -266,6 +338,111 @@ public class MapMarker : Map {
 
 
         
+    }
+
+    protected void addMarkerInstance(MapPointMarker mapPointMarker) {
+
+
+        mapPointMarker.assignTexture(null);
+        GameObject markerGameObject = GameObject.Instantiate(customMarkerGameObject, customMarkerCanvas.transform) as GameObject;
+
+        //gObject.transform.parent = mapPointMarker.getMarker3D().instance.transform;
+
+        RectTransform rectTransform = markerGameObject.transform as RectTransform;
+        //rectTransform.SetParent(customMarkerContainer);
+        markerGameObject.transform.localScale = Vector3.one;
+
+        MarkerInstance marker = new MarkerInstance();
+
+        MarkerData data = new MarkerData();
+        data.title = mapPointMarker.getGridCluster().getNumPoints().ToString();
+        data.longitude = mapPointMarker.getX();
+        data.latitude = mapPointMarker.getY();
+
+
+        marker.data = data;
+       
+        marker.gameObject = markerGameObject;
+        marker.transform = rectTransform;
+        //marker.transform.Rotate(new Vector3(90, 180, 0));
+        /*
+        Quaternion quatRotation = Quaternion.identity;
+        quatRotation.x = 45;
+        quatRotation.y = 180;
+
+        marker.transform.localRotation = quatRotation;*/
+
+        marker.mapMarker = mapPointMarker;
+        mapPointMarker.markerInstance = marker;
+        mapPointMarker.getMarker2D().texture = null;
+        mapPointMarker.getMarker2D().enabled = false;
+
+        SetText(rectTransform, "Title", data.title);
+
+        markers.Add(marker);
+    }
+
+    private void SetText(RectTransform rt, string childName, string value)
+    {
+
+        var title =  rt.GetComponentInChildren<Text>();
+        if (title != null) title.text = value;
+    }
+
+
+    protected MapPointMarker getClusterMarker(GridCluster gCluster, int id)
+    {
+        MapPointMarker mapPoint = new MapPointMarker(gCluster.getCenter().getX(), gCluster.getCenter().getY(), clusterPrefab, true);
+        mapPoint.setGridCluster(gCluster);
+
+        
+
+        //MapPointMarker mapPoint = new MapPointMarker(OnlineMapsMarker3DManager.CreateItem(
+        // new Vector2(clusters[i].getCenter().getX(), clusters[i].getCenter().getY()), clusterPrefab));
+        //mapPoint.getMarker3D().label = "Cluster " + i;
+
+        mapPoint.getMarker3D().instance.name = id.ToString();
+        mapPoint.setLabel("Cluster " + id);
+            
+        mapPoint.setClusteredPoints(gCluster.getPoints());
+
+        mapPoint.setCluster(true);
+        mapPoint.getMarker3D().altitude = 30.0f;
+        mapPoint.getMarker3D().altitudeType = OnlineMapsAltitudeType.absolute;
+        mapPoint.getMarker3D().scale = getScale(gCluster, this.points.Count);
+        mapPoint.setMap(this);
+        addMarkerInstance(mapPoint);
+
+
+        gCluster.setCenter(mapPoint);
+
+        //if (gCluster.isGroupPoints())
+        //    Debug.Log("AQUI");
+
+        if (gCluster.getCategory().Equals("silknow.org/#pthing"))
+        {
+            SphereCollider sphereCollider = mapPoint.getMarker3D().instance.GetComponent<SphereCollider>();
+            sphereCollider.radius = 1;
+            //mapPoint.getMarker3D().scale = mapPoint.getMarker3D().scale * 100.0f;
+        }
+        else
+        {
+            CapsuleCollider capsuleCollider = mapPoint.getMarker3D().instance.GetComponent<CapsuleCollider>();
+            capsuleCollider.radius = 0.5f;
+            capsuleCollider.height = 1.5f;
+            capsuleCollider.direction = 1;
+            mapPoint.getMarker3D().altitude = 70.0f;
+            //mapPoint.getMarker3D().transform.position = mapPoint.getMarker3D().transform.position + new Vector3(0.0f, 60.0f, 0.0f);
+            //mapPoint.getMarker3D().al
+
+        }
+
+
+        
+
+        mapPoint.hide();
+
+        return mapPoint;
     }
 
 
@@ -457,9 +634,10 @@ public class MapMarker : Map {
 
         scale = scaleMin + (int) ((3*scaleMax*clusterPoints)/totalNumPoints);
 
-        scale = scale / 4;
+        if (!cluster.isGroupPoints())            
+            scale = scale / 4;
 
-        return scale;
+        return 20; // scale;
     }
 
 
@@ -520,18 +698,21 @@ public class MapMarker : Map {
                 float corrector = 1.0f;
 
                 if (level == 1) //zoom > 4 && zoom <= 6)
-                    corrector = 1.25f;
+                    corrector = 3.25f;
 
                 if (level == 2) //zoom > 6 && zoom <= 8)
-                    corrector = 1.25f;
+                    corrector = 3.25f;
 
                 if (level == 3) //zoom > 8)
-                    corrector = 1.5f;
+                    corrector = 3.5f;
 
                 if (((MapPointMarker)(points[i])).getMarker3D()!=null)
-                    ((MapPointMarker)(points[i])).getMarker3D().scale = 5* corrector;               
+                    ((MapPointMarker)(points[i])).getMarker3D().scale = 6* corrector;               
                 points[i].show();
             }
+
+            foreach (MapPoint p in clusterManager.getPointGroupsPoints())
+                p.show();
 
             foreach (MapPoint p in pointsWithRelation)
             {
@@ -548,6 +729,10 @@ public class MapMarker : Map {
         {
             for (int i = 0; i < points.Count; i++)
                 points[i].hide();
+
+            foreach (MapPoint p in clusterManager.getPointGroupsPoints())
+                p.hide();
+
             //Debug.Log("MapMarker-->hideClustersAtZoom " + level);
             //Debug.Log(clusterMarkers.Count);
 
@@ -661,7 +846,7 @@ public class MapMarker : Map {
         if (dimension == MapPoint.TWO_DIMENSION)
         {
             Camera.main.orthographic = true;
-            Camera.main.orthographicSize = 365;
+            Camera.main.orthographicSize = 287.5f;
             OnlineMapsCameraOrbit.instance.rotation = new Vector2(0, 0);
         }
         else
@@ -673,7 +858,23 @@ public class MapMarker : Map {
         update();
 
     }
- 
 
+    [Serializable]
+    public class MarkerData
+    {
+        public string title;
+        public float longitude;
+        public float latitude;
+
+
+    }
+
+    public class MarkerInstance
+    {
+        public MarkerData data;
+        public GameObject gameObject;
+        public RectTransform transform;
+        public MapPointMarker mapMarker;
+    }
 
 }

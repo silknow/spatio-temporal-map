@@ -42,12 +42,13 @@ public class ObjectDetailPanel : MonoBehaviour
     
     public void SetData(string uri)
     {
+        MapUIManager.instance.ShowLoadingData();
         APIManager.instance.StartCoroutine(APIManager.instance.GetObjectDetail(uri, ResponseCallback));
     }
 
     private void ResponseCallback(string data)
     {
-      
+        MapUIManager.instance.HideLoadingData();
         //Empty propertiew view;
         foreach (var child in propertiesContentView.GetComponentsInChildren<Transform>())
         {

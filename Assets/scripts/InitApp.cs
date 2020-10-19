@@ -5,10 +5,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Clustering;
+using Honeti;
 using UnityEngine.Events;
 using SilknowMap;
+using UnityEngine.EventSystems;
+using UnityEngine.Networking;
 
-public class InitApp : MonoBehaviour {
+public class InitApp : MonoBehaviour
+{
 
     /// <summary>
     /// Prefab of 3D marker
@@ -34,11 +38,18 @@ public class InitApp : MonoBehaviour {
     public GameObject prefabCluster;
     
     public GameObject clonedMapGroup;
-    
+    public GameObject customMarkerGameObject;
+    public Canvas customMarkerCanvas;
+
     // Event to be triggered when data is loaded to the map
     [Header("Event to be triggered when data is loaded to the map")]
     public UnityEvent loadedDataEvent;
 
+    public Dictionary<string, Texture> iconsTexture = new Dictionary<string, Texture>();
+
+
+    public List<Texture2D> customIcons;
+    
     private void OnGUI()
     {
         //OnlineMaps.instance.zoom = 6;
@@ -165,7 +176,7 @@ public class InitApp : MonoBehaviour {
         map.setGridingZoomData(3, 10, 4);
         map.setGridingQuadsHorizonal(64);
         map.fixZoomInterval(OnlineMaps.instance, 3, 14);
-        map.fixPositionInterval(OnlineMaps.instance, 28.24f, -16.79f, 71.19f, 48.48f);
+        //map.fixPositionInterval(OnlineMaps.instance, 28.24f, -16.79f, 71.19f, 48.48f);
         map.setViewerPosition(23.42f, 46.2f);
         Vector2 br = OnlineMaps.instance.bottomRightPosition;
         Vector2 tl = OnlineMaps.instance.topLeftPosition;
@@ -187,6 +198,10 @@ public class InitApp : MonoBehaviour {
 
         UpdatePropertyManager(SilkMap.instance.map);
 
+        OnlineMapsMarkerManager.instance.defaultTexture = getDefaultTexture();
+
+
+
 
         /*map.reset();
 
@@ -201,6 +216,13 @@ public class InitApp : MonoBehaviour {
 
 
         ///StartCoroutine("RemoveAllMarkers");
+    }
+
+
+
+    public void onClick()
+    {
+        Debug.Log("STACKED CLICK");
     }
 
     // Método que dibuja Quad
@@ -232,6 +254,11 @@ public class InitApp : MonoBehaviour {
     // Función principal inicia las instancias de OnlineMas, y carga los datos
     private void Start()
     {
+        //Update map labels;
+        print(I18N.instance.gameLang.ToString());
+        OnlineMaps.instance.language = I18N.instance.gameLang.ToString().ToLower(CultureInfo.InvariantCulture);
+        
+        
         // Get instance of OnlineMapsControlBase3D (Texture or Tileset)
         OnlineMapsControlBase3D control = OnlineMapsControlBase3D.instance;
 
@@ -240,6 +267,13 @@ public class InitApp : MonoBehaviour {
             Debug.LogError("You must use the 3D control (Texture or Tileset).");
             return;
         }
+
+        List<string> textureFileNames = new List<string>();
+        textureFileNames.Add("vestidop.png");
+        textureFileNames.Add("trajep.png");
+        textureFileNames.Add("trajepi.png");
+
+        StartCoroutine(GetTexture(textureFileNames));
 
         SilkMap.Instance.init();
         //OnlineMaps.instance.SetPosition(3.05, 46.21);
@@ -252,6 +286,11 @@ public class InitApp : MonoBehaviour {
 
         initMarkers();
 
+        map.customMarkerCanvas = customMarkerCanvas;
+        map.customMarkerGameObject = customMarkerGameObject;
+
+        customIcons = new List<Texture2D>();
+        customIcons = Resources.LoadAll<Texture2D>("object_groups").ToList();
     }
 
     public void UpdatePropertyManager(Map map)
@@ -260,10 +299,47 @@ public class InitApp : MonoBehaviour {
         map.GetPropertyManager().AddProperty("description", true, false, 0, 1, false, false);
         map.GetPropertyManager().AddProperty("technique", true, true, 1, 2, false, false, true, Color.blue);
         map.GetPropertyManager().AddProperty("material", true, true, 2, 3, false, false, true, Color.red);
-        map.GetPropertyManager().AddProperty("time", true, true, 3, 4, false, false,false,Color.green);
-        map.GetPropertyManager().AddProperty("place", true, false, 0, 5, false, true, true, Color.grey);
+        map.GetPropertyManager().AddProperty("time", true, true, 3, 4, false, false,true,Color.green);
+        map.GetPropertyManager().AddProperty("place", true, false, 0, 5, false, true, false, Color.grey);
         map.GetPropertyManager().AddProperty("img", true, false, 0, 6, true, false);
      }
+
+
+    public void changeMapDataPosition(string positionName)
+    {
+        map.setMaintainPoints(true);
+        map.activePosition(positionName);
+        map.reset();
+        ResetMapParameters();
+        map.update();
+    }
+
+
+        //https://silknow.org/silknow/media/icons/vestido.png
+
+
+    IEnumerator GetTexture(List<string> textureFileNames)
+    {
+        
+
+        string iconsPath = "https://silknow.org/silknow/media/icons/";
+        foreach (string textureFileName in textureFileNames)
+        {
+            UnityWebRequest www = UnityWebRequestTexture.GetTexture(iconsPath+ textureFileName);
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Texture texture = ((DownloadHandlerTexture)www.downloadHandler).texture;
+                iconsTexture.Add(textureFileName, texture);
+            }
+        }
+        
+    }
 
     public void LoadRestData(List<ManMadeObject> objectList)
     {
@@ -271,6 +347,18 @@ public class InitApp : MonoBehaviour {
         string[] category = { "silknow.org/#pthing", "silknow.org/#man" };
         mapPoints.Clear();
         map.reset();
+        map.addPositionName("Production");
+        map.addPositionName("Actual");
+        int iconRandom = 0;
+
+
+        // Para cambiar mapa con posicion name.........................
+        // map.setMaintainPoints(true);
+        // map.activePosition(positionName);
+        // map.reset();
+        // ResetMapParameters();
+        // map.update();
+
         foreach (var obj in objectList)
         {
             if (obj.production == null || obj.production.location == null)
@@ -281,33 +369,79 @@ public class InitApp : MonoBehaviour {
                 continue;
             longitud = float.Parse(lg, CultureInfo.InvariantCulture);
             latitud = float.Parse(lat, CultureInfo.InvariantCulture);
+
+
             
             // Cada MapPoint tiene una serie de propiedades, la posición, escala y altitud vienen dentro de un objeto
             // MapPointMarker de OnlineMaps 
             // Se añade la posicion (lat,long) y se asocia a un objeto 3d Cube, luego puede cambiarse
             var mapPoint = new MapPointMarker(longitud, latitud, prefabObject,false);
+
+            mapPoint.addPositionValue("Production", new Vector2(longitud, latitud));
+            mapPoint.addPositionValue("Actual", new Vector2(longitud + 1, latitud + 1));
+
             // Altitud del mar = 30.0f
             mapPoint.getMarker3D().altitude = 30.0f;
             // Scale =3.0f, luego se cambia
             mapPoint.getMarker3D().scale = 3.0f;
+            mapPoint.setMap(map);
             
+            /* JAVI - Textura desde web *
+            
+            if (iconRandom % 7 == 0)
+                mapPoint.setKnownLocation(false);
+
+
+            if (iconRandom % 2 == 0)
+                mapPoint.assignTexture(iconsTexture["vestidop.png"]);
+            else
+            {
+                if (mapPoint.isKnownLocation())
+                    mapPoint.assignTexture(iconsTexture["trajep.png"]);
+                else
+                    mapPoint.assignTexture(iconsTexture["trajepi.png"]);
+            }
+
+            iconRandom++;
+            
+            /* JAVI - Textura desde web */
+
+            /* PABLO - Texturas desde editor */
+             if (iconRandom == (customIcons.Count-1)) 
+                 iconRandom = 0;
+             mapPoint.setKnownLocation(true);
+             mapPoint.assignTexture(customIcons[iconRandom]);
+             iconRandom++;
+             
+             if (obj.production.location.Count > 1)
+             {
+                 mapPoint.setKnownLocation(false);
+                 mapPoint.assignTexture(customIcons[customIcons.Count -1]);
+             }
+             /*  PABLO - Texturas desde editor */
+
             // Se introducen el resto de propiedades (URI, categpry (clase), from y to (intervalo de tiempo)
             mapPoint.setURI(obj.id);
             mapPoint.setCategory(category[1]);
             mapPoint.setLabel(obj.label ?? obj.identifier);
-;
-            // Check for century Dictionary
-            if (APIManager.instance.timeValues.TryGetValue(obj.production.time[0], out var time))
+            if (obj.production.time.Count >0)
             {
-                mapPoint.setFrom(time.@from);
-                mapPoint.setTo(time.to);
+                // Check for century Dictionary
+                if (APIManager.instance.timeValues.TryGetValue(obj.production.time[0], out var time))
+                {
+                    mapPoint.setFrom(time.@from);
+                    mapPoint.setTo(time.to);
+                }
+                map.GetPropertyManager().SetPropertyValue("time", mapPoint, obj.production.time[0]);
             }
 
             //Set Properties values
             map.GetPropertyManager().SetPropertyValue("technique", mapPoint, obj.production.technique);
             map.GetPropertyManager().SetPropertyValue("material", mapPoint, obj.production.material);
+            if(obj.production.location.Count<1)
+                continue;
             map.GetPropertyManager().SetPropertyValue("place", mapPoint, obj.production.location[0].country);
-            map.GetPropertyManager().SetPropertyValue("time", mapPoint, obj.production.time[0]);
+           
 
             mapPoint.setDimension(map.GetDimension());
             mapPoints.Add(mapPoint);
@@ -318,7 +452,9 @@ public class InitApp : MonoBehaviour {
         map.update();
 
         loadedDataEvent.Invoke();
+
     }
+
 
     IEnumerator RemoveAllMarkers()
     {
@@ -382,6 +518,35 @@ public class InitApp : MonoBehaviour {
     {
         var dim = map.GetDimension() == 2 ? 3 : 2;
         map.SetDimension(dim);
+        if(dim == 2)
+            GetComponent<OnlineMapsAdjustToScreen>().ResizeMap();
+    }
+
+    private Texture2D getDefaultTexture()
+    {
+        Texture2D tex = new Texture2D(64, 64, TextureFormat.ARGB32, false);
+
+        Color fillColor = Color.clear;
+        Color[] fillPixels = new Color[tex.width * tex.height];
+
+        for (int i = 0; i < fillPixels.Length; i++)
+        {
+            fillPixels[i] = fillColor;
+        }
+
+        tex.SetPixels(fillPixels);
+        /*
+        for (int i = 0; i < 100; i++)
+        {
+            for (int j = 0; j < 15; j++)
+            {
+                tex.SetPixel(i, j, Color.white);
+            }
+        }*/
+
+        tex.Apply();
+
+        return tex;
     }
 }
 
