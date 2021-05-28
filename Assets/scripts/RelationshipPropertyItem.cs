@@ -60,12 +60,20 @@ public class RelationshipPropertyItem : NormalPropertyItem
         {
             //Show relations with this value
             MapUIManager.instance.GetSelectedMarker().showRelations(_property.GetName());
+            AnalyticsMonitor.instance.sendEvent("Show_Linear_Relations", new Dictionary<string, object>
+            {
+                {"property", _property}
+            });
             //Debug.LogFormat("Show relations for property {0}",_property.GetName());
         }
         else
         {
             //Hide relations with this value
             MapUIManager.instance.GetSelectedMarker().removeRelations(_property.GetName());
+            AnalyticsMonitor.instance.sendEvent("Hide_Linear_Relations", new Dictionary<string, object>
+            {
+                {"property", _property}
+            });
         }
     }
 }

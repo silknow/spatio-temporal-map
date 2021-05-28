@@ -21,20 +21,22 @@ public class TimeElement
     }
 }
 [Serializable]
+public class Category
+{
+    public string id;
+    public string label;
+}
+[Serializable]
 public class Location
 {
     [JsonProperty("country")]
     [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string> country;
     public string id;
-    /*[JsonProperty("label")]
-    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
-    public List<string> label;*/
     public string label;
-    
     public string lat;
-    
     public string @long;
+    public string type;
 }
 [Serializable]
 public class Production
@@ -52,12 +54,17 @@ public class Production
     [JsonProperty("time")]
     [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string> time;
+    [JsonProperty("category")]
+    [JsonConverter(typeof(SingleOrArrayConverter<Category>))]
+    public List<Category> category;
 }
 [Serializable]
 public class ManMadeObject
 {
     public string id;
-    public string label;
+    [JsonProperty("label")]
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string> label;
     public string identifier;
     [JsonProperty("description")]
     [JsonConverter(typeof(SingleOrArrayConverter<string>))]
@@ -66,6 +73,13 @@ public class ManMadeObject
     [JsonProperty("img")]
     [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string> img;
+    
+}
+[Serializable]
+public class AdasilkResultPage
+{
+    public int pageNumber;
+    public List<ManMadeObject> pageResults;
     
 }
 public class FloatConverter<T> : JsonConverter

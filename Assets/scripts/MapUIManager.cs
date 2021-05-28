@@ -20,6 +20,9 @@ public class MapUIManager : Singleton<MapUIManager>
     public GameObject timeSliderGameObject;
     public GameObject progressBarGameObject;
     public GameObject loadingDataGameObject;
+    public GameObject helpWindowGameObject;
+    public GameObject errorLoadingDataGameObject;
+    public Text errorText;
     [Space]
 
     public GameObject UICanvas;
@@ -34,6 +37,8 @@ public class MapUIManager : Singleton<MapUIManager>
 
     public MapViewingMode mapviewingMode = MapViewingMode.FLAT;
     private MapPointMarker _selectedMarker = null;
+
+    [HideInInspector] public int selectedHelpTab;
     // Start is called before the first frame update
     void Start()
     {
@@ -129,6 +134,7 @@ public class MapUIManager : Singleton<MapUIManager>
         HideTimeSlider();
         HideFiltersPanel();
         HideLoadingData();
+        HideHelpWindow();
     }
     public void ShowTimeSlider()
     {
@@ -159,13 +165,20 @@ public class MapUIManager : Singleton<MapUIManager>
         mapviewingMode = mapviewingMode == MapViewingMode.FLAT ? MapViewingMode.STACKED : MapViewingMode.FLAT;
         FlatMapCamera.SetActive(mapviewingMode == MapViewingMode.FLAT);
         //UICanvas.SetActive(mapviewingMode == MapViewingMode.FLAT);
+
+        if (mapviewingMode == MapViewingMode.FLAT)
+            SilkMap.instance.removeSnapShots();
+
         if (mapviewingMode == MapViewingMode.STACKED)
         {
             StackedMapVirtualCamera.GetComponent<CameraFollowMap>().PopulateListOfMaps(maps.Select(m => m.transform).ToList());
         }
         StackedMapCamera.SetActive(mapviewingMode == MapViewingMode.STACKED);
         StackedMapCanvas.SetActive(mapviewingMode == MapViewingMode.STACKED);
-
+        //Deactivate user interaction when mapmode is Stacked
+        OnlineMapsCameraOrbit.instance.enabled = mapviewingMode == MapViewingMode.FLAT;
+        OnlineMapsTileSetControl.instance.allowUserControl = mapviewingMode == MapViewingMode.FLAT;
+        OnlineMapsTileSetControl.instance.allowZoom = mapviewingMode == MapViewingMode.FLAT;
         //Hide TimeVisualizationPanel
         if (mapviewingMode == MapViewingMode.STACKED && timeVisualizationPanelGameObject.activeSelf)
         {
@@ -192,6 +205,7 @@ public class MapUIManager : Singleton<MapUIManager>
     
     public void ShowProgressBar(int maxValue)
     {
+        HideLoadingData();
         progressBarGameObject.SetActive(true);
         progressBarGameObject.GetComponentInChildren<Slider>().minValue = 0;
         progressBarGameObject.GetComponentInChildren<Slider>().maxValue = maxValue;
@@ -213,5 +227,43 @@ public class MapUIManager : Singleton<MapUIManager>
     public void HideLoadingData()
     {
         loadingDataGameObject.SetActive(false);
+    }
+
+    public void BlockTimeVisualizationPanel()
+    {
+        HideTimeVisualizationPanel();
+        foreach (var btn in FooterButtonBar.GetComponentsInChildren<Button>())
+        {
+            btn.interactable = btn.gameObject.name != "Time";
+        }
+
+    }
+    public void UnlockTimeVisualizationPanel()
+    {
+        foreach (var btn in FooterButtonBar.GetComponentsInChildren<Button>())
+        {
+            btn.interactable = true;
+        }
+
+    }
+
+    public void ShowHelpWindow()
+    {
+        helpWindowGameObject.SetActive(true);
+    }
+
+    public void HideHelpWindow()
+    {
+        helpWindowGameObject.SetActive(false);
+    }
+    public void ShowErrorLoadingData(string text=null)
+    {
+        errorLoadingDataGameObject.SetActive(false);
+        if (text != null)
+            errorText.text = text;
+    }
+    public void HideErrorLoadingData()
+    {
+        errorLoadingDataGameObject.SetActive(false);
     }
 }

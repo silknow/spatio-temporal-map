@@ -19,7 +19,7 @@
 			console.log("CANCELAR ENVIO DE MENSAJES");
 			cancelLoadingData = true;
 		}, false);
-		window.onresize = function () {
+		function onResize() {
 			var canvas = gameInstance.Module.canvas;
 			var container = gameInstance.container;
 			var w;
@@ -44,51 +44,66 @@
 			container.style.height = canvas.style.height = h + "px";
 			container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
 			container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
+			// This is the screen scale
+			var ratio = window.devicePixelRatio;
+			// Scale canvas height and width not style like the container above
+			canvas.height = h * ratio;
+			canvas.width = w * ratio;
 		}
+		window.addEventListener('resize', onResize);
+		setTimeout(() => {
+			gameInstance.SendMessage('APIManager', "ShowLoading");
+		}, 500);
 	</script>
 	<script>
-		async function loadAllPages(){
+		async function loadAllPages() {
 			const results = []; // this can also be a global variable to update
 			var loc = $("select#country").val();
 			var tech = $("select#technique").val();
 			var mat = $("select#material").val();
 			var time = $("select#time").val();
 			var page = 1;
+			var numberOfTotalPages = 10;
+			gameInstance.SendMessage('APIManager', "StartDumpingJSON", "" + numberOfTotalPages);
+			console.log("===APIManager Start DumpingJSON " + numberOfTotalPages);
 
-			gameInstance.SendMessage('APIManager', "StartDumpingJSON", ""+10);
-			
-			
 			var next = new URL("http://grlc.eurecom.fr/api-git/silknow/api/obj_map"),
-				params = { country: loc, technique: tech,material: mat, time: time, endpoint: "http://data.silknow.org/sparql" }
+					params = {
+						country: loc,
+						technique: tech,
+						material: mat,
+						time: time,
+						endpoint: "http://data.silknow.org/sparql"
+					}
 
 			Object.keys(params).forEach(key => {
 				if (params[key] !== "")
-				next.searchParams.append(key, params[key])
+					next.searchParams.append(key, params[key])
 			});
-			
+
 			while (next) {
-				if(cancelLoadingData) {
-					page = 10;
+				if (cancelLoadingData) {
+					page = 1;
 					break;
 				}
 				let response = await fetch(next);
 				let data = await response.json();
-				//results.push(data)
-				if(Object.entries(data).length !== 0) {
-					var oJSON  = [];
-					data.forEach(element => {
-						oJSON = oJSON.concat(element)
-					});
-					gameInstance.SendMessage('APIManager', "AppendJSONData", JSON.stringify(oJSON));
-				}
-				gameInstance.SendMessage('MapUIManager', "UpdateProgressBar", ""+page);
+
+				var oJSON = {};
+				oJSON.pageNumber = page;
+				var pageResults = [];
+				data.forEach(element => {
+					pageResults = pageResults.concat(element)
+				});
+				oJSON.pageResults = pageResults;
+				gameInstance.SendMessage('APIManager', "AppendJSONData", JSON.stringify(oJSON));
+				console.log("===APIManager AppendJSONData " + JSON.stringify(oJSON));
 				let links = response.headers.get('link').split(',');
 				next = links.find(l => l.split('; ', 2)[1] == 'rel=next')
 				if (next) next = next.split(';', 2)[0].replace(/[<>]/g, '');
 				page++;
 			}
-			if(cancelLoadingData)
-			{
+			if (cancelLoadingData) {
 				cancelLoadingData = false;
 				return;
 			}
@@ -101,39 +116,12 @@
 			});
 			console.log(oJSON);
 			*/
-			 
+
 			gameInstance.SendMessage('APIManager', "EndDumpingJSON");
+			console.log("===APIManager EndDumpingJSON");
+			var analytics = true;
+			gameInstance.SendMessage('APIManager', "SetAnalytics", analytics.toString());
 			return results;
-		}
-		function OnFormSubmit() {
-
-			var loc = $("select#country").val();
-			var tech = $("select#technique").val();
-			var mat = $("select#material").val();
-			var time = $("select#time").val();
-
-			var url = new URL("http://grlc.eurecom.fr/api/silknow/api/obj_map"),
-				params = { country: loc, technique: tech,material: mat, time: time, endpoint: "http://data.silknow.org/sparql" }
-
-			Object.keys(params).forEach(key => {
-				if (params[key] !== "")
-					url.searchParams.append(key, params[key])
-			});
-			fetch(url).then(function (response) {
-
-				for (var k of response.headers.keys()) {
-					console.log('response.headers.get("' + k + '") =', response.headers.get(k));
-				}
-				console.log("ACABO");
-				return response.json();
-			})
-				.then(response => {
-					console.log(response);
-					gameInstance.SendMessage('APIManager', "LoadJSONFromHTML", JSON.stringify(response))
-				}, error => {
-					console.error(error);
-				});
-			return false;
 		}
 		function ChangeLanguage ()
 		{
@@ -157,9 +145,11 @@
 			background: transparent !important;
 			position: absolute;
 		}
-
 		div#gameContainer canvas {
 			position: absolute;
+		}
+
+		div#gameContainer[data-pixelated='true'] canvas {
 			image-rendering: optimizeSpeed;
 			image-rendering: -webkit-crisp-edges;
 			image-rendering: -moz-crisp-edges;
@@ -200,72 +190,70 @@
 	<link href="css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body onload="window.onresize();">
-
-	<body onload="window.onresize();">
-		<div class="container">
-			<form onsubmit="return false;">
-				<div class="row">
-					<button class="btn btn-info wrn-btn" onclick="ChangeLanguage()"> ChangeLanguage</button>
-				</div>
-				<div class="row">
-					<div class="col-lg-12">
-						<div class="row">
-							<div class="col-lg-2 col-md-2 col-sm-12 p-0">
-								<select class="form-control search-slt" id="technique">
-									<option value="">Select Technique</option>
-									<option value="Damask">Damask</option>
-									<option value="Brocade">Brocade</option>
-									<option value="Lampas">Lampas</option>
-									<option value="Velvet">Velvet</option>
-								</select>
-							</div>
-							<div class="col-lg-2 col-md-2 col-sm-12 p-0">
-								<select class="form-control search-slt" id="material">
-									<option value="">Select Material</option>
-									<option value="Silk">Silk</option>
-									<option value="Cotton">Cotton</option>
-									<option value="Silver">Silver</option>
-									<option value="Gold">Gold</option>
-									<option value="Metal">Metal</option>
-								</select>
-							</div>
-							<div class="col-lg-2 col-md-2 col-sm-12 p-0">
-								<select class="form-control search-slt" id="time">
-									<option value="">Select time</option>
-									<option value="sixteenth century (dates CE)">16th Century</option>
-									<option value="seventeenth century (dates CE)">17th Century</option>
-									<option value="eighteenth century (dates CE)">18th Century</option>
-									<option value="nineteenth century (dates CE)">19th Century</option>
-									<option value="twentieth century (dates CE)">20th Century</option>
-								</select>
-							</div>
-							<div class="col-lg-2 col-md-2 col-sm-12 p-0">
-								<select class="form-control search-slt" id="country">
-									<option value="">Select Country</option>
-									<option value="Spain">Spain</option>
-									<option value="France">France</option>
-									<option value="China">China</option>
-									<option value="Italy">Italy</option>
-									<option value="Germany">Germany</option>
-									<option value="Iran">Iran</option>
-								</select>
-							</div>
-						
-							<div class="col-lg-2 col-md-2 col-sm-12 p-0">
-								<button onclick="loadAllPages()" class="btn btn-primary wrn-btn">
-									Search
-								</button>
-							</div>
+<body onload="onResize();">
+	<div class="container">
+		<form onsubmit="return false;">
+			<div class="row">
+				<button class="btn btn-info wrn-btn" onclick="ChangeLanguage()"> ChangeLanguage</button>
+			</div>
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="row">
+						<div class="col-lg-2 col-md-2 col-sm-12 p-0">
+							<select class="form-control search-slt" id="technique">
+								<option value="">Select Technique</option>
+								<option value="Damask">Damask</option>
+								<option value="Brocade">Brocade</option>
+								<option value="Lampas">Lampas</option>
+								<option value="Velvet">Velvet</option>
+							</select>
+						</div>
+						<div class="col-lg-2 col-md-2 col-sm-12 p-0">
+							<select class="form-control search-slt" id="material">
+								<option value="">Select Material</option>
+								<option value="Silk">Silk</option>
+								<option value="Cotton">Cotton</option>
+								<option value="Silver">Silver</option>
+								<option value="Gold">Gold</option>
+								<option value="Metal">Metal</option>
+							</select>
+						</div>
+						<div class="col-lg-2 col-md-2 col-sm-12 p-0">
+							<select class="form-control search-slt" id="time">
+								<option value="">Select time</option>
+								<option value="sixteenth century (dates CE)">16th Century</option>
+								<option value="seventeenth century (dates CE)">17th Century</option>
+								<option value="eighteenth century (dates CE)">18th Century</option>
+								<option value="nineteenth century (dates CE)">19th Century</option>
+								<option value="twentieth century (dates CE)">20th Century</option>
+							</select>
+						</div>
+						<div class="col-lg-2 col-md-2 col-sm-12 p-0">
+							<select class="form-control search-slt" id="country">
+								<option value="">Select Country</option>
+								<option value="Spain">Spain</option>
+								<option value="France">France</option>
+								<option value="China">China</option>
+								<option value="Italy">Italy</option>
+								<option value="Germany">Germany</option>
+								<option value="Iran">Iran</option>
+							</select>
+						</div>
+					
+						<div class="col-lg-2 col-md-2 col-sm-12 p-0">
+							<button onclick="loadAllPages()" class="btn btn-primary wrn-btn">
+								Search
+							</button>
 						</div>
 					</div>
 				</div>
-			</form>
-		</div>
-		<div id="gameContainer" style="width: %UNITY_WIDTH%px; height: %UNITY_HEIGHT%px"></div>
+			</div>
+		</form>
+	</div>
+	<div id="gameContainer" data-pixelated="%UNITY_CUSTOM_OPTIMIZE_FOR_PIXEL_ART%"></div>
 
-		<script src="js/jquery-3.5.0.min.js"></script>
-		<script src="js/bootstrap.bundle.js"></script>
-	</body>
+	<script src="js/jquery-3.5.0.min.js"></script>
+	<script src="js/bootstrap.bundle.js"></script>
+</body>
 
 </html>

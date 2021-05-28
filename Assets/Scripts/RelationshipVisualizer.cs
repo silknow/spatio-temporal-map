@@ -34,12 +34,4 @@ public class RelationshipVisualizer : Singleton<RelationshipVisualizer>
             return null;
         return child.GetComponent<RelationshipItemVisualizer>() == null ? null : child.GetComponent<RelationshipItemVisualizer>().propertyPercentage;
     }
-    public List<Color> GetColors()
-    {
-        var child = transform.GetChild(0);
-        if (child == null)
-            return null;
-        return child.GetComponent<RelationshipItemVisualizer>() == null ? null : child.GetComponent<RelationshipItemVisualizer>().propertyColors;
-
-    }
 }

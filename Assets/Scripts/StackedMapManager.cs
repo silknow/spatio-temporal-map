@@ -14,6 +14,7 @@ public class StackedMapManager : Singleton<StackedMapManager>
     public Dropdown mapSlicesDropdown;
     public List<TimeElement> centuriesValues;
 
+    private bool _loadedData = false;
     private void Awake()
     {
         
@@ -39,11 +40,21 @@ public class StackedMapManager : Singleton<StackedMapManager>
             print(s);
         }
         */
+        OnlineMaps.instance.OnUpdateLate += UpdateSlicesRestrictions;
     }
+
+    public void OnLoadedData()
+    {
+        _loadedData = true;
+    }
+    
 
     public void UpdateSlicesRestrictions()
     {
-        var possibleValues = SilkMap.instance.map.GetPropertyManager().GetPropertyByName("time").getPossibleValues();
+        if (!_loadedData)
+            return;
+        var possibleValues = SilkMap.instance.map.getSceneValuesOfProperty("time");
+        //var possibleValues = SilkMap.instance.map.GetPropertyManager().GetPropertyByName("time").getPossibleValues();
         if (centuriesValues == null)
             centuriesValues = new List<TimeElement>();
         else
@@ -59,7 +70,7 @@ public class StackedMapManager : Singleton<StackedMapManager>
         var opt = new List<string>();
         if (centuriesValues.Count <= 1)
         {
-            //DESACTIVAR EL BOTÓN DE STACKED MAP
+            //DESACTIVAR LA VENTANA DE TIMEVISUALIZATION
             opt.Clear();
         }
         else if (centuriesValues.Count == 2)
@@ -121,7 +132,10 @@ public class StackedMapManager : Singleton<StackedMapManager>
             go.layer = LayerMask.NameToLayer("StackedMap");
             RunOnChildrenRecursive(go, child => child.layer = LayerMask.NameToLayer("StackedMap"));
         }
-
+        AnalyticsMonitor.instance.sendEvent("Generate_Time_Layers", new Dictionary<string, object>
+        {
+            {"numberOfLayers", numberOfSlices}
+        });
         MapUIManager.instance.ToggleMapViewingMode(listOfMaps);
     }
     public static void RunOnChildrenRecursive(GameObject go, Action<GameObject> action)

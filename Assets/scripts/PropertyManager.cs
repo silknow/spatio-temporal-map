@@ -89,8 +89,8 @@ public class PropertyManager
 
         if (property != null)
         {
-            if (property.IsFilter())
-                property.AddValue(valueList);
+            if (property.IsFilter() || property.IsRelatable())
+                property.AddValue(valueList,point);
 
             point.SetPropertyValue(name, valueList);
         }

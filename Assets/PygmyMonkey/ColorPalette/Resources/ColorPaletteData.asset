@@ -15,7 +15,7 @@ MonoBehaviour:
   m_currentPaletteIndex: 0
   colorPaletteList:
   - name: ADASilk
-    showDetails: 0
+    showDetails: 1
     colorInfoList:
     - name: Random
       color: {r: 0.9686275, g: 0.9686275, b: 0.93725497, a: 1}
@@ -27,6 +27,10 @@ MonoBehaviour:
       color: {r: 0, g: 0, b: 0, a: 1}
     - name: Random
       color: {r: 0.08627451, g: 0.2509804, b: 0.42352945, a: 1}
+    - name: Random
+      color: {r: 0.28568888, g: 0.42260352, b: 0.5660378, a: 1}
+    - name: Random
+      color: {r: 0.5294118, g: 0.5372549, b: 0.75294125, a: 1}
     colorList: []
   - name: SilknowMaps
     showDetails: 1

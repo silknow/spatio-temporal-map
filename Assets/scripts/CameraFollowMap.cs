@@ -43,7 +43,7 @@ public class CameraFollowMap : MonoBehaviour
         foreach (var map in mapTileset)
         {
             var cubeTransform = map.GetComponent<StackedMapInstance>().GetCube();
-            offsetSize = cubeTransform.localScale.x / 10f;
+            offsetSize = cubeTransform.localScale.x / 6.5f;
             
             map.localPosition+= new Vector3(0,offsetY,0);
             offsetY -= offsetSize;

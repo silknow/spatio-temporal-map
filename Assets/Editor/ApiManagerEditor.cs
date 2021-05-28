@@ -50,5 +50,9 @@ public class ApiManagerEditor : UnityEditor.Editor
             SilkMap.instance.map.removeFilter("technique", "Damask");
             SilkMap.instance.map.applyFilters();
         }
+        if (GUILayout.Button("Take Screenshot"))
+        {            
+            ScreenCapture.CaptureScreenshot(Application.streamingAssetsPath + "/"+ Time.realtimeSinceStartup + ".png", 4);
+        }
     }
 }

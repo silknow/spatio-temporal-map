@@ -1,25 +1,39 @@
 Lang Code	EN	ES	IT	FR
 ^language	LANGUAGE	IDIOMA	LINGUAGGIO	LANGUE
 ^centuries	Centuries	Siglos	secoli	siècles
-^time_visualization	Time visualization	Visualización de tiempo		
-^data_displayed	Data displayed:	Datos mostrados:		
-^time_fluctuation	Time fluctuation: 	Fluctuación de tiempo:		
-^sequential	Timeline	Secuencial		
-^split	Time Layers	Capas de tiempo		
-^display_items	Display items with:	Mostrar items con:		
-^technique	Technique	Técnica		
-^material	Material	Material		
-^gallery	Gallery	Galería		
-^show_relationships	Show Relationships	Mostrar relaciones		
-^images	Images:	Imágenes:		
-^properties	Properties:	Propiedades:		
-^clear_filters	Clear Filters	Limpiar filtros		
-^description	description	descripción		
-^place	place	lugar		
-^time	Time	Tiempo		
-^loading_data	Loading Data	Cargando datos		
-^missing_time_data	Missing Time Data	Información de tiempo no disponible		
-^exit_timeVisualization	Exit Time Visualization	Salir de Visualización de tiempo		
-^stacked_centuries_label	Centuries {0} to {1}	Siglos {0} a {1}		
-^property	Property	Propiedad		
-^legend_title	Relations of Properties	Relaciones de propiedades		
+^time_visualization	Time visualization	Visualización de tiempo	Visualizzazione del tempo	Visualisation du temps
+^data_displayed	Data displayed:	Datos mostrados:	Dati visualizzati:	Données affichées :
+^time_fluctuation	Time fluctuation: 	Fluctuación de tiempo:	Fluttuazione temporale: 	Fluctuation du temps : 
+^sequential	Timeline	Secuencial	Timeline	Chronologie
+^split	Time Layers	Capas de tiempo	Livelli temporali	Les couches temporelles
+^display_items	Display items with:	Mostrar items con:	Visualizzare gli articoli con:	Afficher les articles avec :
+^technique	Technique	Técnica	Tecnica	Technique
+^material	Material	Material	Materiale	Matériel
+^gallery	Gallery	Galería	Galleria	Galerie
+^show_relationships	Show Relationships	Mostrar relaciones	Mostra le relazioni	Montrer les relations
+^images	Images:	Imágenes:	Immagini:	Images :
+^properties	Properties:	Propiedades:	Proprietà:	Propriétés :
+^clear_filters	Clear Filters	Limpiar filtros	Filtri trasparenti	Effacer les filtres
+^description	description	descripción	descrizione	description
+^place	place	lugar	posto	lieu
+^time	Time	Tiempo	Tempo	Heure
+^loading_data	Loading Data	Cargando datos	Caricamento dei dati	Chargement des données
+^missing_time_data	Missing Time Data	Información de tiempo no disponible	Dati di tempo mancanti	Données sur les heures manquantes
+^exit_timeVisualization	Exit Time Visualization	Salir de Visualización de tiempo	Visualizzazione del tempo di uscita	Visualisation du temps de sortie
+^stacked_centuries_label	Centuries {0} to {1}	Siglos {0} a {1}	Secoli da {0} a {1}	Siècles {0} à {1}
+^property	Property	Propiedad	Proprietà	Propriété
+^legend_title	Relations of Properties	Relaciones de propiedades	Relazioni di proprietà	Relations de propriétés
+^category	Category	Categoría	Categoria	Catégorie
+^legend	Legend	Leyenda	Leggenda	Légende
+^blue_markers_legend	Blue markers represent objects with a unique production location.	Los marcadores azules representan objetos con únicamente una localización de producción.	I marcatori blu rappresentano oggetti con un unico luogo di produzione.	Les marqueurs bleus représentent les objets ayant un lieu de production unique.
+^purple_markers_legend	Purple markers represent objects that have multiple production locations (this may be due to uncertainties in the origin of the objects).	Los marcadores púrpuras representan objetos con multiples localizaciones de producción (esto puede ocurrir cuando no hay certeza del origen de los objetos).	I marcatori viola rappresentano oggetti che hanno più sedi di produzione (ciò può essere dovuto a incertezze sull'origine degli oggetti).	Les marqueurs violets représentent les objets qui ont plusieurs lieux de production (cela peut être dû à des incertitudes sur l'origine des objets).
+^no_category_legend	Object has no category	El objeto no tiene categorías	L'oggetto non ha una categoria	L'objet n'a pas de catégorie
+^multiple_category_legend	Object has multiple categories 	El objeto tiene múltiples categorías	L'oggetto ha più categorie 	L'objet a plusieurs catégories 
+^drawings_category_legend	Drawings category group	Dibujos	Gruppo categoria disegni	Groupe de catégories de dessins
+^dressings_category_legend	Dressings category group	Vestidos	Gruppo categoria medicazioni	Groupe de catégories d'habillages
+^fabrics_category_legend	Fabrics category group	Tejidos	Gruppo categoria tessuti	Groupe de catégories de tissus
+^furniture_category_legend	Furniture category group	Mobiliario	Gruppo categoria mobili	Groupe de catégories de meubles
+^household_category_legend	HouseHold Objects category group	Objeto Personales	Gruppo categoria oggetti HouseHold	Groupe de catégories HouseHold Objets
+^religious_category_legend	Religious Objects category group	Objetos Religiosos	Gruppo categoria Oggetti Religiosi	Groupe de catégories Objets religieux
+^icons_legend	Icons for object categories:	Iconos para las categorías de objetos	Icone per le categorie di oggetti:	Icônes pour les catégories d'objets :
+^error_loading_data	Error Loading Data	Error cargando datos	Errore nel caricamento dei dati	Erreur de chargement des données

@@ -31,11 +31,21 @@ public class RelatablePropertyValueItem : MonoBehaviour
          //Show relations with this value
          MapUIManager.instance.GetSelectedMarker().showRelations(property);
          Debug.LogFormat("Show relations for property {0}",property);
+         AnalyticsMonitor.instance.sendEvent("Show_Linear_Relations", new Dictionary<string, object>
+         {
+            {"property", property},
+            {"value", value}
+         });
       }
       else
       {
          //Hide relations with this value
          MapUIManager.instance.GetSelectedMarker().hideRelations(property);
+         AnalyticsMonitor.instance.sendEvent("Hide_Linear_Relations", new Dictionary<string, object>
+         {
+            {"property", property},
+            {"value", value}
+         });
       }
       
         

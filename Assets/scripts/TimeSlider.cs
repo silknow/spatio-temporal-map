@@ -59,12 +59,18 @@ public class TimeSlider : MonoBehaviour
         {
             //Debug.LogFormat("Llamo a ActivateTimeFrame from:{0} to {1}",selectedCentury.@from,selectedCentury.to);
             SilkMap.instance.map.activateTimeFrame(selectedCentury.@from, selectedCentury.to);
+            AnalyticsMonitor.instance.sendEvent("Timeline_Update", new Dictionary<string, object>
+            {
+                {"from", selectedCentury.@from},
+                {"to",  selectedCentury.to}
+            });
         }
         else{
             var timeElement = APIManager.instance.timeValues.First(t=>t.Value.century == (int)value).Value;
             Debug.LogFormat("OCULTAR:  Llamo a ActivateTimeFrame from:{0} to {1}",timeElement.@from,timeElement.to);
             SilkMap.instance.map.activateTimeFrame(timeElement.@from,timeElement.to);
         }
+        
 
     }
 

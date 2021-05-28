@@ -42,11 +42,22 @@ public class FilteredPropertyRow : MonoBehaviour
         {
             //Filter property with FilterManager
             SilkMap.instance.map.addFilter(property, value);
+            AnalyticsMonitor.instance.sendEvent("Apply_Filter", new Dictionary<string, object>
+            {
+                {"property", property},
+                {"value", value}
+            });
+           
         }
         else
         {
             //Remove FilterValue;
             SilkMap.instance.map.removeFilter(property,value);
+            AnalyticsMonitor.instance.sendEvent("Remove_Filter", new Dictionary<string, object>
+            {
+                {"property", property},
+                {"value", value}
+            });
         }
 
         //Mover a botón de Apply Filters

@@ -211,8 +211,10 @@ public class SilkMap : MonoBehaviour {
 
         foreach (Transform child in ClonedMap.instance.getObjectMap().transform)
         {
-            GameObject.Destroy(child.gameObject);
+            GameObject.DestroyImmediate(child.gameObject);
         }
+
+        Resources.UnloadUnusedAssets();
 
         ClonedMap.instance.unStackPoints();
     }

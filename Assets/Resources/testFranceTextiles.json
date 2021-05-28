@@ -1810,13 +1810,21 @@
     "identifier": "9489",
     "production": {
       "id": "http://data.silknow.org/production/2b1bdea3-4bd2-362c-a049-049fec723318",
-      "location": {
+      "location": [{
         "country": "Spain",
         "id": "https://sws.geonames.org/2514239/",
         "label": "Majorca",
         "lat": "39.6078",
         "long": "3.01197"
-      },
+      }, 
+        {
+        "country": "Spain",
+        "id": "https://sws.geonames.org/2510409/",
+        "label": "Toledo",
+        "lat": "39.8581",
+        "long": "-4.02263"
+      }
+      ],
       "material": [
         "Silk",
         "Flax"

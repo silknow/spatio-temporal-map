@@ -50,7 +50,11 @@ public class MapPoint
 
     protected int id;
 
-    public bool groupPoint = false;    
+    public bool groupPoint = false;
+
+    public GridCluster isInGroupPoint;
+
+    public bool multipleLocations = false;
 
     // If filtered is active, the point must no be displayed
     protected bool filtered=false;
@@ -101,6 +105,21 @@ public class MapPoint
         return map;
     }
 
+    public bool isMultipleLocations()
+    {
+        return multipleLocations;
+    }
+
+    public void setMultipleLocations(bool multiple)
+    {
+        this.multipleLocations = multiple;
+    }
+
+    public GridCluster getGroupPointCluster()
+    {
+        return isInGroupPoint;
+    }
+
     public bool isKnownLocation()
     {
         return knownLocation;
@@ -119,11 +138,21 @@ public class MapPoint
 
     public bool isGroupPoint()
     {
+        /*
         if (isCluster() && getClusteredPoints()!=null && getClusteredPoints().Count>0)
             return getClusteredPoints()[0].groupPoint;
         else
-            return false;
-        //return groupPoint;
+            return false;*/
+        if (groupPoint)
+            return true;
+        else
+        {
+            if (this.getGridCluster() != null)
+                return this.getGridCluster().isGroupPoints();
+            else
+                return false;
+        }
+        
     }
 
     public void setGroupPoint(bool groupPoint)
@@ -286,9 +315,23 @@ public class MapPoint
 
     public List<MapPoint> getClusteredPoints()
     {
-        if (isCluster())
+        if (isCluster() || isGroupPoint())
         {
             return this.clusteredPointList;
+        }
+        else
+            return null;
+    }
+
+    public List<MapPoint> getClusteredPointsNoFiltered()
+    {
+        if (isCluster() || isGroupPoint())
+        {
+            List<MapPoint> pointNF = new List<MapPoint>();
+            foreach (MapPoint p in this.clusteredPointList)
+                if (!p.isFiltered())
+                    pointNF.Add(p);
+            return pointNF;
         }
         else
             return null;
@@ -397,9 +440,12 @@ public class MapPoint
         {
             hidden = false;
             graphicShow();
+            /*
             if (isCluster())
                 gridCluster.showRelations();
             else
+                showAllRelations();*/
+            if (!isCluster())
                 showAllRelations();
         }
     }
@@ -543,9 +589,18 @@ public class MapPoint
         {
             hidden = true;
             graphicHide();
+
+            /*
             if (isCluster())
                 gridCluster.hideRelations();
             else
+            {
+                if (isFiltered())
+                    hideAllRelations();
+            }
+            */
+
+            if (!isCluster() && isFiltered())
                 hideAllRelations();
         }
     }
@@ -557,11 +612,21 @@ public class MapPoint
             this.filtered = filtered;
 
             if (this.filtered)
+            {
                 foreach (GridCluster gCluster in this.clusterList)
                     gCluster.addFilteredPoint();
+
+                if (isInGroupPoint != null)
+                    isInGroupPoint.addFilteredPoint();
+            }
             else
+            {
                 foreach (GridCluster gCluster in this.clusterList)
                     gCluster.removeFilteredPoint();
+
+                if (isInGroupPoint != null)
+                    isInGroupPoint.removeFilteredPoint();
+            }
         }
 
     }

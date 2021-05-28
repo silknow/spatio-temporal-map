@@ -24,6 +24,8 @@ public class APIManager : Singleton<APIManager>
     public Dictionary<string, TimeElement> timeValues;
 
     private bool _sendingInfo = false;
+    private int _currentLoadedPages = 0;
+    private int _currentTotalPages = -1;
 
     public void Awake()
     {
@@ -33,6 +35,14 @@ public class APIManager : Singleton<APIManager>
         timeValues = new Dictionary<string, TimeElement>();
         PopulateTimeDictionary();
     }
+
+    private void Start()
+    {
+        #if UNITY_EDITOR
+        Invoke(nameof(TestLoadTextilesFromHTML),0.5f);
+        #endif
+    }
+
 
     private void PopulateTimeDictionary()
     {
@@ -141,7 +151,7 @@ public class APIManager : Singleton<APIManager>
                 }
                 catch (JsonReaderException e)
                 {
-                    print("errorParsing");
+                    print("errorParsing: "+e.Message);
                     yield break;
                 }
 
@@ -158,7 +168,7 @@ public class APIManager : Singleton<APIManager>
             }
         }
     }
-    public IEnumerator GetObjectDetail(string objectId, Action<string> callback = null)
+    public IEnumerator GetObjectDetail(string objectId, Action<string> callback = null,  Action<string> errorCallback = null)
     {
         if (string.IsNullOrEmpty(objectId))
             yield break;
@@ -191,9 +201,10 @@ public class APIManager : Singleton<APIManager>
         {
             // Request and wait for the desired page.
             yield return webRequest.SendWebRequest();
-            if (webRequest.isNetworkError)
+            if (webRequest.isNetworkError || webRequest.isHttpError)
             {
                 Debug.Log(": Error: " + webRequest.error);
+                if (errorCallback != null) errorCallback("Error: " + webRequest.error);
             }
             else
             {
@@ -244,7 +255,8 @@ public class APIManager : Singleton<APIManager>
     }
     public void TestLoadTextilesFromHTML()
     {
-        var jsontest = Resources.Load("testFranceTextiles");
+        //var jsontest = Resources.Load("testFranceTextiles");
+        var jsontest = Resources.Load("veniceDataset");
         TextAsset temp = jsontest as TextAsset;
         if (temp != null) LoadJSONFromHTML(temp.text);
     }
@@ -262,29 +274,42 @@ public class APIManager : Singleton<APIManager>
     
     public void StartDumpingJSON(string numberOfPages)
     {
-        //print("StartDumpingJSON Total numberOfPages: "+numberOfPages);
+        if (_sendingInfo)
+            return;
         _sendingInfo = true;
+        _currentLoadedPages = 0;
+        _currentTotalPages = Int32.Parse(numberOfPages);
         objectList.Clear();
         MapUIManager.instance.ShowProgressBar(Int32.Parse(numberOfPages));
     }
 
     public void AppendJSONData(string json)
     {
-        if(!_sendingInfo)
+        if(!_sendingInfo || _currentLoadedPages>= _currentTotalPages)
             return;
-        var manMadeObjectList = JsonConvert.DeserializeObject<List<ManMadeObject>>(json);
-        //print("AppendJSONData Incoming JSON count: "+manMadeObjectList.Count);
-        objectList  = objectList.Concat(manMadeObjectList).ToList();
+        
+        var adasilkresultpage = JsonConvert.DeserializeObject<AdasilkResultPage>(json);
+
+        
+        if(adasilkresultpage.pageNumber != _currentLoadedPages +1)
+            return;
+        _currentLoadedPages++;
+        var manMadeObjectList = adasilkresultpage.pageResults;
+       
+        if(manMadeObjectList.Count>0)
+            objectList  = objectList.Concat(manMadeObjectList).ToList();
+        MapUIManager.instance.UpdateProgressBar(_currentLoadedPages.ToString());
         //print("AppendJSONData Total JSON count: "+objectList.Count);
     }
 
     public void EndDumpingJSON()
     {
+        if (!_sendingInfo)
+            return;
         //print("EndDumpingJSON");
         _sendingInfo = false;
         initAppRef.LoadRestData(objectList);
         MapUIManager.instance.HideProgressBar();
-        //print("EndDumpingJSON Total JSON count: "+objectList.Count);
         objectList.Clear();
     }
     public void CancelDumpingJSON()
@@ -329,10 +354,32 @@ public class APIManager : Singleton<APIManager>
         if (!string.IsNullOrEmpty(lang))
         {
             I18N.instance.setLanguage(lang);
+            OnlineMaps.instance.language = I18N.instance.gameLang.ToString().ToLower(CultureInfo.InvariantCulture);
         }
        
     }
+    public void SetAnalytics(string value)
+    {
+        print(value);
+        if (bool.TryParse(value, out bool result))
+        {
+            AnalyticsMonitor.instance.SetAnalyticsStatus(result);
+            Debug.Log("Analytics tracking: "+result);
+        }
 
-    
+
+        else
+        {
+            Debug.Log("Incorrect Value for Analytics");
+        }
+
+       
+    }
+    public void ShowLoading()
+    {
+        MapUIManager.instance.ShowLoadingData();
+    }
+
+
 }
 

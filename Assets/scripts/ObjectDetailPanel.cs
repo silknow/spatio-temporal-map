@@ -43,9 +43,19 @@ public class ObjectDetailPanel : MonoBehaviour
     public void SetData(string uri)
     {
         MapUIManager.instance.ShowLoadingData();
-        APIManager.instance.StartCoroutine(APIManager.instance.GetObjectDetail(uri, ResponseCallback));
+        print(uri);
+        AnalyticsMonitor.instance.sendEvent("Open_Object_Detail", new Dictionary<string, object>
+        {
+            {"objectUri", uri}
+        });
+        APIManager.instance.StartCoroutine(APIManager.instance.GetObjectDetail(uri, ResponseCallback, ErrorCallback));
     }
 
+    private void ErrorCallback(string errorText)
+    {
+        MapUIManager.instance.HideLoadingData();
+        MapUIManager.instance.ShowErrorLoadingData(errorText);
+    }
     private void ResponseCallback(string data)
     {
         MapUIManager.instance.HideLoadingData();
@@ -58,6 +68,7 @@ public class ObjectDetailPanel : MonoBehaviour
         
         
         gameObject.SetActive(true);
+        
         var obj = JsonConvert.DeserializeObject<List<ManMadeObject>>(data)[0];
         
         //Rellenar información mapPoint con datos de petición detalle

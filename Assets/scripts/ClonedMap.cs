@@ -1,4 +1,9 @@
-﻿using System;
+﻿/**
+ * This script is in charge to generate the stacked map gameobjects related with the displayed data on map.
+ * 
+ * */
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -344,7 +349,7 @@ public class ClonedMap : MonoBehaviour
     
 
             foreach (OnlineMapsTile tile in listTiles)
-                putMarkers(tile, groupCanvasObject, groupObject, centerMap, from, to, -boundsG.size.x * 0.0015f);
+                putMarkers(tile, groupCanvasObject, groupObject, centerMap, from, to, -boundsG.size.x * 0.0015f, cube.transform);
         }
 
     }
@@ -441,27 +446,145 @@ public class ClonedMap : MonoBehaviour
 
         foreach (GameObject gObject in modelElements)
             Destroy(gObject);
+        //Resources.UnloadUnusedAssets();
     }
 
 
-    protected void putMarkers(OnlineMapsTile tile, GameObject parentCanvas, GameObject parent, Vector2 centerMap, int from, int to, float desp)
+    protected void putMarkers(OnlineMapsTile tile, GameObject parentCanvas, GameObject parent, Vector2 centerMap, int from, int to, float desp, Transform baseT)
     {
+
         if (!map.pointsViewing())
-            putClusterMarkers(tile, parentCanvas, parent, centerMap, from, to, desp);
+            putClusterMarkers(tile, parentCanvas, parent, centerMap, from, to, desp, baseT);
         else
-            putPointMarkers(tile, parent, centerMap, from, to, desp);
+        {
+            List<GridCluster> groupPointList = putPointMarkers(tile, parent, centerMap, from, to, desp, baseT);
+            putGroupPointMarkers(tile, parentCanvas, parent, centerMap, from, to, desp, baseT, groupPointList);
+        }
 
     }
 
-    protected void putClusterMarkers(OnlineMapsTile tile, GameObject parentCanvas, GameObject parent, Vector2 centerMap, int from, int to, float desp)
+    protected void putGroupPointMarkers(OnlineMapsTile tile, GameObject parentCanvas, GameObject parent, Vector2 centerMap, int from, int to, float desp, Transform baseT, List<GridCluster> groupPointList)
+    {
+        int level = map.getLevel();
+
+
+        //List<MapPointMarker> clusterList = ((MapMarker)(map)).getClusterMarkersAtLevel(level);
+
+        List<MapPointMarker> clusterList = new List<MapPointMarker>();
+
+        foreach (GridCluster gCluster in groupPointList)
+            clusterList.Add((MapPointMarker)gCluster.getCenter());
+
+
+        for (int m = 0; m < clusterList.Count; m++)
+        {
+
+            List<MapPoint> pointList = clusterList[m].getClusteredPoints();
+            int numData = 0;
+
+            foreach (MapPoint pointC in pointList)
+                if (pointC.getFrom() >= from && pointC.getTo() <= to)
+                    numData++;
+
+            if (numData > 0)
+            {
+                double longitud, latitud;
+
+                MapPointMarker gPoint = clusterList[m];
+
+                gPoint.getMarker3D().GetPosition(out longitud, out latitud);
+
+                if (longitud >= tile.topLeft.x && longitud <= tile.bottomRight.x)
+                    if (latitud <= tile.topLeft.y && latitud >= tile.bottomRight.y)
+                    {
+
+                        //------------------
+                        GameObject marker = Instantiate(clusterList[m].getMarker3D().prefab,
+                            new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
+                        marker.transform.SetPositionAndRotation(marker.transform.position +
+                                               new Vector3((-(float)(longitud)) + centerMap.x,
+                                                            desp,
+                                                           (-(float)(latitud)) + centerMap.y), marker.transform.rotation);
+
+                        marker.transform.parent = parent.transform;
+
+
+
+                        marker.name = gPoint.getLabel();
+
+                        /*
+                        GameObject markerCluster = Instantiate(clusterList[m].markerInstance.gameObject,
+                            new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
+                        markerCluster.transform.SetPositionAndRotation(markerCluster.transform.position +
+                                               new Vector3((-(float)(longitud)) + centerMap.x,
+                                                            -1.0f,
+                                                           (-(float)(latitud)) + centerMap.y), markerCluster.transform.rotation);
+                        markerCluster.transform.parent = parent.transform;
+                        */
+
+
+
+
+
+                        Canvas canvasSlice = parentCanvas.GetComponent<Canvas>();
+
+                        GameObject markerCluster = GameObject.Instantiate(clusterList[m].markerInstance.gameObject, canvasSlice.transform) as GameObject;
+                        markerCluster.transform.SetPositionAndRotation(marker.transform.localPosition, marker.transform.rotation);
+                        //markerCluster.transform.parent = parent.transform;
+
+                        RectTransform rectTransform = markerCluster.transform as RectTransform;
+                        //markerCluster.transform.localScale = new Vector3(0.1f,0.1f,0.1f);
+                        float factor = baseT.localScale.x / 1000.0f;
+                        markerCluster.transform.localScale = new Vector3(factor, factor, factor);
+                        markerCluster.transform.localRotation = Quaternion.Euler(new Vector3(-60, 180, 0));
+                        markerCluster.transform.localPosition += Vector3.up * 0.6f;
+
+                        string titleData = numData.ToString();
+                        SetText(rectTransform, "Title", titleData);
+
+
+
+                        //float scale = (clusterList[m].getMarker3D().scale / 15.0f) * numData;
+                        //4.0f;
+                        //marker.transform.localScale = new Vector3(scale, scale, scale);
+
+
+                        gPoint.setStackedGameObject(marker);
+                        stackedPoints.Add(gPoint);
+
+                        if (gPoint.isFiltered() || !gPoint.isVisible())
+                            marker.SetActive(false);
+                        else
+                            marker.SetActive(true);
+
+
+
+                        //------------------
+
+                        /*
+                        
+                        gPoint.setStackedPosition(new Vector3((-(float)(gPoint.getX())) + centerMap.x,
+                                                        -1.0f,
+                                                    (-(float)(gPoint.getY())) + centerMap.y), parent.transform);
+                        float scale = gPoint.getMarker3D().scale /6.0f;
+                        gPoint.setStackedScale(new Vector3(scale, scale, scale));
+
+                        stackedPoints.Add(gPoint);
+                        */
+
+                    }
+            }
+
+        }
+    }
+
+    protected void putClusterMarkers(OnlineMapsTile tile, GameObject parentCanvas, GameObject parent, Vector2 centerMap, int from, int to, float desp, Transform baseT)
     {
         int level = map.getLevel();
 
         
         List<MapPointMarker> clusterList = ((MapMarker)(map)).getClusterMarkersAtLevel(level);
 
-        if (clusterList == null)
-            return;
 
         for (int m = 0; m < clusterList.Count; m++)
         {
@@ -520,7 +643,9 @@ public class ClonedMap : MonoBehaviour
                         //markerCluster.transform.parent = parent.transform;
 
                         RectTransform rectTransform = markerCluster.transform as RectTransform;
-                        markerCluster.transform.localScale = new Vector3(0.1f,0.1f,0.1f);
+                       //markerCluster.transform.localScale = new Vector3(0.1f,0.1f,0.1f);
+                        float factor = baseT.localScale.x / 1000.0f;
+                        markerCluster.transform.localScale = new Vector3(factor, factor, factor);
                         markerCluster.transform.localRotation = Quaternion.Euler(new Vector3(-60, 180, 0));
                         markerCluster.transform.localPosition += Vector3.up * 0.6f;
 
@@ -529,9 +654,10 @@ public class ClonedMap : MonoBehaviour
 
 
 
-                            float scale = (clusterList[m].getMarker3D().scale / 10.0f) * numData;
-                            //4.0f;
-                        marker.transform.localScale = new Vector3(scale, scale, scale);
+                            //float scale = (clusterList[m].getMarker3D().scale / 15.0f) * numData;
+                        //4.0f;
+                        //marker.transform.localScale = new Vector3(scale, scale, scale);
+                   
 
                         gPoint.setStackedGameObject(marker);
                         stackedPoints.Add(gPoint);
@@ -569,20 +695,22 @@ public class ClonedMap : MonoBehaviour
         if (title != null) title.text = value;
     }
 
-    protected void putPointMarkers(OnlineMapsTile tile, GameObject parent, Vector2 centerMap, int from, int to, float desp)
+    protected List<GridCluster> putPointMarkers(OnlineMapsTile tile, GameObject parent, Vector2 centerMap, int from, int to, float desp, Transform baseT)
     {
         int level = map.getLevel();
+        int numPoint = 0;
 
 
+        List<GridCluster> groupPointList = new List<GridCluster>();
         List<MapPoint> pointList = map.pointsInTime(from, to);
 
         Debug.Log("Los puntos de " + from + " hasta " + to + " son :");
 
         if (pointList == null)
-            return;
+            return null;
 
-       foreach (MapPoint p in pointList)
-       {
+        foreach (MapPoint p in pointList)
+        {
             MapPointMarker gPoint = (MapPointMarker)p;
 
             
@@ -593,50 +721,64 @@ public class ClonedMap : MonoBehaviour
             if (tile.topLeft.x<=longitud && tile.bottomRight.x>=longitud &&
                 tile.topLeft.y>=latitud  && tile.bottomRight.y<=latitud) {
 
-                Debug.Log(p.getLabel()+ "("+ gPoint.getMarker3D().transform.name+") - "+p.getFrom()+"-"+p.getTo());
-
-                //--------------
-                
-                GameObject marker = Instantiate(gPoint.getMarker3D().prefab,
-                               new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
-                marker.transform.SetPositionAndRotation(marker.transform.position +
-                                                new Vector3((-(float)(gPoint.getX())) + centerMap.x,
-                                                                desp,
-                                                            (-(float)(gPoint.getY())) + centerMap.y), marker.transform.rotation);
-
-
-                foreach (Transform child in marker.transform)
+                if (!p.isGroupPoint())
                 {
-                    GameObject obj = child.gameObject;
+                    numPoint++;
 
-                    if (child.name.Equals("picture"))
+                    if (numPoint == 2 && from==1701)
+                        numPoint++;
+
+                    Debug.Log(p.getLabel() + "(" + gPoint.getMarker3D().transform.name + ") - " + p.getFrom() + "-" + p.getTo());
+
+                    //--------------
+
+                    GameObject marker = Instantiate(gPoint.getMarker3D().prefab,
+                        new Vector3(0.0f, 0.0f, 0.0f), Quaternion.identity);
+                    marker.transform.SetPositionAndRotation(marker.transform.position +
+                                                            new Vector3((-(float)(gPoint.getX())) + centerMap.x,
+                                                                desp,
+                                                                (-(float)(gPoint.getY())) + centerMap.y), marker.transform.rotation);
+
+
+                    foreach (Transform child in marker.transform)
                     {
-                        child.GetComponent<Renderer>().material.mainTexture = gPoint.getTexture();
+                        GameObject obj = child.gameObject;
+
+                        if (child.name.Equals("picture"))
+                        {
+                            child.GetComponent<Renderer>().material.mainTexture = gPoint.getTexture();
+                        }
+
                     }
 
+                    marker.transform.parent = parent.transform;
+
+
+
+                    //float scale = gPoint.getMarker3D().scale / 100.0f;
+                    //marker.transform.localScale = new Vector3(scale, scale, scale);
+
+                    float factor = baseT.localScale.x / 20.0f;
+                    marker.transform.localScale = new Vector3(factor, factor, factor);
+
+
+                    marker.AddComponent(typeof(EventTrigger));
+                    EventTrigger trigger = marker.GetComponent<EventTrigger>();
+                    EventTrigger.Entry entry = new EventTrigger.Entry();
+                    entry.eventID = EventTriggerType.PointerClick;
+                    entry.callback.AddListener((eventData) => { onClick(); });
+                    trigger.triggers.Add(entry);
+
+
+
+
+
+                    gPoint.setStackedGameObject(marker);
+                    stackedPoints.Add(gPoint);
                 }
-
-                marker.transform.parent = parent.transform;
-                
-                
-
-                float scale = gPoint.getMarker3D().scale / 100.0f;
-                marker.transform.localScale = new Vector3(scale, scale, scale);
-                
-
-                marker.AddComponent(typeof(EventTrigger));
-                EventTrigger trigger = marker.GetComponent<EventTrigger>();
-                EventTrigger.Entry entry = new EventTrigger.Entry();
-                entry.eventID = EventTriggerType.PointerClick;
-                entry.callback.AddListener((eventData) => { onClick(); });
-                trigger.triggers.Add(entry);
-
-
-
-
-
-                gPoint.setStackedGameObject(marker);
-                stackedPoints.Add(gPoint);
+                else
+                    if (!groupPointList.Contains(p.getGroupPointCluster()))
+                        groupPointList.Add(p.getGroupPointCluster());
 
                 //--------------------
 
@@ -652,6 +794,8 @@ public class ClonedMap : MonoBehaviour
 
             }
         }
+
+        return groupPointList;
     }
 
     public void onClick()

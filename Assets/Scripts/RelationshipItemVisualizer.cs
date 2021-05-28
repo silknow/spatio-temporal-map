@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class RelationshipItemVisualizer : MonoBehaviour
 {
-    public List<Color> propertyColors;
+    
     private int _propertyCount =3;
     private List<Property> _properties;
     public GameObject relationshipArcPrefab;
@@ -28,33 +28,30 @@ public class RelationshipItemVisualizer : MonoBehaviour
         _propertyCount = _properties.Count;
         OnlineMaps.instance.OnUpdateLate += UpdateSpritePosition;
         _rectTransform = GetComponent<RectTransform>();
-        if (_propertyCount > propertyColors.Count)
-        {
-            print("FALTAN COLORES");
-            return;
-        }
-
         FillCircle();
 
     }
-    private void OnDestroy()
-    { 
-        OnlineMaps.instance.OnUpdateLate -= UpdateSpritePosition;
-    }
+    // private void OnDestroy()
+    // {
+    //     if (OnlineMaps.instance.OnUpdateLate != null) OnlineMaps.instance.OnUpdateLate -= UpdateSpritePosition;
+    // }
 
 
     private void FillCircle()
     {
         var sizeOfProperty = 1.0f / _propertyCount;
         float offset = 0f;
-        var totalNumOfPoints = (SilkMap.instance.map.getNumPoints() * 1.0f);
+        //Exclude itself from total num
+        var totalNumOfPoints = Mathf.Max((SilkMap.instance.map.getNumPoints()-1),0);
         for (int i = 0; i < _propertyCount; i++)
         {
            var rel = Instantiate(relationshipArcPrefab, this.GetComponent<RectTransform>()).GetComponent<RelationshipArcProperty>();
            rel.GetComponent<RectTransform>().localRotation = Quaternion.Euler(0,0,offset * 360f);
-           rel.baseColor = propertyColors[i];
+           rel.baseColor = _properties[i].GetRelationColor();
            rel.totalSizeOfProperty = sizeOfProperty;
-           var percent = mapPointMarker.getNumObjectsWithProperty(_properties[i].GetName()) / totalNumOfPoints;
+
+           var percent = totalNumOfPoints == 0 ? 0 : (mapPointMarker.getNumObjectsWithProperty(_properties[i].GetName()) / (float)totalNumOfPoints);
+           percent = Mathf.Max(percent, 0.0f);
            propertyPercentage.Add(_properties[i],percent);
            rel.sizeOfRelation = sizeOfProperty * percent; 
            offset += sizeOfProperty;

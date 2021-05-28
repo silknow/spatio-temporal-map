@@ -1,6 +1,17 @@
-﻿using System;
+﻿/**
+ * MapMarker extends Map
+ * 
+ * Supports the graphical tasks involved that Map methods can not manage, because it is a higher level class.
+ * 
+ *
+ * */
+
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -52,17 +63,85 @@ public class MapMarker : Map {
     }
 
     public void OnMapUpdated()
-    {
+    {        
         SilkMap.instance.refreshStack();
         if (markers!=null)
             UpdateMarkers();
+    }
+
+    public List<MapPointMarker> getVisiblePoints()
+    {
+        List<MapPointMarker> visiblePoints = new List<MapPointMarker>();
+        int levelMap = 0;
+
+        foreach (MapPointMarker point in this.GetPoints())
+            if (point.isVisible() && areCoordinatesOnMap(point.getX(), point.getY()))
+                visiblePoints.Add(point);
+
+        for (levelMap=0; levelMap < this.clusterManager.getNumLevels(); levelMap++)
+        {
+            foreach (MapPointMarker clusterPoint in this.getClusterMarkersAtLevel(levelMap))
+            {
+                if (clusterPoint.isVisible() && areCoordinatesOnMap(clusterPoint.getX(), clusterPoint.getY()))
+                    visiblePoints.Add(clusterPoint);
+            }
+        }
+
+        foreach (GridCluster gc in this.clusterManager.getPointGroupClusters())
+                if (gc.getCenter().isVisible() && areCoordinatesOnMap(gc.getCenter().getX(), gc.getCenter().getY()))
+                    visiblePoints.Add((MapPointMarker)gc.getCenter());
+
+
+
+        return visiblePoints;
+    }
+
+    public List<string> getSceneValuesOfProperty(string propertyName)
+    {
+        List<string> valuesOfProperty = new List<string>();
+
+        foreach (MapPointMarker pointMarker in getVisiblePoints())
+            if (pointMarker.isCluster() || pointMarker.isGroupPoint())
+            {
+                foreach (MapPointMarker pointMarkerCluster in pointMarker.getClusteredPoints())
+                {
+                    var values = pointMarkerCluster.getPropertyValue(propertyName);
+                    valuesOfProperty.AddRange(values.Except(valuesOfProperty));
+                }
+            }
+            else
+            {
+                var values = pointMarker.getPropertyValue(propertyName);
+                valuesOfProperty.AddRange(values.Except(valuesOfProperty));
+                /*var values = pointMarker.getPropertyValue(propertyName);
+                if (values.Count>0 && !valuesOfProperty.Contains(values[0]))
+                    valuesOfProperty.Add(pointMarker.getPropertyValue(propertyName)[0]);*/
+            }
+
+        return valuesOfProperty;
+
     }
 
     private void UpdateMarkers()
     {
 
         foreach (MarkerInstance marker in markers) UpdateMarker(marker);
+
     }
+
+    private bool areCoordinatesOnMap(double longitude, double latitude)
+    {
+        bool areOnMap = true;
+
+        Vector2 screenPosition = control.GetScreenPosition(longitude, latitude);
+
+        if (screenPosition.x < 0 || screenPosition.x > Screen.width ||
+            screenPosition.y < 0 || screenPosition.y > Screen.height)
+            areOnMap = false;
+
+        return areOnMap;
+    }
+
 
     private void UpdateMarker(MarkerInstance marker)
     {
@@ -80,7 +159,8 @@ public class MapMarker : Map {
 
         if (marker.mapMarker != null && marker.mapMarker.isVisible())
         {
-            string newTitle = marker.mapMarker.getGridCluster().getNumVisiblePoints().ToString();
+            int numPoints = marker.mapMarker.getGridCluster().getNumVisiblePoints();
+            string newTitle = numPoints.ToString();
             if (!newTitle.Equals(marker.data.title)) {
                 marker.data.title = newTitle;
                 SetText(marker.transform, "Title", newTitle);
@@ -256,6 +336,67 @@ public class MapMarker : Map {
                     mapPoint.setDimension(dimension);
     }
 
+    public override void createGraphicRelationData()
+    {
+        int level;
+
+        //while (!relationsLoaded)
+          //    yield return null;
+
+        for (level = 0; level < clusterManager.getNumLevels(); level++)
+        {
+            //this.clusterMarkers.Add(new List<MapPointMarker>());
+
+
+            //this.clusterLines.Add(new List<OnlineMapsDrawingLine>());
+            // Each level , a list lines per cluster
+
+
+            List<List<OnlineMapsDrawingLine>> levelConnections = new List<List<OnlineMapsDrawingLine>>();
+            for (int a = 0; a < clusterManager.getGridClustersAtLevel(level).Count; a++)
+                levelConnections.Add(new List<OnlineMapsDrawingLine>());
+
+            connectionsLinesPerLevel.Add(level, levelConnections);
+        }
+
+
+        for (level = 0; level < clusterManager.getNumLevels(); level++)
+        {
+            List<GridCluster> clusters = clusterManager.getGridClustersAtLevel(level);
+
+            //            Debug.Log("En el nivel " + level + " hay " + clusters.Count + " cluster ");
+
+            if (clusters.Count > 0 && !clusters[0].getCenter().isCluster())
+            {
+
+                for (int i = 0; i < clusters.Count; i++)
+                {
+
+
+
+
+                    if (level == 0)
+                    {
+                        clusters[i].initConnectionsList(clusters.Count);
+                        clusters[i].updateConnections(clusters);
+
+                     
+                        List<List<OnlineMapsDrawingLine>> levelConnections = (List<List<OnlineMapsDrawingLine>>)connectionsLinesPerLevel[level];
+
+                        for (int clusterCon = 0; clusterCon < clusters.Count; clusterCon++)
+                            if (clusters[i].getConnections()[clusterCon] == 0)
+                                levelConnections[i].Add(null);
+                            else
+                                levelConnections[i].Add(addConnection(clusters[i], clusters[clusterCon], clusters[i].getConnections()[clusterCon]));
+                        
+
+
+                    }
+                }
+            }
+        }
+    }
+
 
     public void update()
     {
@@ -269,11 +410,15 @@ public class MapMarker : Map {
 
         if (clusterManager.hasData())
             return;
+        //Debug.Log("Clustering..... IN "+ System.DateTime.Now.ToLongTimeString());
 
         updateClustering();
 
+        //Debug.Log("Clustering..... OUT " + System.DateTime.Now.ToLongTimeString());
 
         distributeGroupsOnCircle();
+
+        //Debug.Log("groups in circle..... OUT "+ System.DateTime.Now.ToLongTimeString());
 
         foreach (GridCluster gCluster in clusterManager.getPointGroupClusters())
         {
@@ -281,20 +426,28 @@ public class MapMarker : Map {
             c++;
         }
 
+        //Debug.Log("markers cmanager..... OUT "+System.DateTime.Now.ToLongTimeString());
+
         
+
         for (level = 0; level < clusterManager.getNumLevels(); level++)
         {
             this.clusterMarkers.Add(new List<MapPointMarker>());
+
+            
             this.clusterLines.Add(new List<OnlineMapsDrawingLine>());
             // Each level , a list lines per cluster
 
-            
+            /* MEMO
             List<List<OnlineMapsDrawingLine>> levelConnections = new List<List<OnlineMapsDrawingLine>>();
             for (int a = 0; a < clusterManager.getGridClustersAtLevel(level).Count; a++)
                 levelConnections.Add(new List<OnlineMapsDrawingLine>());
 
-            connectionsLinesPerLevel.Add(level, levelConnections);  
+            connectionsLinesPerLevel.Add(level, levelConnections);  */
         }
+
+
+        //Debug.Log("markers levels 1..... OUT");
 
         for (level = 0; level < clusterManager.getNumLevels(); level++)
         {
@@ -320,6 +473,7 @@ public class MapMarker : Map {
                         clusters[i].initConnectionsList(clusters.Count);
                         clusters[i].updateConnections(clusters);
 
+                        /* MEMO
                         List<List<OnlineMapsDrawingLine>> levelConnections = (List<List<OnlineMapsDrawingLine>>)connectionsLinesPerLevel[level];
 
                         for (int clusterCon = 0; clusterCon < clusters.Count; clusterCon++)
@@ -327,6 +481,7 @@ public class MapMarker : Map {
                                 levelConnections[i].Add(null);
                             else
                                 levelConnections[i].Add(addConnection(clusters[i], clusters[clusterCon], clusters[i].getConnections()[clusterCon]));
+                        */
 
 
                     }
@@ -336,8 +491,10 @@ public class MapMarker : Map {
 
         }
 
+        //Debug.Log("markers levels 2..... OUT");
 
-        
+
+
     }
 
     protected void addMarkerInstance(MapPointMarker mapPointMarker) {
@@ -645,9 +802,9 @@ public class MapMarker : Map {
     {
         int level = clusterManager.getLevel(zoom);
 
-        if (level < clusterManager.getNumLevels()-2)
+        if (level>=0 && level < clusterManager.getNumLevels()-2)
         {
-
+            
             //Debug.Log("MapMarker-->showClustersAtZoom " + level);
             //Debug.Log(clusterMarkers.Count);
 
@@ -676,6 +833,8 @@ public class MapMarker : Map {
                     //clusterLineList[i].visible = true;
                 }
 
+                foreach (MapPoint p in clusterManager.getPointGroupsPoints())
+                    p.hide();
 
                 if (drawTheClustersQuad && quadsDrawed.Count == 0)
                 {
@@ -725,7 +884,7 @@ public class MapMarker : Map {
     {
         int level = clusterManager.getLevel(zoom);
 
-        if (level < clusterManager.getNumLevels()-2)
+        if (level>=0 && level < clusterManager.getNumLevels()-2)
         {
             for (int i = 0; i < points.Count; i++)
                 points[i].hide();

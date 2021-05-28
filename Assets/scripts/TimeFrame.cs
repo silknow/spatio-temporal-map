@@ -36,7 +36,19 @@ public class TimeFrame
 
     public bool checkInFrame(MapPoint point)
     {
-        bool inFrame = point.getFrom()>= from && point.getTo()<=to;
+        bool inFrame = false;
+        if (point.getFrom() >= from)
+        {
+            if (point.getTo() <= to)
+                inFrame = true;
+            if (point.getFrom() <= to)
+                inFrame = true;
+        }else
+        {
+            if (point.getTo() >= from)
+                inFrame = true;
+        }
+            //bool inFrame = point.getFrom()>= from && point.getTo()<=to;
 
         if (!inFrame) {
             if (!filteredPoints.Contains(point))

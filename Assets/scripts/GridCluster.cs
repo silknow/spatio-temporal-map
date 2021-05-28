@@ -364,4 +364,15 @@ public class GridCluster
     {
         return this.points;
     }
+
+    public List<MapPoint> getNoFilteredPoints()
+    {
+        List<MapPoint> pointsNoFiltered = new List<MapPoint>();
+
+        foreach (MapPoint p in getPoints())
+            if (!p.isFiltered())
+                pointsNoFiltered.Add(p);
+
+        return pointsNoFiltered;
+    }
 }

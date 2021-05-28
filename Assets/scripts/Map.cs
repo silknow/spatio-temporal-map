@@ -21,8 +21,9 @@ public class Map {
     protected List<string> positionNames = new List<string>();
     protected bool stacked = false;
     protected bool maintainPoints = false;
+    public bool relationsLoaded = false;
 
-    public const int MAX_POINTS_PER_GROUP=20;
+    public const int MAX_POINTS_PER_GROUP=14; //20
 
     const int NO_LEVEL_VISUALIZED = -1; 
     
@@ -142,8 +143,13 @@ public class Map {
     public List<MapPoint> pointsInTime(int from, int to)
     {
         List<MapPoint> pointsResult = new List<MapPoint>();
+        int p2 = 0;
 
         foreach (MapPoint p in points) {
+
+            if (p.isGroupPoint() || (p.getGridCluster()!=null && p.getGridCluster().isGroupPoints()))
+                p2 = 2;
+            
             if (p.getFrom() >= from && p.getTo() <= to)
                pointsResult.Add(p);
 
@@ -176,6 +182,22 @@ public class Map {
         return propertyManager;
     }
 
+    public int getFloorLevel()
+    {
+        if (clusterManager != null)
+            return clusterManager.getNumLevels() - 2;
+        else
+            return 0;
+    }
+
+    public List<GridCluster> getGroupPoints()
+    {
+        List<GridCluster> gPoints = new List<GridCluster>();
+        if (clusterManager != null)
+            gPoints = clusterManager.getPointGroupClusters();
+
+        return gPoints;
+    }
     /**
      * This method gets if the point data could be displayed, or only are displayed the cluster data
      * It is true if the current zoom level is less than the number of levels of the cluster manager
@@ -409,7 +431,10 @@ public class Map {
             else
             {
                 GridCluster gCluster = new GridCluster(pointList);
+                gCluster.groupPoints = true;
                 clusterManager.addPointGroup(gCluster);
+                foreach (MapPointMarker m in pointList)
+                    m.isInGroupPoint = gCluster;
             }
         }
 
@@ -509,10 +534,99 @@ public class Map {
         clusterManager.addPoints(points);
         clusterManager.update();
         updateRelationData();
+
+        createGraphicRelationData();
     }
 
+    public virtual void createGraphicRelationData()
+    {
+        //yield return null;
+    }
+    
     public void updateRelationData()
     {
+        while (!relationsLoaded)
+        {
+            if (propertyManager != null)
+            {
+                List<Property> propertyList = propertyManager.GetRelatableProperties();
+
+                foreach (MapPoint p in points)
+                {
+                    foreach (Property prop in propertyList)
+                    {
+                        List<string> valuesOrigin = p.getPropertyValue(prop.GetName());
+                        p.setRelatedDataFor(prop.GetName(), prop.getPointsWithValues(valuesOrigin));
+                    }
+                    //yield return null;
+                }
+                relationsLoaded = true;
+            }
+        }
+
+ 
+        //Debug.Log("RELATIONS OUT " + System.DateTime.Now.ToLongTimeString());
+
+
+
+        /*
+
+)        {
+          //yield return null;
+
+
+          if (propertyManager != null)
+          {
+              List<string> propertyList = propertyManager.GetRelatablePropertiesName();
+
+              foreach (MapPoint p in points)
+              {               
+                  //Debug.Log("Iterating points " + iter+ " " + System.DateTime.Now.ToLongTimeString());
+                  iter++;
+                  foreach (string propertyName in propertyList)
+                  {
+                      List<string> valuesOrigin = p.getPropertyValue(propertyName);
+                      int numMatchs = 0;
+                      foreach (MapPoint pDest in points)
+                      {
+                          if (pDest != p)
+                          {
+                              List<string> valuesDest = pDest.getPropertyValue(propertyName);
+
+                              if (valuesOrigin.Any(x => valuesDest.Any(y => y.Equals(x))))
+                                  numMatchs++;
+                          }
+                      }
+
+                      p.setRelatedDataFor(propertyName, numMatchs);
+                  }
+                  yield return null;
+                  //yield return new WaitForEndOfFrame();
+              }                                    
+          }
+         
+
+        relationsLoaded = true;
+            Debug.Log("RELATIONS OUT " + System.DateTime.Now.ToLongTimeString());
+
+        
+
+        }*/
+
+        /*
+        if (propertyManager != null)
+        {
+            List<string> propertyList = propertyManager.GetRelatablePropertiesName();
+
+            RelationshipUpdater updater = new RelationshipUpdater();
+
+            updater.setData(propertyList, points);
+
+            updater.Start();
+        }
+        */
+        /*
+
         if (propertyManager!=null)
         {
             List<string> propertyList = propertyManager.GetRelatablePropertiesName();
@@ -527,15 +641,17 @@ public class Map {
                         if (pDest!=p)
                         {
                             List<string> valuesDest = pDest.getPropertyValue(propertyName);
-              
+
                             if (valuesOrigin.Any(x => valuesDest.Any(y => y.Equals(x))))
                                 numMatchs++;
                         }
 
                     p.setRelatedDataFor(propertyName, numMatchs);
                 }
-        }
-            
+        }*/
+
+        //return 0;
+
     }
 
     public void activateTimeFrame(int from, int to)
@@ -615,6 +731,7 @@ public class Map {
         {
             this.zoom = zoom;
         }
+        //Debug.Log( "ZOOM es "+zoom);
     }
 
     public float getZoom()
