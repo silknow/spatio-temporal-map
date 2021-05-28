@@ -15,34 +15,7 @@ public class StackedMapManager : Singleton<StackedMapManager>
     public List<TimeElement> centuriesValues;
 
     private bool _loadedData = false;
-    private void Awake()
-    {
-        
-        /* TEST FUNCION ORDENADO DE SIGLOS
-        var centuriesTest = new List<TimeElement>();
-        
-         var listOfCenturies =  Enumerable.Range(13, 5).Select(n => n).ToList();
-         foreach (var c in listOfCenturies)
-         {
-             centuriesTest.Add(new TimeElement(0,0,c));
-         }
-        
-        var splittedList = SplitCenturiesInChunks(centuriesTest, 4);
-        foreach (var centuryList in splittedList)
-        {
-            var s = "{ ";
-            foreach (var cent in centuryList)
-            {
-                s += cent.century + ", ";
-            }
-
-            s += "}";
-            print(s);
-        }
-        */
-        OnlineMaps.instance.OnUpdateLate += UpdateSlicesRestrictions;
-    }
-
+   
     public void OnLoadedData()
     {
         _loadedData = true;
@@ -54,7 +27,6 @@ public class StackedMapManager : Singleton<StackedMapManager>
         if (!_loadedData)
             return;
         var possibleValues = SilkMap.instance.map.getSceneValuesOfProperty("time");
-        //var possibleValues = SilkMap.instance.map.GetPropertyManager().GetPropertyByName("time").getPossibleValues();
         if (centuriesValues == null)
             centuriesValues = new List<TimeElement>();
         else

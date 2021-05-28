@@ -13,10 +13,11 @@ public class RelationshipItemVisualizer : MonoBehaviour
     public Dictionary<Property, float> propertyPercentage;
 
     [HideInInspector] public MapPointMarker mapPointMarker;
+    [HideInInspector] public RelationshipVisualizer parentVisualizer;
 
     private void Awake()
     { 
-       OnlineMaps.instance.OnUpdateLate += UpdateSpritePosition;
+        _rectTransform = GetComponent<RectTransform>();
     }
 
     void Start()
@@ -26,8 +27,8 @@ public class RelationshipItemVisualizer : MonoBehaviour
         var propManager = SilkMap.instance.map.GetPropertyManager();
         _properties = propManager.GetRelatableProperties();
         _propertyCount = _properties.Count;
-        OnlineMaps.instance.OnUpdateLate += UpdateSpritePosition;
-        _rectTransform = GetComponent<RectTransform>();
+        //OnlineMaps.instance.OnChangePosition += UpdateSpritePosition;
+       
         FillCircle();
 
     }
@@ -57,19 +58,15 @@ public class RelationshipItemVisualizer : MonoBehaviour
            offset += sizeOfProperty;
         }
     }
-    private void UpdateSpritePosition()
+    public void UpdateSpritePosition()
     {
+        
         if(this== null)
             return;
-        var dim = mapPointMarker.getDimension();
-        var isInMapview = dim == 2 ? mapPointMarker.getMarker2D().InMapView() : mapPointMarker.getMarker3D().InMapView(); 
-        var isEnabled = dim == 2 ? mapPointMarker.getMarker2D().enabled : mapPointMarker.getMarker3D().enabled; 
-        gameObject.SetActive( isInMapview  && isEnabled);
-        
         var position = OnlineMapsTileSetControl.instance.GetWorldPosition(mapPointMarker.getVector2());
         _rectTransform.localPosition = new Vector3(position.x, -position.z,0f);
 
-        if (dim == 3)
+        if (mapPointMarker.getDimension() == 3)
         {
             _rectTransform.pivot = new Vector2(0.5f,0.45f);  
         }

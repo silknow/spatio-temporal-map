@@ -13,9 +13,7 @@ public class MapPointMarker : MapPoint {
     protected Vector3 stackedPosition;
     protected Vector3 stackedScale;
     protected Transform stackedTransform;
-    protected Texture texture;
     public MarkerInstance markerInstance;
-    public MarkerInstance stackedMarkerInstance;
     
 
     protected Dictionary<string, List<OnlineMapsDrawingLine>> graphicRelationsPerProperty = new Dictionary<string, List<OnlineMapsDrawingLine>>();
@@ -28,11 +26,6 @@ public class MapPointMarker : MapPoint {
         this.marker2D = OnlineMapsMarkerManager.CreateItem(new Vector2(marker.position.x, marker.position.y), "");
         this.initData();
 
-    }
-
-    protected void setTexture(Texture texture)
-    {
-        this.texture = texture;
     }
 
     protected void OnMarkerClick(OnlineMapsMarkerBase marker)
@@ -65,9 +58,14 @@ public class MapPointMarker : MapPoint {
     {
         //Debug.Log("Longi,Lat --> " + longitud+","+latitud);
         
-        marker3D = OnlineMapsMarker3DManager.CreateItem(new Vector2(longitud, latitud), prefabObject);
-        marker3D.prefab.name = this.label;
-        marker3D.transform.name = this.label;
+        //marker3D = OnlineMapsMarker3DManager.CreateItem(new Vector2(longitud, latitud), prefabObject);
+        marker3D = null;
+        if (marker3D != null)
+        {
+            marker3D.prefab.name = this.label;
+            marker3D.transform.name = this.label;
+        }
+
         marker2D = OnlineMapsMarkerManager.CreateItem(new Vector2(longitud, latitud), "");
 
         this.cluster = cluster;
@@ -89,196 +87,209 @@ public class MapPointMarker : MapPoint {
 
     public void assignTexture(Texture2D texture)
     {
+        if (marker3D!= null)
+            foreach (MeshRenderer child in marker3D.instance.GetComponentsInChildren<MeshRenderer>())
+                child.material.mainTexture = texture;
 
-       foreach (Transform child in marker3D.instance.transform)
-       {
-           GameObject obj = child.gameObject;
+        //Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, true);
+        //if (texture != null)
+        marker2D.texture = texture; //TextureToTexture2D(texture);
+        //else
+        //    marker2D.texture = null;
 
-           if (child.name.Equals("picture"))
-           {
-               child.GetComponent<Renderer>().material.mainTexture = texture;
-           }
+    }
 
-       }
+    public Texture getTexture()
+    {
+        if (marker3D != null)
+        {
+            var tex = marker3D.instance.GetComponentInChildren<MeshRenderer>().material.mainTexture;
+            return tex != null ? tex : null;
+        }
+        return null;
+    }
 
-       //Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, true);
-       //if (texture != null)
-       marker2D.texture = texture; //TextureToTexture2D(texture);
-       //else
-       //    marker2D.texture = null;
+    private Texture2D TextureToTexture2D(Texture texture)
+    {
+        Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+        RenderTexture currentRT = RenderTexture.active;
+        RenderTexture renderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 32);
+        Graphics.Blit(texture, renderTexture);
 
-   }
+        RenderTexture.active = renderTexture;
+        texture2D.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        texture2D.Apply();
 
-   public Texture getTexture()
-   {
-       foreach (Transform child in marker3D.instance.transform)
-       {
-           GameObject obj = child.gameObject;
-
-           if (child.name.Equals("picture"))
-           {
-               return child.GetComponent<Renderer>().material.mainTexture;
-           }
-
-       }
-
-       return null;
-   }
-
-   private Texture2D TextureToTexture2D(Texture texture)
-   {
-       Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
-       RenderTexture currentRT = RenderTexture.active;
-       RenderTexture renderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 32);
-       Graphics.Blit(texture, renderTexture);
-
-       RenderTexture.active = renderTexture;
-       texture2D.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
-       texture2D.Apply();
-
-       RenderTexture.active = currentRT;
-       RenderTexture.ReleaseTemporary(renderTexture);
-       return texture2D;
-   }
+        RenderTexture.active = currentRT;
+        RenderTexture.ReleaseTemporary(renderTexture);
+        return texture2D;
+    }
 
 
 
-   private void initData()
-   {
+    private void initData()
+    {
        
-      marker2D.OnClick += OnMarkerClick;
-      marker3D.OnClick += OnMarkerClick;
+        //marker2D.OnClick += OnMarkerClick;
+        //marker3D.OnClick += OnMarkerClick;
 
+        /*
       marker2D.OnRollOver += OnRollOver;
       marker2D.OnRollOut += OnRollOut;
 
       marker3D.OnRollOver += OnRollOver;
-      marker3D.OnRollOut += OnRollOut;
+      marker3D.OnRollOut += OnRollOut;*/
 
       
-      if (!cluster)
-          createCollider();
-      else
-      {
-            marker2D.texture = Resources.Load("clusterMarker64px") as Texture2D;
+        if (!cluster && marker3D!=null)
+            createCollider();
+        else
+        {
+            //marker2D.texture = Resources.Load("clusterMarker64px") as Texture2D;
             marker2D.scale *= .75f;
-       }
+        }
 
         if (dimension == MapPoint.THREE_DIMENSION)
             marker2D.enabled = false;
 
-        if (dimension == MapPoint.TWO_DIMENSION)
-            marker3D.enabled = false;
+        else if (dimension == MapPoint.TWO_DIMENSION)
+        {
+            if(marker3D!= null)
+                marker3D.enabled = false;
+        }
     }
 
     protected override void graphicHide()
-   {
-       if (marker3D != null)
-       {
-           marker3D.enabled = false;
-           if (isStacked())
-           {
-               stackedPosition = this.getMarker3D().transform.position;
-               stackedGameObject.SetActive(false);
-               //if (isFiltered())
+    {
+        if (marker3D != null)
+        {
+            marker3D.enabled = false;
+            if (isStacked())
+            {
+                stackedPosition = this.getMarker3D().transform.position;
+                stackedGameObject.SetActive(false);
+                //if (isFiltered())
+                marker3D.OnClick -= OnMarkerClick;
+            }
 
-           }
+        }        //marker3D.prefab.SetActive(false);
+        if (marker2D != null)
+        {
+            marker2D.enabled = false;
+            marker2D.OnClick -= OnMarkerClick;
+        }
+    }
 
-       }        //marker3D.prefab.SetActive(false);
-       if (marker2D != null)
-           marker2D.enabled = false;
-   }
+    protected override void graphicShow()
+    {
+        if (marker3D != null && (map.GetDimension() == THREE_DIMENSION ))
+        {
+            marker3D.enabled = true;
+            if (isStacked())
+            {
+                //refreshStackedPosition(stackedPosition, stackedTransform);
+                stackedGameObject.SetActive(true);
+            }
+            
+            marker3D.OnClick += OnMarkerClick;
+        }
+        //marker3D.prefab.SetActive(true);
+        if (marker2D != null && map.GetDimension() == TWO_DIMENSION)
+        {
+            marker2D.enabled = true;
+            marker2D.OnClick += OnMarkerClick;
+        }
+    }
 
-   protected override void graphicShow()
-   {
-       if (marker3D != null && (map.GetDimension() == THREE_DIMENSION ))
-       {
-           marker3D.enabled = true;
-           if (isStacked())
-           {
-               //refreshStackedPosition(stackedPosition, stackedTransform);
-               stackedGameObject.SetActive(true);
-           }
-       }
-       //marker3D.prefab.SetActive(true);
-       if (marker2D != null && map.GetDimension() == TWO_DIMENSION)
-           marker2D.enabled = true;
-   }
+    public void forceShow()
+    {
+        graphicShow();
+    }
 
-   public void forceShow()
-   {
-       graphicShow();
-   }
+    protected override void updateGraphicsCoordinates()
+    {
+        if (marker3D != null)
+            marker3D.SetPosition(getX(), getY());
 
-   protected override void updateGraphicsCoordinates()
-   {
-       if (marker3D != null)
-           marker3D.SetPosition(getX(), getY());
+        if (marker2D != null)
+            marker2D.SetPosition(getX(), getY());
 
-       if (marker2D != null)
-           marker2D.SetPosition(getX(), getY());
+    }
 
-   }
+    public OnlineMapsMarker3D getMarker3D()
+    {
+        return this.marker3D;
+    }
 
-   public OnlineMapsMarker3D getMarker3D()
-   {
-       return this.marker3D;
-   }
+    public OnlineMapsMarker3D getMarker3DCloned()
+    {
+        MapMarker m = (MapMarker)(this.getMap());
 
-   public OnlineMapsMarker getMarker2D()
-   {
-       return this.marker2D;
-   }
+        OnlineMapsMarker3D marker3DCloned = OnlineMapsMarker3DManager.CreateItem(new Vector2(x, y), m.clusterPrefab);        
 
-   private void OnPointClick()
-   {
-       Debug.Log("HOLA");
-   }
+        if (marker3DCloned != null)
+        {
+            marker3DCloned.prefab.name = this.label;
+            marker3DCloned.transform.name = this.label;
+        }
 
-   protected override void updateGraphicLabel()
-   {
-       if (marker3D != null)
-       {
-           marker3D.prefab.name = this.label;
-           marker3D.prefab.transform.name = this.label;            
-           marker3D.label = this.label;
-           marker3D.transform.name = this.label;
-       }
+        return marker3D;
+    }
 
-       if (marker2D != null)
-           marker2D.label = this.label;
-   }
+public OnlineMapsMarker getMarker2D()
+    {
+        return this.marker2D;
+    }
 
-   private void OnRollOut(OnlineMapsMarkerBase marker)
-   {
-       // Remove a reference to marker
-       //Debug.Log("Hover out " + this.getLabel());
-   }
+    private void OnPointClick()
+    {
+        Debug.Log("HOLA");
+    }
 
-   private void OnRollOver(OnlineMapsMarkerBase marker)
-   {
-       // Make a reference to marker
-       //Debug.Log("Hover on " + this.getLabel());
+    protected override void updateGraphicLabel()
+    {
+        if (marker3D != null)
+        {
+            marker3D.prefab.name = this.label;
+            marker3D.prefab.transform.name = this.label;            
+            marker3D.label = this.label;
+            marker3D.transform.name = this.label;
+        }
 
-       //if (isCluster())
-   }
+        if (marker2D != null)
+            marker2D.label = this.label;
+    }
 
-   protected override void updateGraphicRelations(string propertyName, bool show)
-   {
-       /*
-       List<Vector2> points = new List<Vector2>();
+    private void OnRollOut(OnlineMapsMarkerBase marker)
+    {
+        // Remove a reference to marker
+        //Debug.Log("Hover out " + this.getLabel());
+    }
 
-       points.Add(from.getVector2());
-       points.Add(to.getVector2());
+    private void OnRollOver(OnlineMapsMarkerBase marker)
+    {
+        // Make a reference to marker
+        //Debug.Log("Hover on " + this.getLabel());
 
+        //if (isCluster())
+    }
 
-
-       OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, Color.blue);
-       oLine.width = 1.0f;
-       oLine.visible = true;
-       OnlineMapsDrawingElementManager.AddItem(oLine);
-       oLine.visible = false;
-       oLine.name = "connection";*/
+    protected override void updateGraphicRelations(string propertyName, bool show)
+    {
+        /*
+        List<Vector2> points = new List<Vector2>();
+ 
+        points.Add(from.getVector2());
+        points.Add(to.getVector2());
+ 
+ 
+ 
+        OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, Color.blue);
+        oLine.width = 1.0f;
+        oLine.visible = true;
+        OnlineMapsDrawingElementManager.AddItem(oLine);
+        oLine.visible = false;
+        oLine.name = "connection";*/
         RelationShip relation;
 
      
@@ -496,4 +507,3 @@ public class MapPointMarker : MapPoint {
 
     
 }
-

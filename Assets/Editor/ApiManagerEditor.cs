@@ -11,23 +11,24 @@ public class ApiManagerEditor : UnityEditor.Editor
         DrawDefaultInspector();
 
         var apm = (APIManager)target;
-        if (GUILayout.Button("Test Damask"))
+        if (GUILayout.Button("Load Dataset 300 "))
         {            
-            apm.OnButtonTestClick();
+            apm.LoadDataset(300);
            
         }
-        if (GUILayout.Button("Test Spain Textiles"))
+        if (GUILayout.Button("Load Dataset 3000 "))
         {            
-            apm.TestFranceTextiles();
+            apm.LoadDataset(3000);
            
         }
-        if (GUILayout.Button("Test Load Textiles from HTML"))
-        {
-            apm.TestLoadTextilesFromHTML();
-        }
-        if (GUILayout.Button("Test Object Detail"))
+        if (GUILayout.Button("Load Dataset 15000"))
         {            
-            apm.TestObjectDetail();
+            apm.LoadDataset(15000);
+           
+        }
+        if (GUILayout.Button("Load Dataset 30000 "))
+        {            
+            apm.LoadDataset(30000);
            
         }
         if (GUILayout.Button("Flat Map"))
@@ -40,19 +41,16 @@ public class ApiManagerEditor : UnityEditor.Editor
             apm.ToggleLanguage();
            
         }
-        if (GUILayout.Button("Apply Damask Filter"))
-        {            
-            SilkMap.instance.map.addFilter("technique", "Damask");
-            SilkMap.instance.map.applyFilters();
-        }
-        if (GUILayout.Button("Remove Damask Filter"))
-        {            
-            SilkMap.instance.map.removeFilter("technique", "Damask");
-            SilkMap.instance.map.applyFilters();
+       
+        if (GUILayout.Button("Load JSON FROM STREAM"))
+        {
+            apm.LoadJSONFromStream();
+
         }
         if (GUILayout.Button("Take Screenshot"))
         {            
             ScreenCapture.CaptureScreenshot(Application.streamingAssetsPath + "/"+ Time.realtimeSinceStartup + ".png", 4);
         }
+
     }
 }

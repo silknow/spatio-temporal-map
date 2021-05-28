@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Linq;
+using Debug = UnityEngine.Debug;
 
 public class Map {
 
     protected List<MapPoint> points = new List<MapPoint>();
     protected ClusterManager clusterManager;
-    protected float zoom;
+    protected int zoom;
     protected Vector3 viewerPosition;
-    protected int visualizedClustersLevel;
     protected bool visualizedQuads;
-    protected int dimension = MapPoint.TWO_DIMENSION;
+    protected short dimension = MapPoint.TWO_DIMENSION;
     protected PropertyManager propertyManager;
     protected FilterManager filterManager;
     protected Dictionary<Vector2, List<MapPoint>> positionsGroup = new Dictionary<Vector2, List<MapPoint>>();
@@ -25,14 +26,11 @@ public class Map {
 
     public const int MAX_POINTS_PER_GROUP=14; //20
 
-    const int NO_LEVEL_VISUALIZED = -1; 
-    
     public Map()
     {
         clusterManager = new ClusterManager();
         propertyManager = new PropertyManager();
         filterManager = new FilterManager();
-        visualizedClustersLevel = NO_LEVEL_VISUALIZED;
         visualizedQuads = false;
         viewerPosition = new Vector3();
         zoom = -1;        
@@ -143,18 +141,18 @@ public class Map {
     public List<MapPoint> pointsInTime(int from, int to)
     {
         List<MapPoint> pointsResult = new List<MapPoint>();
-        int p2 = 0;
+        //int p2 = 0;
 
         foreach (MapPoint p in points) {
 
-            if (p.isGroupPoint() || (p.getGridCluster()!=null && p.getGridCluster().isGroupPoints()))
-                p2 = 2;
+            //if (p.isGroupPoint() || (p.getGridCluster()!=null && p.getGridCluster().isGroupPoints()))
+            //    p2 = 2;
             
             if (p.getFrom() >= from && p.getTo() <= to)
                pointsResult.Add(p);
 
-            if (p.getLabel().Equals("7236"))
-                Debug.Log("El punto es de " + p.getFrom() + " hasta " + p.getTo());
+            //if (p.getLabel().Equals("7236"))
+              //  Debug.Log("El punto es de " + p.getFrom() + " hasta " + p.getTo());
         }
 
         return pointsResult;
@@ -212,7 +210,7 @@ public class Map {
             return true;
     }
 
-    public void SetDimension(int dimension)
+    public void SetDimension(short dimension)
     {
         if (dimension != this.dimension)
         {
@@ -441,7 +439,7 @@ public class Map {
     }
 
 
-    public int GetDimension()
+    public short GetDimension()
     {
         return this.dimension;
     }
@@ -457,6 +455,11 @@ public class Map {
             if (put)
             {
                 positionsGroup[v].Add(point);
+
+
+                ((MapPointMarker)point).getMarker3D()?.DestroyInstance();
+                ((MapPointMarker)point).getMarker2D().DestroyInstance();
+
                 return true;
             }
         }
@@ -531,11 +534,22 @@ public class Map {
 
     public void updateClustering()
     {
+        var crono = Stopwatch.StartNew();
+
+      
         clusterManager.addPoints(points);
+        
+        Debug.Log($"AddPoints - updateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
+        crono = Stopwatch.StartNew();
         clusterManager.update();
-        updateRelationData();
+        Debug.Log($"update - updateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
+        crono = Stopwatch.StartNew();
+        //updateRelationData();
+        Debug.Log($"updateRelationData - updateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
+        crono = Stopwatch.StartNew();
 
         createGraphicRelationData();
+        Debug.Log($"createGraphicRelationData - updateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
     }
 
     public virtual void createGraphicRelationData()
@@ -671,6 +685,8 @@ public class Map {
     public void showClusters()
     {
         //Debug.Log("Map-->showClusters");
+        //var m = this as MapMarker;
+        //m.UpdateMarkers();
         showClustersAtZoom(this.zoom);
     }
 
@@ -689,7 +705,7 @@ public class Map {
 
     }
 
-    public virtual void updateClustersDimension(int dimension)
+    public virtual void updateClustersDimension(short dimension)
     {
    
     }
@@ -715,7 +731,7 @@ public class Map {
         this.viewerPosition.y = y;
     }
 
-    public void setViewerZoom(float zoom)
+    public void setViewerZoom(int zoom)
     {
         //Debug.Log("El zoom es " + zoom);
         bool changeZoom = this.zoom!=zoom;
@@ -726,8 +742,10 @@ public class Map {
             hideClusters();
             this.zoom = zoom;
             showClusters();
+            var m = this as MapMarker;
+            m.UpdateMarkers();
         }
-        else
+        else if(init)
         {
             this.zoom = zoom;
         }

@@ -33,32 +33,27 @@ public class MapUIManager : Singleton<MapUIManager>
     public GameObject StackedMapVirtualCamera;
 
     public GameObject ExitTimeVisualizationButton;
+    public GameObject RelationsToggle;
     public GameObject FooterButtonBar;
 
     public MapViewingMode mapviewingMode = MapViewingMode.FLAT;
     private MapPointMarker _selectedMarker = null;
 
     [HideInInspector] public int selectedHelpTab;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
+    
     public void OnZoomIn()
     {
         OnlineMaps.instance.zoom += 1;
+        Debug.Log("level " + SilkMap.instance.map.getLevel());
+        //SilkMap.instance.map.SetDimension(3);
+        //SilkMap.instance.map.showClusters();
     }
 
     public void OnZoomOut()
     {
+        Debug.Log("level " + SilkMap.instance.map.getLevel());
         OnlineMaps.instance.zoom -= 1;
+        
     }
     public void OnAboutClick()
     {
@@ -75,6 +70,7 @@ public class MapUIManager : Singleton<MapUIManager>
     }
     public void ShowTimeVisualizationPanel()
     {
+        StackedMapManager.instance.UpdateSlicesRestrictions();
         timeVisualizationPanelGameObject.SetActive(true);
     }
     public void HideTimeVisualizationPanel()
@@ -188,6 +184,7 @@ public class MapUIManager : Singleton<MapUIManager>
         //If MapviewingModed.STACKED -> disable all buttons except filters.
         
         ExitTimeVisualizationButton.SetActive(mapviewingMode == MapViewingMode.STACKED);
+        RelationsToggle.SetActive(mapviewingMode != MapViewingMode.STACKED);
 
         foreach (var btn in FooterButtonBar.GetComponentsInChildren<Button>())
         {
@@ -258,7 +255,7 @@ public class MapUIManager : Singleton<MapUIManager>
     }
     public void ShowErrorLoadingData(string text=null)
     {
-        errorLoadingDataGameObject.SetActive(false);
+        errorLoadingDataGameObject.SetActive(true);
         if (text != null)
             errorText.text = text;
     }

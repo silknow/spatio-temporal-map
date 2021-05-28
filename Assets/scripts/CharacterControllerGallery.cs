@@ -7,10 +7,7 @@ public class CharacterControllerGallery : MonoBehaviour {
     public float speed = 3.0f;
 
 	// Use this for initialization
-	void Start () {
-	    //Cursor.lockState = CursorLockMode.Locked;	
-	}
-	
+
 	// Update is called once per frame
 	void Update () {
         float translation = Input.GetAxis("Vertical") * speed;

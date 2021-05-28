@@ -96,6 +96,25 @@ using UnityEngine.UI;
 
                 
             }
+            else if (targetMarker.isCluster() && targetMarker.getGridCluster().getNumVisiblePoints() ==1)
+            {
+                var innerMarker = targetMarker.getGridCluster().getPoints()[0] as MapPointMarker;
+                if (innerMarker == null)
+                    return;
+                // Show the popup
+                clusterPopup.SetActive(false);
+                selectedPopup = itemTitlePopup;
+                selectedPopup.SetActive(true);
+                
+                // Set title and address
+                title.text = innerMarker.getLabel();
+                MapUIManager.instance.SetSelectedMarker(innerMarker);
+                
+                selectedPopup.GetComponent<RelationsLegendPopup>().ClearRows();
+                selectedPopup.GetComponent<RelationsLegendPopup>().PopulateLegend();
+
+                
+            }
             
             else
             {

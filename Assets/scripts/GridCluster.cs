@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class GridCluster
 {
-    int hQuad;
-    int vQuad;
+    public int hQuad;
+    public int vQuad;
     public string category="";
     protected GridCluster parent = null;
     protected List<GridCluster> childs = new List<GridCluster>();
@@ -18,7 +18,9 @@ public class GridCluster
     // Conexiones
     List<int> connectionsList = new List<int>();
     MapPoint center = null;
-    float maxX = NO_VALUE, maxY = NO_VALUE, minX=NO_VALUE, minY=NO_VALUE;
+    public float maxX = NO_VALUE, maxY = NO_VALUE, minX=NO_VALUE, minY=NO_VALUE;
+    public Rect gridZone;
+    public bool processed = false;
 
     int level = 0;
 
@@ -31,13 +33,76 @@ public class GridCluster
         //this.points.Add(point);
         addPoint(point);
         this.category = point.getCategory();
+        this.numFilteredPoints = 0;        
+    }
+
+
+    public GridCluster(GridCluster a, GridCluster b)
+    {
+        this.numFilteredPoints = 0;
+        this.points.AddRange(a.getPoints());
+        this.points.AddRange(b.getPoints());
+        a.setParent(this);
+        b.setParent(this);
+        this.addChild(a);
+        this.addChild(b);
+        this.setAverageCenter(a.getCenter(), b.getCenter());        
+        
+    }
+
+    public void associatePoints()
+    {
+        for (int i = 0; i < this.points.Count; i++)
+            points[i].addCluster(this);
+    }
+
+    public GridCluster(GridCluster a)
+    {
+        this.numFilteredPoints = 0;
+        this.points.AddRange(a.getPoints());        
+        a.setParent(this);        
+        this.addChild(a);
+        this.center = new MapPoint(a.getCenter().getX(), a.getCenter().getY());        
+    }
+
+    public void setAverageCenter(MapPoint a, MapPoint b)
+    {
+        this.setCenter(new MapPoint((a.getX() + b.getX()) / 2.0f, (a.getY() + b.getY()) / 2.0f));
+    }
+
+    public GridCluster(int h, int v, MapPoint point, MapLevel level)
+    {
+        this.hQuad = h;
+        this.vQuad = v;
+        //this.points.Add(point);
+        addPoint(point);
+        this.category = point.getCategory();
+        this.numFilteredPoints = 0;        
+        this.gridZone.xMin = level.quadWidth * (h - level.numQuadsH/2 - 1);
+        this.gridZone.yMin = level.quadHeight * (v - level.numQuadsV/2 - 1);
+
+        this.center = new MapPoint(point.getX(), point.getY());
+
+        this.gridZone.width = level.quadWidth;
+        this.gridZone.height = level.quadHeight;
         this.numFilteredPoints = 0;
     }
 
+    public GridCluster(int h, int v)
+    {
+        this.hQuad = h;
+        this.vQuad = v;
+
+        this.numFilteredPoints = 0;
+    }
     public int getNumVisiblePoints()
     {
+        //Debug.Log("El cluster tiene " + getNumPoints() + " puntos");
+        //Debug.Log("El cluster tiene " +numFilteredPoints + " puntos filtrados");
+
         return getNumPoints() - numFilteredPoints;
     }
+
 
     public GridCluster(List <MapPoint> pointsGroup)
     {
@@ -47,9 +112,19 @@ public class GridCluster
             p.setGroupPoint(true);
         }
 
+        this.update();
+
         center.setXY(pointsGroup[0].getX(), pointsGroup[0].getY());
 
+        this.numFilteredPoints = 0;
+
         this.groupPoints = true;
+    }
+
+    public void addPointDirect(MapPoint point)
+    {
+        this.points.Add(point);
+        point.setGridCluster(this);
     }
 
     public bool isGroupPoints()
@@ -178,6 +253,7 @@ public class GridCluster
 
     public void addFilteredPoint()
     {
+        //Debug.Log("Se esta filtrando ");
         numFilteredPoints++;
 
         //if (center.getLabel().Trim().Equals("Cluster 2"))
@@ -253,7 +329,7 @@ public class GridCluster
         if (maxY == NO_VALUE || maxY < point.getY())
             maxY = point.getY();
 
-        update();
+        //update();
     }
 
     public int getNumPoints()
@@ -263,7 +339,7 @@ public class GridCluster
 
     public void update()
     {
-        float x, y, xsum=0.0f, ysum=0.0f;
+        float xsum=0.0f, ysum=0.0f;
         int i;
 
         for (i=0;i<points.Count;i++)
@@ -324,9 +400,15 @@ public class GridCluster
         center.setGridCluster(this);
     }
 
-    public bool check(int h, int v, string category)
+    //, string category)
+    public bool check(int h, int v) 
     {
-        return (this.hQuad == h) && (this.vQuad == v) && (this.category.Equals(category));
+        return (this.hQuad == h) && (this.vQuad == v);// && (this.category.Equals(category));
+    }
+
+    public bool checkPoint(float x, float y)
+    {
+        return gridZone.xMin <= x && gridZone.yMin <= y && gridZone.xMax >= x && gridZone.yMax >= y;
     }
 
     public MapPoint getPoint(int i)

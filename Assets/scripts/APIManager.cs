@@ -1,24 +1,34 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
+using DefaultNamespace;
 using SilknowMap;
 using Honeti;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 public class APIManager : Singleton<APIManager>
 {
+   
 
     [DllImport("__Internal")]
     private static extern void CancelLoadingData();
+    [DllImport("__Internal")]
+    private static extern void DataLoaded();
 
 
+    [HideInInspector]
     public List<ManMadeObject> objectList;
-    public string endpoint = "http://grlc.eurecom.fr/api-git/silknow/api/";
+    public string endpoint = "https://grlc.eurecom.fr/api-git/silknow/api/";
     public InitApp initAppRef;
     [SerializeField]
     public Dictionary<string, TimeElement> timeValues;
@@ -27,22 +37,15 @@ public class APIManager : Singleton<APIManager>
     private int _currentLoadedPages = 0;
     private int _currentTotalPages = -1;
 
+    private List<ManMadeObjectMod> prueba = new List<ManMadeObjectMod>();
     public void Awake()
     {
 
-        endpoint = string.IsNullOrEmpty(PlayerPrefs.GetString("API_endpoint")) ? "http://grlc.eurecom.fr/api-git/silknow/api/" :PlayerPrefs.GetString("API_endpoint") ;
+        endpoint = string.IsNullOrEmpty(PlayerPrefs.GetString("API_endpoint")) ? "https://grlc.eurecom.fr/api-git/silknow/api/" :PlayerPrefs.GetString("API_endpoint") ;
         
         timeValues = new Dictionary<string, TimeElement>();
         PopulateTimeDictionary();
     }
-
-    private void Start()
-    {
-        #if UNITY_EDITOR
-        Invoke(nameof(TestLoadTextilesFromHTML),0.5f);
-        #endif
-    }
-
 
     private void PopulateTimeDictionary()
     {
@@ -163,7 +166,7 @@ public class APIManager : Singleton<APIManager>
 
                 objectList = manMadeObjectList;
                
-                initAppRef.LoadRestData(objectList);
+                StartCoroutine(initAppRef.LoadRestData(objectList.ToArray()));
                 
             }
         }
@@ -255,10 +258,20 @@ public class APIManager : Singleton<APIManager>
     }
     public void TestLoadTextilesFromHTML()
     {
+       
         //var jsontest = Resources.Load("testFranceTextiles");
-        var jsontest = Resources.Load("veniceDataset");
+        var jsontest = Resources.Load("parsed_results_lite");
         TextAsset temp = jsontest as TextAsset;
-        if (temp != null) LoadJSONFromHTML(temp.text);
+        if (temp != null)
+        {
+            LoadJSONFromHTML(temp.text);
+            Destroy(temp);
+            Resources.UnloadAsset(jsontest);
+        }
+
+        Resources.UnloadUnusedAssets();
+
+
     }
     public void TestObjectDetail()
     {
@@ -267,9 +280,43 @@ public class APIManager : Singleton<APIManager>
 
     public void LoadJSONFromHTML(string json)
     {
-        var manMadeObjectList = JsonConvert.DeserializeObject<List<ManMadeObject>>(json);
-        objectList = manMadeObjectList;
-        initAppRef.LoadRestData(objectList);
+        var startTime = Stopwatch.StartNew();
+        objectList = JsonConvert.DeserializeObject<List<ManMadeObject>>(json);
+        EvaluationConsole.instance.AddLine($"Deserializar JSON objetos: {startTime.ElapsedMilliseconds * 0.001f} s");
+        if (objectList != null)
+        {
+            StartCoroutine(initAppRef.LoadRestData(objectList.ToArray()));
+            objectList.Clear();
+        }
+
+        GC.Collect();
+    }
+    /*public void LoadJSONFromHTML(string json)
+    {
+        var startTime = Stopwatch.StartNew();
+
+        prueba = JsonUtility.FromJson<RootObject>("{\"manMadeObjects\":"+json+"}").manMadeObjects.ToList();
+        EvaluationConsole.instance.AddLine($"Deserializar JSON objetos: {startTime.ElapsedMilliseconds * 0.001f} s");
+        EvaluationConsole.instance.AddLine(prueba[25].production.location[0].lat.ToString());
+        GC.Collect();
+    }*/
+    public void LoadJSONFromStream()
+    {
+        var startTime = Stopwatch.StartNew();
+        HttpClient client = new HttpClient();
+
+        using (Stream s = client.GetStreamAsync("https://silknow.eu/silknow/STMAPS_Evaluation/parsed_results30000.json").Result)
+        using (StreamReader sr = new StreamReader(s))
+        using (JsonReader reader = new JsonTextReader(sr))
+        {
+            JsonSerializer serializer = new JsonSerializer();
+
+            // read the json from a stream
+            // json size doesn't matter because only a small piece is read at a time from the HTTP request
+            objectList = serializer.Deserialize<List<ManMadeObject>>(reader);
+        }
+        EvaluationConsole.instance.AddLine($"Deserializar JSON objetos Stream: {startTime.ElapsedMilliseconds * 0.001f} s");
+        //StartCoroutine(initAppRef.LoadRestData(objectList.ToArray()));
     }
     
     public void StartDumpingJSON(string numberOfPages)
@@ -308,7 +355,7 @@ public class APIManager : Singleton<APIManager>
             return;
         //print("EndDumpingJSON");
         _sendingInfo = false;
-        initAppRef.LoadRestData(objectList);
+        initAppRef.LoadRestData(objectList.ToArray());
         MapUIManager.instance.HideProgressBar();
         objectList.Clear();
     }
@@ -318,7 +365,9 @@ public class APIManager : Singleton<APIManager>
         _sendingInfo = false;
         MapUIManager.instance.HideProgressBar();
         objectList.Clear();
-        CancelLoadingData();
+        #if UNITY_WEBGL && !UNITY_EDITOR
+            CancelLoadingData();
+        #endif
     }
     
     
@@ -378,6 +427,55 @@ public class APIManager : Singleton<APIManager>
     public void ShowLoading()
     {
         MapUIManager.instance.ShowLoadingData();
+    }
+
+    public void LoadDataset(int objectCount)
+    {
+        Object jsontest = null;
+        switch (objectCount)
+        {
+            case 300:
+                jsontest = Resources.Load("parsed_results300");
+                break;
+            case 3000:
+                jsontest = Resources.Load("parsed_results3000");
+                break;
+            case 15000:
+                jsontest = Resources.Load("parsed_results15000");
+                break;
+            case 30000:
+                jsontest = Resources.Load("parsed_results30000");
+                break;
+        }
+
+        if (jsontest == null)
+        {
+            print("jsontest es null");
+            return;
+        }
+
+        TextAsset temp = jsontest as TextAsset;
+        if (temp != null)
+        {
+            LoadJSONFromHTML(temp.text);
+            Resources.UnloadAsset(temp);
+            Resources.UnloadAsset(jsontest);
+            GC.Collect();
+        }
+        else
+        {
+            print("temp es null");
+        }
+
+        Resources.UnloadUnusedAssets();
+    }
+
+    public void OnDataLoaded()
+    {
+        //Llamada a Javascript
+        #if !UNITY_EDITOR
+        DataLoaded();
+        #endif
     }
 
 

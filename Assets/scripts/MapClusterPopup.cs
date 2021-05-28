@@ -8,17 +8,7 @@ public class MapClusterPopup : MonoBehaviour
     public Transform content;
 
     public GameObject clusterItemPrefab;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void RemoveChildren()
     {

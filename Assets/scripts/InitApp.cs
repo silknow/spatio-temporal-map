@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Clustering;
@@ -10,6 +11,8 @@ using UnityEngine.Events;
 using SilknowMap;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using UnityEngine.Timeline;
+using Debug = UnityEngine.Debug;
 
 public class InitApp : MonoBehaviour
 {
@@ -38,6 +41,7 @@ public class InitApp : MonoBehaviour
 
     public GameObject clonedMapGroup;
     public GameObject customMarkerGameObject;
+    [SerializeField] private Sprite customGroupPointMarker;
     public Canvas customMarkerCanvas;
 
     // Event to be triggered when data is loaded to the map
@@ -50,12 +54,13 @@ public class InitApp : MonoBehaviour
 
     private Dictionary<string, ScriptableCategory> categoriesDictionary;
     private List<ScriptableCategory> categoriesGroups;
+   
 
     private void OnGUI()
     {
         //OnlineMaps.instance.zoom = 6;
         // Reajusta el mapa de acorde al zoom del sistema.
-        map.setViewerZoom(OnlineMaps.instance.zoom);
+        //map.setViewerZoom(OnlineMaps.instance.zoom);
     }
 
     // Método que muestra por consola los proveedores de mapas admitidos
@@ -170,24 +175,18 @@ public class InitApp : MonoBehaviour
     // añade los puntos a representar desde la lista mapPoints
     private void initMarkers()
     {
-        //generateRandomMarkers();
-
         map = new MapMarker();
         map.clusterPrefab = prefabCluster;
-        map.setGridingZoomData(3, 10, 4);
-        map.setGridingQuadsHorizonal(64);
-        map.fixZoomInterval(OnlineMaps.instance, 3, 14);
+       
         //map.fixPositionInterval(OnlineMaps.instance, 28.24f, -16.79f, 71.19f, 48.48f);
-        map.setViewerPosition(23.42f, 46.2f);
-        Vector2 br = OnlineMaps.instance.bottomRightPosition;
-        Vector2 tl = OnlineMaps.instance.topLeftPosition;
-        int zoomi = OnlineMaps.instance.zoom;
-
-        //map.addPoints(mapPoints);
-        //map.update();
-        //APIManager.instance.OnButtonTestClick();
-        map.setViewerZoom(OnlineMaps.instance.zoom);
-
+        map.setViewerPosition(10.23985f, 21.83287f);
+        OnlineMaps.instance.zoom = 3;
+        map.setViewerZoom(3);
+        
+        map.setGridingZoomData(3, 12, 4);// CAmbio 2,10,6 por 2,14,4
+        map.setGridingQuadsHorizonal(16); // cambio 16 por 8
+        map.fixZoomInterval(OnlineMaps.instance, 3, 12);
+      
         SilkMap.Instance.map = map;
         //ClonedMap.instance.setMap(map);
         if (clonedMapGroup != null)
@@ -201,27 +200,15 @@ public class InitApp : MonoBehaviour
 
         OnlineMapsMarkerManager.instance.defaultTexture = getDefaultTexture();
 
+        /*
         GameObject lightGameObject = new GameObject("The Light");
         Light lightComp = lightGameObject.AddComponent<Light>();
         lightComp.type = LightType.Directional;
         lightComp.color = Color.white;
         lightGameObject.transform.position = new Vector3(0, 5, 0);
         lightGameObject.transform.Rotate(new Vector3(45, 0, 0), Space.Self);
-
-
-        /*map.reset();
-
-        for (int i = 0; i < mapPoints.Count; i++)
-            mapPoints[i].reset();
-        mapPoints.RemoveRange(0, mapPoints.Count);
-
-        generateRandomMarkers();
-
-        map.addPoints(mapPoints);
-        map.update();*/
-
-
-        ///StartCoroutine("RemoveAllMarkers");
+        */
+        Resources.UnloadUnusedAssets();
     }
 
 
@@ -282,32 +269,24 @@ public class InitApp : MonoBehaviour
             return;
         }
 
-        List<string> textureFileNames = new List<string>();
-        textureFileNames.Add("vestidop.png");
-        textureFileNames.Add("trajep.png");
-        textureFileNames.Add("trajepi.png");
-
-        //StartCoroutine(GetTexture(textureFileNames));
 
         SilkMap.Instance.init();
-        //OnlineMaps.instance.SetPosition(3.05, 46.21);
-        OnlineMaps.instance.SetPositionAndZoom(13.896, 47.527, 4.5f);
         Camera.main.orthographicSize = 287;
         OnlineMapsCameraOrbit.instance.lockPan = true;
         OnlineMapsCameraOrbit.instance.lockTilt = true;
 
-        //LogTypeList();
-        //Debug.Log("start method 2..... IN " + Time.time * 1000);
+        
         initMarkers();
-        //Debug.Log("start method 3..... IN " + Time.time * 1000);
 
         map.customMarkerCanvas = customMarkerCanvas;
         map.customMarkerGameObject = customMarkerGameObject;
+        map.customGroupPointMarker = customGroupPointMarker;
         categoriesDictionary = new Dictionary<string, ScriptableCategory>();
         categoriesGroups = Resources.LoadAll<ScriptableCategory>("ScriptableCategories").ToList();
 
         FillCategoriesDictionary();
         Resources.UnloadUnusedAssets();
+        GC.Collect();
         //Debug.Log("start method 4..... IN " + Time.time * 1000);
     }
 
@@ -386,15 +365,175 @@ public class InitApp : MonoBehaviour
         }
     }
 
-    public void LoadRestData(List<ManMadeObject> objectList)
+    private void AppendObjectsToMap(ManMadeObject[] objectList)
     {
-        float longitud, latitud;
-        string[] category = {"silknow.org/#pthing", "silknow.org/#man"};
+        var objCount = objectList.Length;
+        var listOfPoints = new List<MapPoint>();
+        for (var index = 0; index < objCount; index++)
+        {
+            var obj = objectList[index];
+            if (obj.production?.location == null)
+                continue;
+            /* PRUEBA RENDIMIENTO */
+            var listOfCenturies = new List<TimeElement>();
+            if (obj.production?.time.Length > 0)
+            {
+             
+                foreach (var timeElement in obj.production.time)
+                {
+                    if (APIManager.instance.timeValues.TryGetValue(timeElement, out var time))
+                    {
+                        listOfCenturies.Add(time);
+                    }
+
+                       
+                }
+
+                listOfCenturies = listOfCenturies.OrderBy(t => t.century).ToList();
+     
+            }
+            var objCategory = categoriesGroups[0];
+
+            var listOfCategories = new List<string>();
+            if (obj.production?.category != null && obj.production.category?.Length > 0 &&
+                obj.production.category[0] != null && 
+                obj.production.category[0].label != null)
+            {
+                listOfCategories = obj.production.category.Select(s=>s.label).ToList();
+                switch (listOfCategories.Count)
+                {
+                    case 0:
+                        objCategory = categoriesGroups[0];
+                        break;
+                    case 1:
+                    {
+                        objCategory = categoriesDictionary.TryGetValue(listOfCategories[0], out var cat) ? cat : categoriesGroups[0];
+                        break;
+                    }
+                    default:
+                    {
+                        var selectedCategories = new List<ScriptableCategory>();
+                        foreach (var categoryName in listOfCategories)
+                        {
+                            if (!categoriesDictionary.TryGetValue(categoryName, out var cat)) continue;
+                            if (!selectedCategories.Contains(cat))
+                                selectedCategories.Add(cat);
+                        }
+
+                        objCategory = selectedCategories.Count > 1 ? categoriesGroups[1] : selectedCategories[0];
+
+                        selectedCategories.Clear();
+                        break;
+                    }
+                }
+            }
+            /* PRUEBA RENDIMIENTO */
+            foreach (var currentLocation in obj.production?.location)
+            {
+                var latitude = currentLocation.lat;
+                var longitude = currentLocation.@long;
+
+                if (float.IsNaN(latitude) || float.IsNaN(longitude))
+                    continue;
+
+                // Cada MapPoint tiene una serie de propiedades, la posición, escala y altitud vienen dentro de un objeto
+                // MapPointMarker de OnlineMaps 
+                // Se añade la posicion (lat,long) y se asocia a un objeto 3d Cube, luego puede cambiarse
+                var mapPoint = new MapPointMarker(longitude, latitude, prefabObject, false);
+                //mapPoint.addPositionValue("Production", new Vector2(longitude, latitude));
+                if (mapPoint.getMarker3D() != null)
+                {
+                    mapPoint.getMarker3D().altitude = 30.0f;
+                    mapPoint.getMarker3D().scale = 3.0f;
+                }
+
+                mapPoint.setMap(map);
+
+                /* PRUEBA RENDIMIENTO */
+                // Se introducen el resto de propiedades (URI, categpry (clase), from y to (intervalo de tiempo)
+                mapPoint.setURI(obj.id);
+                mapPoint.setLabel(obj.label != null && obj.label.Length > 0 ? obj.label[0] : obj.identifier);
+ 
+                if (obj.production?.time?.Length > 0)
+                {
+                    map.GetPropertyManager().SetPropertyValue("time", mapPoint, obj.production.time.ToList());
+                    if (listOfCenturies.Count > 0)
+                    {
+                        mapPoint.setFrom(listOfCenturies.First().@from);
+                        mapPoint.setTo(listOfCenturies.Last().to);
+                    }
+                }
+ 
+                //Set Properties values
+                map.GetPropertyManager().SetPropertyValue("technique", mapPoint, obj.production.technique.ToList());
+                map.GetPropertyManager().SetPropertyValue("material", mapPoint, obj.production.material.ToList());
+ 
+                
+                var listOfPlaces = obj.production.location.Select(s=>s.label).ToList();
+                map.GetPropertyManager().SetPropertyValue("place", mapPoint, listOfPlaces);
+                mapPoint.assignTexture(listOfPlaces.Count == 1 ? objCategory.defaultIcon: objCategory.multipleLocationIcon);
+                mapPoint.setKnownLocation(listOfPlaces.Count ==1);
+                
+                map.GetPropertyManager().SetPropertyValue("category", mapPoint, listOfCategories);
+ 
+               
+                 mapPoint.setDimension(map.GetDimension());
+                 mapPoint.setMultipleLocations(obj.production.location.Length > 1);
+                  /* PRUEBA RENDIMIENTO  */
+                listOfPoints.Add(mapPoint);
+            }
+        }
+        map.addPoints(listOfPoints);
+        
+    }
+
+    public IEnumerator LoadRestData(ManMadeObject[] objectList)
+    {
+        EvaluationConsole.instance.AddLine($"El Dataset tiene: {objectList.Length} objetos");
+        var totalTime = Stopwatch.StartNew();
+        var startTime = Stopwatch.StartNew();
+        
+        map.reset();
+        map.addPositionName("Production");
+        
+        //AppendOBJECTS
+        foreach (var smallerList in  objectList.Split(10))
+        {
+            AppendObjectsToMap(smallerList.ToArray());
+            yield return null;
+        }
+
+       
+        
+        EvaluationConsole.instance.AddLine($"CARGAR OBJETOS: {startTime.ElapsedMilliseconds * 0.001f} s");
+        yield return new WaitForSeconds(0.1f);
+        var resetTime = Stopwatch.StartNew();
+        ResetMapParameters();
+        EvaluationConsole.instance.AddLine($"Resetear parametros Mapa: {resetTime.ElapsedMilliseconds * 0.001f} s");
+        var updateTime = Stopwatch.StartNew();
+        map.update();
+        EvaluationConsole.instance.AddLine($"Actualizar Mapa: {updateTime.ElapsedMilliseconds * 0.001f} s");
+
+        //print("loadedDataEvent triggered");
+        loadedDataEvent.Invoke();
+        map.setViewerZoom(OnlineMaps.instance.zoom);
+        map.UpdateMarkers();
+
+        objectList = null;
+        GC.Collect();
+        Resources.UnloadUnusedAssets();
+        EvaluationConsole.instance.AddLine($"Tiempo Total Load Dataset: {updateTime.ElapsedMilliseconds * 0.001f} s");
+    }
+    /*public IEnumerator LoadRestData(ManMadeObject[] objectList)
+    {
+     
+        Debug.Log("Empezando a cargar datos");
+        var startTime = Stopwatch.StartNew();
+
         mapPoints.Clear();
         map.reset();
         map.addPositionName("Production");
-        map.addPositionName("Actual");
-        int iconRandom = 3;
+        //map.addPositionName("Actual");
 
 
         // Para cambiar mapa con posicion name.........................
@@ -404,36 +543,35 @@ public class InitApp : MonoBehaviour
         // ResetMapParameters();
         // map.update();
 
-        // List to maintain the points with the same locations per iteration
-        List<MapPoint> sameLocationPoints = new List<MapPoint>();
-
-        foreach (var obj in objectList)
+        var objCount = objectList.Length;
+        var coroutineYieldFactor = objCount / 5;
+        for (var index = 0; index < objCount; index++)
         {
-
+            if (index%coroutineYieldFactor == 0)
+                yield return null;
+            var obj = objectList[index];
             if (obj.production == null || obj.production.location == null)
                 continue;
 
-            for (int locationIndex = 0; locationIndex < obj.production.location.Count; locationIndex++)
+            for (int locationIndex = 0; locationIndex < obj.production.location.Length; locationIndex++)
             {
-                string lat = obj.production.location[locationIndex].lat;
-                string lg = obj.production.location[locationIndex].@long;
+                var latitude = obj.production.location[locationIndex].lat;
+                var longitude = obj.production.location[locationIndex].@long;
 
-                if (string.IsNullOrEmpty(lat) || string.IsNullOrEmpty(lg))
+                if (float.IsNaN(latitude) || float.IsNaN(longitude))
                     continue;
 
-                longitud = float.Parse(lg, CultureInfo.InvariantCulture);
-                latitud = float.Parse(lat, CultureInfo.InvariantCulture);                
 
                 // Cada MapPoint tiene una serie de propiedades, la posición, escala y altitud vienen dentro de un objeto
                 // MapPointMarker de OnlineMaps 
                 // Se añade la posicion (lat,long) y se asocia a un objeto 3d Cube, luego puede cambiarse
-                var mapPoint = new MapPointMarker(longitud, latitud, prefabObject, false);
+                var mapPoint = new MapPointMarker(longitude, latitude, prefabObject, false);
 
                 // If the object has a correct location, it is added to he sameLocationPoints list.
-                sameLocationPoints.Add(mapPoint);
+                //sameLocationPoints.Add(mapPoint);
 
-                mapPoint.addPositionValue("Production", new Vector2(longitud, latitud));
-                mapPoint.addPositionValue("Actual", new Vector2(longitud + 1, latitud + 1));
+                mapPoint.addPositionValue("Production", new Vector2(longitude, latitude));
+                //mapPoint.addPositionValue("Actual", new Vector2(longitud + 1, latitud + 1));
 
                 // Altitud del mar = 30.0f               
                 mapPoint.getMarker3D().altitude = 30.0f;
@@ -441,50 +579,41 @@ public class InitApp : MonoBehaviour
                 mapPoint.getMarker3D().scale = 3.0f;
                 mapPoint.setMap(map);
 
+                /* PRUEBA RENDIMIENTO #1#
                 // Se introducen el resto de propiedades (URI, categpry (clase), from y to (intervalo de tiempo)
                 mapPoint.setURI(obj.id);
-                mapPoint.setCategory(category[1]);
-                mapPoint.setLabel(obj.label != null && obj.label.Count > 0 ? obj.label[0] : obj.identifier);
+                //mapPoint.setCategory(category[1]);
+                mapPoint.setLabel(obj.label != null && obj.label.Length > 0 ? obj.label[0] : obj.identifier);
 
-                if (obj.production.time.Count > 0)
+                if (obj.production.time.Length > 0)
                 {
-                    var listOfCenturies = new List<TimeElement>(); 
+                    var listOfCenturies = new List<TimeElement>();
                     foreach (var timeElement in obj.production.time)
                     {
                         if (APIManager.instance.timeValues.TryGetValue(timeElement, out var time))
                         {
                             listOfCenturies.Add(time);
                         }
+
                         map.GetPropertyManager().SetPropertyValue("time", mapPoint, timeElement);
                     }
 
                     var orderedList = listOfCenturies.OrderBy(t => t.century).ToList();
-                    if (orderedList.Count > 1)
-                    {
-                        print("Ordered List From: "+ orderedList.First().@from + " -> to: "+orderedList.Last().to);
-                    }
-                    mapPoint.setFrom(orderedList.First().@from);
-                    mapPoint.setTo(orderedList.Last().to);
-                    /* código que funciona bien 
-                    
-                    // Check for century Dictionary
-                    if (APIManager.instance.timeValues.TryGetValue(obj.production.time[0], out var time))
-                    {
-                        mapPoint.setFrom(time.@from);
-                        mapPoint.setTo(time.to);
-                    }
-                    map.GetPropertyManager().SetPropertyValue("time", mapPoint, obj.production.time[0]);
-                    */
 
+                    if (orderedList.Count > 0)
+                    {
+                        mapPoint.setFrom(orderedList.First().@from);
+                        mapPoint.setTo(orderedList.Last().to);
+                    }
                 }
 
                 //Set Properties values
-                map.GetPropertyManager().SetPropertyValue("technique", mapPoint, obj.production.technique);
-                map.GetPropertyManager().SetPropertyValue("material", mapPoint, obj.production.material);
+                map.GetPropertyManager().SetPropertyValue("technique", mapPoint, obj.production.technique.ToList());
+                map.GetPropertyManager().SetPropertyValue("material", mapPoint, obj.production.material.ToList());
 
                 ScriptableCategory objCategory = categoriesGroups[0];
 
-                if (obj.production.category != null && obj.production.category.Count > 0 &&
+                if (obj.production.category != null && obj.production.category.Length > 0 &&
                     obj.production.category[0] != null)
                 {
                     var listOfCategories = new List<string>();
@@ -510,8 +639,6 @@ public class InitApp : MonoBehaviour
                     }
                     else
                     {
-                        bool multipleCategories;
-                        int categoryCount = 0;
                         List<ScriptableCategory> selectedCategories = new List<ScriptableCategory>();
                         foreach (var categoryName in listOfCategories)
                         {
@@ -528,6 +655,8 @@ public class InitApp : MonoBehaviour
                         {
                             objCategory = selectedCategories[0];
                         }
+
+                        selectedCategories.Clear();
                     }
                 }
 
@@ -550,14 +679,15 @@ public class InitApp : MonoBehaviour
                     mapPoint.assignTexture(objCategory.multipleLocationIcon);
                 }
 
-
+                /* PRUEBA RENDIMIENTO  #1#
                 mapPoint.setDimension(map.GetDimension());
+                mapPoint.setMultipleLocations(obj.production.location.Length>1);
                 mapPoints.Add(mapPoint);
             }
 
             // If there are more that one object with the same locations, 
             // All the objects are multipleLocation marked
-            if (sameLocationPoints.Count > 1)
+           /* if (sameLocationPoints.Count > 1)
             {
                 //Debug.Log("DUPLICADOS " + sameLocationPoints.Count);
                 foreach (MapPoint p in sameLocationPoints)
@@ -567,24 +697,37 @@ public class InitApp : MonoBehaviour
                 }
             }
 
-            sameLocationPoints.Clear();
+            sameLocationPoints.Clear();#1#
         }
 
 
         map.addPoints(mapPoints);
+        mapPoints.Clear();
+        EvaluationConsole.instance.AddLine($"CARGAR OBJETOS: {startTime.ElapsedMilliseconds * 0.001f} s");
+      
         //Debug.Log("HAY " + mapPoints.Count + " PUNTOS");
-
+        
+        
+        var resetTime = Stopwatch.StartNew();
         ResetMapParameters();
+        EvaluationConsole.instance.AddLine($"Resetear parametros Mapa: {resetTime.ElapsedMilliseconds * 0.001f} s");
+        var updateTime = Stopwatch.StartNew();
         map.update();
-
+        EvaluationConsole.instance.AddLine($"Actualizar Mapa: {updateTime.ElapsedMilliseconds * 0.001f} s");
         //StartCoroutine(map.updateRelationData());
 
         //StartCoroutine(map.createGraphicRelationData());
 
         //print("loadedDataEvent triggered");
         loadedDataEvent.Invoke();
+        map.setViewerZoom(OnlineMaps.instance.zoom);
+        map.UpdateMarkers();
+
+        objectList = null;
+        GC.Collect();
         Resources.UnloadUnusedAssets();
-    }
+    }*/
+ 
 
     IEnumerator RemoveAllMarkers()
     {
@@ -623,7 +766,7 @@ public class InitApp : MonoBehaviour
         */
         SilkMap.Instance.map = map;
 
-        CenterMapOnData();
+        //CenterMapOnData();
 
 
         //map.showClusters();
@@ -634,28 +777,32 @@ public class InitApp : MonoBehaviour
         Vector2 center;
         int zoom;
 
-        var listOfMarkers = mapPoints.Select(t => (t as MapPointMarker).getMarker2D());
+        var listOfMarkers = mapPoints.Select(t => (t as MapPointMarker)?.getMarker2D() as OnlineMapsMarkerBase);
 
         //Debug.LogFormat("OnlineMapsMarkerManager count : {0}",OnlineMapsMarkerManager.instance.items.Count);
         // Get the center point and zoom the best for all markers.
-        OnlineMapsUtils.GetCenterPointAndZoom(listOfMarkers.ToArray(), out center, out zoom);
+        OnlineMapsUtils.GetCenterPointAndZoom(OnlineMapsMarkerManager.instance.ToArray(), out center, out zoom);
 
         //Debug.LogFormat("Zoom Level: {0}",zoom);
         //Debug.LogFormat("Center: {0} ; {1}",center.x,center.y);
         // Change the position and zoom of the map.
 
 
-        map.fixZoomInterval(OnlineMaps.instance, 3, Mathf.Max(zoom, 14));
+        map.fixZoomInterval(OnlineMaps.instance, 2, Mathf.Max(zoom, 14));
         map.setViewerZoom(zoom);
-        map.setViewerPosition(center.x, center.y);
+        //map.setViewerPosition(center.x, center.y);
     }
 
     public void ToggleDimension()
     {
-        var dim = map.GetDimension() == 2 ? 3 : 2;
+        short dim = map.GetDimension() == (short)2 ? (short)3 : (short)2;
         map.SetDimension(dim);
         if (dim == 2)
-            GetComponent<OnlineMapsAdjustToScreen>().ResizeMap();
+        {
+            GetComponent<OnlineMapsAdjustToScreen>();
+        }
+          
+        map.showClusters();
     }
 
     private Texture2D getDefaultTexture()

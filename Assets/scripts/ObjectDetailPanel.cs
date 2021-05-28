@@ -67,14 +67,31 @@ public class ObjectDetailPanel : MonoBehaviour
         }
         
         
+       
+        
+        ManMadeObject obj;
+        var objList = JsonConvert.DeserializeObject<List<ManMadeObject>>(data);
+        print(data);
+        if (objList.Count > 0)
+        {
+           
+            obj = objList[0];
+         
+        }
+        else
+        {
+            ErrorCallback("Error Loading Data");
+            return;
+        }
         gameObject.SetActive(true);
         
-        var obj = JsonConvert.DeserializeObject<List<ManMadeObject>>(data)[0];
         
         //Rellenar información mapPoint con datos de petición detalle
         var mapPoint = SilkMap.instance.map.getPointPerUri(obj.id);
-        SilkMap.instance.map.GetPropertyManager().SetPropertyValue("description", mapPoint, obj.description);
-        SilkMap.instance.map.GetPropertyManager().SetPropertyValue("img", mapPoint, obj.img);
+        if(obj.description != null && obj.description.Length>0)
+            SilkMap.instance.map.GetPropertyManager().SetPropertyValue("description", mapPoint, obj.description.ToList());
+        if(obj.img != null && obj.img.Length>0)
+            SilkMap.instance.map.GetPropertyManager().SetPropertyValue("img", mapPoint, obj.img.ToList());
         
         labelText.text = mapPoint.getLabel();
         var visibleProperties = SilkMap.instance.map.GetPropertyManager().GetVisibleProperties();

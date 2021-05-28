@@ -16,11 +16,7 @@ public class ArcTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         _rect = tooltipElement.GetComponent<RectTransform>();
         GetComponent<Image>().alphaHitTestMinimumThreshold = .1f;
     }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        throw new System.NotImplementedException();
-    }
+    
 
     public void OnPointerEnter(PointerEventData eventData)
     {

@@ -6,15 +6,12 @@ using UnityEngine;
 
 public class MapPoint 
 {
-    public const int TWO_DIMENSION = 2;
-    public const int THREE_DIMENSION = 3;
+    public const short TWO_DIMENSION = 2;
+    public const short THREE_DIMENSION = 3;
     public static int lastId = 0;
+    protected short dimension = TWO_DIMENSION;
 
-    public Vector3 data;
-
-    protected float distance = -1.0f;
-
-    protected int dimension = TWO_DIMENSION;
+    public bool clusteredLevel = false;
 
     protected GameObject stackedGameObject = null;
 
@@ -30,7 +27,6 @@ public class MapPoint
     // x,y,z position in map coordinates
     protected float x;
     protected float y;
-    protected float z;
 
     // Dsisplay or not display
     protected bool hidden = false;
@@ -64,7 +60,7 @@ public class MapPoint
 
     // Clusters where this point is related to
     protected List<GridCluster> clusterList = new List<GridCluster>();
-    protected List<MapPoint> clusteredPointList;
+    protected List<MapPoint> clusteredPointList=new List<MapPoint>();
     
     protected Dictionary<string, List<string>> propertyValues = new Dictionary<string, List<string>>();
 
@@ -77,11 +73,6 @@ public class MapPoint
     GridCluster gridCluster;
 
     protected Map map;
-
-   
-    public string Model { get; set; }
-
-
     public MapPoint(float x, float y)
     {
         this.x = x;
@@ -263,13 +254,13 @@ public class MapPoint
     }
 
 
-    public int getDimension()
+    public short getDimension()
     {
         return dimension;
     } 
 
 
-    public void setDimension(int dimension)
+    public void setDimension(short dimension)
     {
         if (this.dimension!=dimension)
         {
@@ -401,6 +392,11 @@ public class MapPoint
     public void addCluster(GridCluster cluster)
     {
         this.clusterList.Add(cluster);
+    }
+
+    public void removeCluster(GridCluster cluster)
+    {
+        this.clusterList.Remove(cluster);
     }
 
     public List<GridCluster> getRelatedClusters()
@@ -613,8 +609,13 @@ public class MapPoint
 
             if (this.filtered)
             {
+                //if (this.clusterList.Count > 1)
+                //   Debug.Log("Hay clusters en la lista");
+
+
                 foreach (GridCluster gCluster in this.clusterList)
                     gCluster.addFilteredPoint();
+
 
                 if (isInGroupPoint != null)
                     isInGroupPoint.addFilteredPoint();
@@ -735,6 +736,7 @@ public class MapPoint
     {
         this.gridCluster = gCluster;
         setCluster(true);
+        
     }
 
     public GridCluster getGridCluster()
