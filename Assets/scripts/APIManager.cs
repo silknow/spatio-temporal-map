@@ -236,7 +236,7 @@ public class APIManager : Singleton<APIManager>
         {
             // Request and wait for the desired page.
             yield return webRequest.SendWebRequest();
-            if (webRequest.isNetworkError)
+            if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
             {
                 Debug.Log(": Error: " + webRequest.error);
             }
@@ -282,7 +282,7 @@ public class APIManager : Singleton<APIManager>
     {
         var startTime = Stopwatch.StartNew();
         objectList = JsonConvert.DeserializeObject<List<ManMadeObject>>(json);
-        EvaluationConsole.instance.AddLine($"Deserializar JSON objetos: {startTime.ElapsedMilliseconds * 0.001f} s");
+        EvaluationConsole.instance.AddLine($"Tiempo Deserialización JSON: {startTime.ElapsedMilliseconds * 0.001f} s");
         if (objectList != null)
         {
             StartCoroutine(initAppRef.LoadRestData(objectList.ToArray()));
@@ -444,7 +444,7 @@ public class APIManager : Singleton<APIManager>
                 jsontest = Resources.Load("parsed_results15000");
                 break;
             case 30000:
-                jsontest = Resources.Load("parsed_results30000");
+                jsontest = Resources.Load("parsed_results_KG");
                 break;
         }
 

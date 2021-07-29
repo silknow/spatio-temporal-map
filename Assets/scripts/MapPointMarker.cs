@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static MapMarker;
@@ -30,10 +31,15 @@ public class MapPointMarker : MapPoint {
 
     protected void OnMarkerClick(OnlineMapsMarkerBase marker)
     {
-        //Debug.Log("TOC TOC on "+marker.label);
+        
+        
+
+        updateGraphicLabel();
+        //Debug.Log("TOC TOC on " + marker.label);
+
         //if (isGroupPoint())
         //    Debug.Log("Es un grupo");
-        
+
         MapItemPopup.instance.OnMarkerClick(this);
         //SilkMap.instance.refreshStack();
         //this.showRelations("technique");
@@ -48,39 +54,48 @@ public class MapPointMarker : MapPoint {
     protected void createCollider()
     {
         //BoxCollider box = marker3D.instance.GetComponent<BoxCollider>();
-        BoxCollider box = marker3D.instance.AddComponent<BoxCollider>();
+        /*BoxCollider box = marker3D.instance.AddComponent<BoxCollider>();
         box.center = new Vector3(0.0f, 0.75f, 0.0f);
         box.size = new Vector3(0.75f, 0.75f, 0.75f);
-
+*/
     }
 
     public MapPointMarker(float longitud, float latitud, GameObject prefabObject, bool cluster) : base(longitud, latitud)
     {
         //Debug.Log("Longi,Lat --> " + longitud+","+latitud);
         
-        //marker3D = OnlineMapsMarker3DManager.CreateItem(new Vector2(longitud, latitud), prefabObject);
-        marker3D = null;
+ 
+        marker3D = OnlineMapsMarker3DManager.CreateItem(new Vector2(longitud, latitud), prefabObject);
         if (marker3D != null)
         {
-            marker3D.prefab.name = this.label;
             marker3D.transform.name = this.label;
         }
 
         marker2D = OnlineMapsMarkerManager.CreateItem(new Vector2(longitud, latitud), "");
 
         this.cluster = cluster;
+        /*if (this.cluster)
+        {
+            if (marker3D != null) marker3D.DestroyInstance();
+            marker3D = null;
+        }*/
 
         this.initData();
 
-        /*
-        marker2D.OnClick += OnMarkerClick;
-        marker3D.OnClick += OnMarkerClick;
+        if (marker2D != null)
+        {
+            marker2D.OnClick += OnMarkerClick;
+            if (dimension == MapPoint.THREE_DIMENSION)
+                marker2D.enabled = false;
+        }
 
-        if (dimension == MapPoint.THREE_DIMENSION)
-            marker2D.enabled = false;
-
-        if (dimension == MapPoint.TWO_DIMENSION)
-            marker3D.enabled = false;*/
+        if (marker3D != null)
+        {
+            marker3D.OnClick += OnMarkerClick;
+            if (dimension == MapPoint.TWO_DIMENSION)
+                marker3D.enabled = false;
+            
+        }
 
     }
 
@@ -90,6 +105,9 @@ public class MapPointMarker : MapPoint {
         if (marker3D!= null)
             foreach (MeshRenderer child in marker3D.instance.GetComponentsInChildren<MeshRenderer>())
                 child.material.mainTexture = texture;
+                
+        //if(marker3D!= null)
+        //    marker3D.instance.GetComponentInChildren<MeshRenderer>().material.mainTexture = texture;
 
         //Texture2D texture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, true);
         //if (texture != null)
@@ -103,7 +121,10 @@ public class MapPointMarker : MapPoint {
     {
         if (marker3D != null)
         {
-            var tex = marker3D.instance.GetComponentInChildren<MeshRenderer>().material.mainTexture;
+            // Se comenta esta línea porque en los puntos finales marker3D.instance es null
+            //var tex= marker3D.instance.GetComponentInChildren<MeshRenderer>().material.mainTexture;
+            var tex= getMarker2D().texture;
+
             return tex != null ? tex : null;
         }
         return null;
@@ -171,7 +192,7 @@ public class MapPointMarker : MapPoint {
                 //if (isFiltered())
                 marker3D.OnClick -= OnMarkerClick;
             }
-
+            
         }        //marker3D.prefab.SetActive(false);
         if (marker2D != null)
         {
@@ -182,6 +203,7 @@ public class MapPointMarker : MapPoint {
 
     protected override void graphicShow()
     {
+       
         if (marker3D != null && (map.GetDimension() == THREE_DIMENSION ))
         {
             marker3D.enabled = true;
@@ -198,6 +220,7 @@ public class MapPointMarker : MapPoint {
         {
             marker2D.enabled = true;
             marker2D.OnClick += OnMarkerClick;
+            //Debug.Log("graphicShow");
         }
     }
 
@@ -229,7 +252,6 @@ public class MapPointMarker : MapPoint {
 
         if (marker3DCloned != null)
         {
-            marker3DCloned.prefab.name = this.label;
             marker3DCloned.transform.name = this.label;
         }
 
@@ -250,14 +272,12 @@ public OnlineMapsMarker getMarker2D()
     {
         if (marker3D != null)
         {
-            marker3D.prefab.name = this.label;
-            marker3D.prefab.transform.name = this.label;            
             marker3D.label = this.label;
             marker3D.transform.name = this.label;
         }
 
         if (marker2D != null)
-            marker2D.label = this.label;
+            marker2D.label = this.label; 
     }
 
     private void OnRollOut(OnlineMapsMarkerBase marker)
@@ -363,7 +383,8 @@ public OnlineMapsMarker getMarker2D()
                 {
                     List<Vector2> points = new List<Vector2>();
 
-                    points.Add(point.getVector2());
+                    //points.Add(point.getVector2());
+                    points.Add(this.getVector2());
                     points.Add(p.getVector2());
 
                     OnlineMapsDrawingLine oLine = new OnlineMapsDrawingLine(points, Color.blue);

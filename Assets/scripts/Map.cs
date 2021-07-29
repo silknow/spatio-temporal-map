@@ -429,10 +429,15 @@ public class Map {
             else
             {
                 GridCluster gCluster = new GridCluster(pointList);
+                gCluster.setCenter(pointList[0]);
                 gCluster.groupPoints = true;
                 clusterManager.addPointGroup(gCluster);
                 foreach (MapPointMarker m in pointList)
+                {
+                    m.clusteredLevel = true; // xxx
+                    m.addCluster(gCluster); //xxx
                     m.isInGroupPoint = gCluster;
+                }
             }
         }
 
@@ -457,8 +462,8 @@ public class Map {
                 positionsGroup[v].Add(point);
 
 
-                ((MapPointMarker)point).getMarker3D()?.DestroyInstance();
-                ((MapPointMarker)point).getMarker2D().DestroyInstance();
+                //((MapPointMarker)point).getMarker3D()?.DestroyInstance();
+                //((MapPointMarker)point).getMarker2D().DestroyInstance();
 
                 return true;
             }
@@ -534,22 +539,16 @@ public class Map {
 
     public void updateClustering()
     {
-        var crono = Stopwatch.StartNew();
-
-      
+       
         clusterManager.addPoints(points);
-        
-        Debug.Log($"AddPoints - updateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
-        crono = Stopwatch.StartNew();
+        var crono = Stopwatch.StartNew();
         clusterManager.update();
-        Debug.Log($"update - updateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
+        EvaluationConsole.instance.AddLine($"Tiempo Clusterización Marcadores: {crono.ElapsedMilliseconds * 0.001f} s");
         crono = Stopwatch.StartNew();
-        //updateRelationData();
-        Debug.Log($"updateRelationData - updateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
-        crono = Stopwatch.StartNew();
-
+        updateRelationData();
         createGraphicRelationData();
-        Debug.Log($"createGraphicRelationData - updateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
+        EvaluationConsole.instance.AddLine($"Tiempo Creación Relaciones Lineales: {crono.ElapsedMilliseconds * 0.001f} s");
+        //propertyManager.resetPropertyValues();
     }
 
     public virtual void createGraphicRelationData()
@@ -703,6 +702,17 @@ public class Map {
     public virtual void hideClustersAtZoom(float zoom)
     {
 
+    }
+
+    public int getViewedLevel()
+    {
+        int currentLevel = clusterManager.getLevel(zoom);
+        int levelInc = clusterManager.getLevel(zoom + 2);
+
+        if (levelInc > currentLevel && currentLevel > 1)
+            currentLevel = levelInc;
+
+        return currentLevel;
     }
 
     public virtual void updateClustersDimension(short dimension)

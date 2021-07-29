@@ -97,6 +97,7 @@ public class ClusterManager {
         this.points = pointList;
     }
 
+
     public void update()
     {
         int i = 0;
@@ -106,52 +107,79 @@ public class ClusterManager {
         //List<MapPoint> levelPoints = this.points;
 
         //Debug.Log("Actualizando para " + points.Count + "");
-        var startTime = Stopwatch.StartNew();
+
 
         for (i=0;i<zoomIntervals;i++)
         {
             this.levels.Add(new MapLevel(this.zone, this.numQuadsHoriz, this.numQuadsVert, i));
         }
         
+        
         for (i = zoomIntervals-2; i >=0; i--)
         {
-
+            int numClos = 0;
+            
             int punto1 = 0;
             //MapLevel level = new MapLevel(this.zone, this.numQuadsHoriz, this.numQuadsVert, i);
             MapLevel level = this.levels[i];
+
+
             if (lastLevel == null)
             {
-                var levelTime = Stopwatch.StartNew();
-                level.managePoints(this.points,1.10f);
-                //Debug.Log("EN el nivel " + i + " hay " + level.getGridClusters().Count);
-                EvaluationConsole.instance.AddLine($"CLusterManager->Update | Carga Nivel 0 : {levelTime.ElapsedMilliseconds * 0.001f} s");
+                //Debug.Log("Hay "+ this.pointGroups.Count+" gouppoints");
+                
+                
+                for (int pG = 0; pG<this.pointGroups.Count; pG++)
+                {
+                    this.pointGroups[pG].setLevel(level);
+                    level.addCluster(this.pointGroups[pG]);
+                    //this.pointGroups[pG].processed = true;
+                }
+                level.managePoints(this.points,0.5f);    
+                
+           
             }
             else 
             {
+             
+                
                 List<GridCluster> clusterList = lastLevel.getGridClusters();// this.getGridClustersAtLevel(i+1);
-                Debug.Log("EN nivel " + lastLevel.getLevel() + " hay " + clusterList.Count + " clusters");
+                //Debug.Log("EN ZOOM INTERVAL " + i + "y nivel " + lastLevel.getLevel() + " hay ....");
+                //Debug.Log("EN nivel " + lastLevel.getLevel() + " hay " + clusterList.Count + " clusters");
+
+                //Debug.Log("El minimio del nivel " + lastLevel.getLevel() + " es " + level.getMinimum());
                 if (clusterList != null) {
 
                     if (clusterList.Count == 1)
                     {
-                        GridCluster newGridCluster = new GridCluster(clusterList[0]);                        
+                        //Debug.Log("UNO Y SALE");
+                        GridCluster newGridCluster = new GridCluster(clusterList[0]);
+                        newGridCluster.associatePoints();
                         //newGridCluster.update();
                         level.addCluster(newGridCluster);
+                        
+  
                     }
                     else
-                    {                        
+                    {           
+                        float minimum = level.getMinimum();
+
+                        if (level.getLevel() <= 1)
+                            minimum = minimum * 100.0f;
+                        
+                        //for (int o = 0;o<clusterList.Count;o++) 
+                          //  clusterList[o].closest = getClosestTo(clusterList[o], clusterList, 0, minimum, false);
+                        
                         int aux = 0;              
                         while (aux < clusterList.Count)
                         {
                             GridCluster currentCluster = clusterList[aux];
                             if (!clusterList[aux].processed)
                             {
-                                /*
-                                if (currentCluster.getNumPoints() > 1)
-                                {*/
-                                    GridCluster closest = getClosestTo(clusterList[aux], clusterList, aux);
-                                    //Debug.Log("El más cercano a " + currentCluster.getCenter().getX()+","+ currentCluster.getCenter().getY()+
-                                    //     " es " + closest.getCenter().getX()+","+ closest.getCenter().getY());
+                                    if (clusterList[aux].getPoints()[0].getURI().Equals(("http://data.silknow.org/object/5f7a48fe-d8ac-37d8-90e3-f4448e665a9b")))
+                                        Debug.Log("Procesando");
+                                    GridCluster closest = getClosestTo(clusterList[aux], clusterList, aux, minimum, false);
+
                                     if (closest != null)
                                     {
                                         GridCluster newGridCluster = new GridCluster(currentCluster, closest);
@@ -160,6 +188,7 @@ public class ClusterManager {
                                         level.addCluster(newGridCluster);
                                         currentCluster.processed = true;
                                         closest.processed = true;
+                                        numClos++;
                                     }                              
                                     else
                                     {
@@ -190,39 +219,99 @@ public class ClusterManager {
                 //Debug.Log("EN el nivel " + i + " hay " + level.getGridClusters().Count);
                 //Debug.Log("De los cuales " + punto1 + " son de 1 punto");
             }
- 
+
+            //Debug.Log(numClos + " clusters cercanos");
             lastLevel = level;
+
             //this.levels.Add(level);
         }
-        EvaluationConsole.instance.AddLine($"CLusterManager->Update | Carga Niveles total: {startTime.ElapsedMilliseconds * 0.001f} s");
+
+        for (int p = 0; p < points.Count; p++)
+        {
+            if (points[p].getURI().Equals("http://data.silknow.org/object/54e7582f-d37e-3e85-9cac-c26b52a7711b"))
+            {
+                MapPoint pn = points[p];
+            }
+            
+            if (points[p].getURI().Equals("http://data.silknow.org/object/12eed6aa-578c-39c0-b0d8-ecf3cdfd68c8"))
+            {
+                MapPoint pn = points[p];
+            }
+            
+            if (points[p].getURI().Equals("http://data.silknow.org/object/db5ed89d-fac0-3cf1-81ec-fc55a66b8252"))
+            {
+                MapPoint pn = points[p];
+            }
+                
+        }
+        
+       
     }
 
-    protected GridCluster getClosestTo(GridCluster from, List<GridCluster> clusterList, int since)
+    protected GridCluster getClosestTo(GridCluster from, List<GridCluster> clusterList, int since, float minimum, bool check)
     {
         GridCluster closest = null;
         GridCluster closest1 = null;
+        string fromURI = from.getPoints()[0].getURI();
         
         float minDistance = 1000000.0f;
         float minDistance1 = 1000000.0f;
+        //float minimum = 5.0f;
 
         int i = since;
+        //i = 0;
 
         while (i < clusterList.Count)
         {
             if (!clusterList[i].processed && from != clusterList[i] ) //&& clusterList[i].getNumPoints()>1)
             {
                 float currentDistance = getDistance(from.getCenter(), clusterList[i].getCenter());
-                
-                if (currentDistance < minDistance && clusterList[i].getNumPoints()>1)
-                {
-                    minDistance = currentDistance;                    
-                    closest = clusterList[i];
-                }
 
-                if (currentDistance < minDistance1 && clusterList[i].getNumPoints() == 1)
+                if (currentDistance <= minimum)
                 {
-                    minDistance1 = currentDistance;
-                    closest1 = clusterList[i];
+
+                    if (check)
+                    {
+                        //GridCluster closest2 = getClosestTo(clusterList[i], clusterList, since, minimum, false);
+
+                        GridCluster closest2 = clusterList[i].closest;
+                        
+                        if (closest2 != null)
+                        {
+                            if (closest2.getPoints()[0].getURI().Equals(fromURI))
+                            {
+                                if (currentDistance < minDistance && clusterList[i].getNumPoints() >= 1)
+                                {
+                                    minDistance = currentDistance;
+                                    closest = clusterList[i];
+                                }
+
+                                /*
+                                if (currentDistance < minDistance1 && clusterList[i].getNumPoints() == 1)
+                                {
+                                    minDistance1 = currentDistance;
+                                    closest1 = clusterList[i];
+                                }*/
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (currentDistance < minDistance && clusterList[i].getNumPoints() >= 1)
+                        {
+                            minDistance = currentDistance;
+                            closest = clusterList[i];
+                        }
+
+                        /*
+                        if (currentDistance < minDistance1 && clusterList[i].getNumPoints() == 1)
+                        {
+                            minDistance1 = currentDistance;
+                            closest1 = clusterList[i];
+                        }*/
+                    }
+
+
                 }
 
             }
@@ -230,8 +319,8 @@ public class ClusterManager {
             i++;
         }
 
-        if (minDistance1 < minDistance / 1.25f)
-            closest = closest1;
+        //if (minDistance1 < minDistance / 1.25f)
+          //  closest = closest1;
 
         return closest;
     }
@@ -288,11 +377,11 @@ public class ClusterManager {
 
     public void showInfo()
     {
-        Debug.Log("En este manager se gestiona la siguiente información............");
-        Debug.Log("Hay ....... " + points.Count + " puntos.");
-        Debug.Log("Hay ........" + levels.Count + " niveles.");
-        for (int i = 0; i < levels.Count; i++)
-            levels[i].showInfo();
+        //Debug.Log("En este manager se gestiona la siguiente información............");
+        //Debug.Log("Hay ....... " + points.Count + " puntos.");
+        //Debug.Log("Hay ........" + levels.Count + " niveles.");
+        //for (int i = 0; i < levels.Count; i++)
+        //    levels[i].showInfo();
     }
 
     public List<GridCluster> getGridClustersAtLevel(int level)

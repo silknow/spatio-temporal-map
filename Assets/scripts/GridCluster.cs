@@ -21,6 +21,9 @@ public class GridCluster
     public float maxX = NO_VALUE, maxY = NO_VALUE, minX=NO_VALUE, minY=NO_VALUE;
     public Rect gridZone;
     public bool processed = false;
+    public static int MIN_SIZE = 5;
+    private GridCluster associatedTo=null;
+    public GridCluster closest = null;
 
     int level = 0;
 
@@ -53,7 +56,20 @@ public class GridCluster
     public void associatePoints()
     {
         for (int i = 0; i < this.points.Count; i++)
+        {
+
             points[i].addCluster(this);
+        }
+    }
+
+    public void associateTo(GridCluster gridCluster)
+    {
+        this.associatedTo = gridCluster;
+    }
+
+    public GridCluster getAssociatedTo()
+    {
+        return this.associatedTo;
     }
 
     public GridCluster(GridCluster a)
@@ -76,6 +92,7 @@ public class GridCluster
         this.vQuad = v;
         //this.points.Add(point);
         addPoint(point);
+        //point.setGridCluster(this);
         this.category = point.getCategory();
         this.numFilteredPoints = 0;        
         this.gridZone.xMin = level.quadWidth * (h - level.numQuadsH/2 - 1);
@@ -86,6 +103,19 @@ public class GridCluster
         this.gridZone.width = level.quadWidth;
         this.gridZone.height = level.quadHeight;
         this.numFilteredPoints = 0;
+    }
+
+    public void setLevel(MapLevel level)
+    {
+        this.hQuad = 0;
+        this.vQuad = 0;
+
+        this.numFilteredPoints = 0;
+
+        this.gridZone.xMin = level.quadWidth * (0 - level.numQuadsH / 2 - 1);
+        this.gridZone.yMin = level.quadHeight * (0 - level.numQuadsV / 2 - 1);
+        this.gridZone.width = level.quadWidth;
+        this.gridZone.height = level.quadHeight;
     }
 
     public GridCluster(int h, int v)
@@ -100,7 +130,10 @@ public class GridCluster
         //Debug.Log("El cluster tiene " + getNumPoints() + " puntos");
         //Debug.Log("El cluster tiene " +numFilteredPoints + " puntos filtrados");
 
-        return getNumPoints() - numFilteredPoints;
+        //if (numFilteredPoints > getNumPoints())
+        //    return 0;
+        //else
+            return getNumPoints() - numFilteredPoints;
     }
 
 
@@ -254,13 +287,16 @@ public class GridCluster
     public void addFilteredPoint()
     {
         //Debug.Log("Se esta filtrando ");
-        numFilteredPoints++;
+        if (numFilteredPoints < points.Count)
+        {
+            numFilteredPoints++;
 
-        //if (center.getLabel().Trim().Equals("Cluster 2"))
-        //    Debug.Log("En cluster " + center.getLabel() + " hay " + numFilteredPoints + " de " + points.Count);
+            //if (center.getLabel().Trim().Equals("Cluster 2"))
+            //    Debug.Log("En cluster " + center.getLabel() + " hay " + numFilteredPoints + " de " + points.Count);
 
-        if (numFilteredPoints == points.Count)
-            center.setFiltered(true);
+            if (numFilteredPoints == points.Count)
+                center.setFiltered(true);
+        }
     }
 
     public void removeFilteredPoint()

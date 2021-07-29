@@ -44,16 +44,11 @@ public class MapUIManager : Singleton<MapUIManager>
     public void OnZoomIn()
     {
         OnlineMaps.instance.zoom += 1;
-        Debug.Log("level " + SilkMap.instance.map.getLevel());
-        //SilkMap.instance.map.SetDimension(3);
-        //SilkMap.instance.map.showClusters();
     }
 
     public void OnZoomOut()
     {
-        Debug.Log("level " + SilkMap.instance.map.getLevel());
         OnlineMaps.instance.zoom -= 1;
-        
     }
     public void OnAboutClick()
     {
@@ -167,6 +162,8 @@ public class MapUIManager : Singleton<MapUIManager>
 
         if (mapviewingMode == MapViewingMode.STACKED)
         {
+            //PABLO CERRAR PANEL DE FILTROS
+            HideFiltersPanel();
             StackedMapVirtualCamera.GetComponent<CameraFollowMap>().PopulateListOfMaps(maps.Select(m => m.transform).ToList());
         }
         StackedMapCamera.SetActive(mapviewingMode == MapViewingMode.STACKED);
@@ -188,7 +185,7 @@ public class MapUIManager : Singleton<MapUIManager>
 
         foreach (var btn in FooterButtonBar.GetComponentsInChildren<Button>())
         {
-            if (btn.gameObject.name != "Filter" && mapviewingMode == MapViewingMode.STACKED)
+            if (/*btn.gameObject.name != "Filter" && */mapviewingMode == MapViewingMode.STACKED)
             {
                 btn.interactable = false;
             }

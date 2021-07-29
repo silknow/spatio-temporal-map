@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
@@ -151,7 +152,7 @@ public class MapMarker : Map {
 
     private void UpdateMarker(MarkerInstance marker)
     {
-
+        //Debug.Log("PABLO: - UPDATE MARKER VISIBILITY");
         if (marker == null)
             return;
 
@@ -170,7 +171,6 @@ public class MapMarker : Map {
         if (marker.mapMarker != null && marker.mapMarker.isVisible())
         {
             int numPoints = marker.mapMarker.getGridCluster().getNumVisiblePoints();
-            //Debug.Log("El cluster tiene " + numPoints + " puntos visibles");
             string newTitle = numPoints.ToString();
             if (!newTitle.Equals(marker.data.title)) {
                 marker.data.title = newTitle;
@@ -423,17 +423,15 @@ public class MapMarker : Map {
 
         if (clusterManager.hasData())
             return;
-        var crono = Stopwatch.StartNew();
-
-        updateClustering();
-        Debug.Log($"UpdateClustering {crono.ElapsedMilliseconds * 0.001f} segundos");
-
-        var crono2 = Stopwatch.StartNew();
 
         distributeGroupsOnCircle();
+        updateClustering();
+        
+        
+        
+        
 
         this.positionsGroup.Clear();
-        Debug.Log($"positions group {crono2.ElapsedMilliseconds * 0.001f} segundos");
         //Debug.Log("Hay " + clusterManager.getPointGroupClusters().Count + " gouppoints");
 
         var crono3 = Stopwatch.StartNew();
@@ -516,7 +514,7 @@ public class MapMarker : Map {
 
     }
 
-    protected void addMarkerInstance(MapPointMarker mapPointMarker) {
+    public void addMarkerInstance(MapPointMarker mapPointMarker) {
 
 
         mapPointMarker.assignTexture(null);
@@ -552,6 +550,11 @@ public class MapMarker : Map {
         mapPointMarker.markerInstance = marker;
         mapPointMarker.getMarker2D().texture = null;
         mapPointMarker.getMarker2D().enabled = false;
+        if (mapPointMarker.getMarker3D() != null)
+        {
+            mapPointMarker.getMarker3D().enabled = false;
+            mapPointMarker.getMarker3D().instance.SetActive(false);
+        }
 
         SetText(rectTransform, "Title", data.title);
 
@@ -570,10 +573,11 @@ public class MapMarker : Map {
     {
         MapPointMarker mapPoint = new MapPointMarker(gCluster.getCenter().getX(), gCluster.getCenter().getY(), clusterPrefab, true);
         mapPoint.setGridCluster(gCluster);
-
-        if(mapPoint.getMarker3D()!= null)
-            mapPoint.getMarker3D().instance.name = id.ToString();
         mapPoint.setLabel("Cluster " + id);
+
+        //if(mapPoint.getMarker3D()!= null)
+        //    mapPoint.getMarker3D().instance.name = id.ToString();
+      
             
         mapPoint.setClusteredPoints(gCluster.getPoints());
 
@@ -588,9 +592,6 @@ public class MapMarker : Map {
         mapPoint.setMap(this);
 
 
-        if (mapPoint.getMarker3D() != null)
-            mapPoint.getMarker3D().DestroyInstance();
-        mapPoint.getMarker2D().DestroyInstance();
 
         addMarkerInstance(mapPoint);
 
@@ -842,9 +843,12 @@ public class MapMarker : Map {
 
     public override void showClustersAtZoom(float zoom)
     {
-
-
         int level = clusterManager.getLevel(zoom);
+        int levelInc = clusterManager.getLevel(zoom + 2);
+
+        if (levelInc > level && level>1)
+            level = levelInc;
+
         int numLevels = clusterManager.getNumLevels();
 
         
@@ -857,7 +861,6 @@ public class MapMarker : Map {
             if (this.clusterMarkers.Count > 0)
             {
                 List<MapPointMarker> clusterList = this.clusterMarkers[level];
-                List<OnlineMapsDrawingLine> clusterLineList = this.clusterLines[level];
 
                 if (!this.resetted)
                 {
@@ -866,22 +869,33 @@ public class MapMarker : Map {
                     this.resetted = true;
                 }
 
-                List<GridCluster> clusters = clusterManager.getGridClustersAtLevel(level);
 
-                //Debug.Log("Se muestran los clusters "+clusterList.Count);
+                //List<GridCluster> clusters = clusterManager.getGridClustersAtLevel(level);
+
+                //Debug.Log("Se muestran los clusters de zoom " + zoom +" level "+ level+ "hay "+ clusterList.Count);
+                
                 for (int i = 0; i < clusterList.Count; i++)
                 {
-                    if(clusterList[i].getMarker3D()!= null)
-                        clusterList[i].getMarker3D().scale = scaleCorrection(clusters[i], this.points.Count, zoom);
+                    if (clusterList[i].getMarker3D() != null)
+                    {
+                        clusterList[i].getMarker3D().scale =
+                            20.0f; //scaleCorrection(clusters[i], this.points.Count, zoom);
+                    }
 
 
-                    if (clusterList[i].getGridCluster()!=null)
-                        clusterList[i].getGridCluster().getCenter().show();
-                    clusterList[i].show();
-
-
-                    UpdateMarker(clusterList[i].markerInstance);                    
+                    /*if (clusterList[i].getGridCluster() != null)
+                    {
+                        
+                            clusterList[i].getGridCluster().getCenter().show();
+                    }*/
+                   
+                    if (clusterList[i].getMarker2D().InMapView())
+                    {
+                        clusterList[i].show(); 
+                        UpdateMarker(clusterList[i].markerInstance);
+                    }
                     
+
 
                 }
 
@@ -896,7 +910,7 @@ public class MapMarker : Map {
         {
             for (int i = 0; i < points.Count; i++)
             {
-                float corrector = 1.0f;
+               /* float corrector = 1.0f;
 
                 if (level == 1) //zoom > 4 && zoom <= 6)
                     corrector = 3.25f;
@@ -906,16 +920,21 @@ public class MapMarker : Map {
 
                 if (level == 3) //zoom > 8)
                     corrector = 3.5f;
-
+                */
+               var corrector = 3.5f;
                 if (((MapPointMarker)(points[i])).getMarker3D()!=null)
-                    ((MapPointMarker)(points[i])).getMarker3D().scale = 2* corrector;               
+                    ((MapPointMarker)(points[i])).getMarker3D().scale =40f;          
                 points[i].show();
             }
 
             foreach (MapPoint p in clusterManager.getPointGroupsPoints())
             {
-                p.show();
-                UpdateMarker(((MapPointMarker)p).markerInstance);
+                //p.show();
+                if (((MapPointMarker) p).getMarker2D().InMapView())
+                {
+                    p.show();
+                    UpdateMarker(((MapPointMarker) p).markerInstance);
+                }
             }
 
             //UpdateMarkers();
@@ -930,14 +949,18 @@ public class MapMarker : Map {
     public override void hideClustersAtZoom(float zoom)
     {
         int level = clusterManager.getLevel(zoom);
+        int levelInc = clusterManager.getLevel(zoom+2);
+
+        if (levelInc > level  && level>1)
+            level = levelInc;
 
         if (level>=0 && level < clusterManager.getNumLevels())
         {
             for (int i = 0; i < points.Count; i++)
                 points[i].hide();
 
-            foreach (MapPoint p in clusterManager.getPointGroupsPoints())
-                p.hide();
+            //foreach (MapPoint p in clusterManager.getPointGroupsPoints())
+              //  p.hide();
 
             //Debug.Log("MapMarker-->hideClustersAtZoom " + level);
             //Debug.Log(clusterMarkers.Count);
@@ -951,7 +974,8 @@ public class MapMarker : Map {
                 {
                     if (clusterList[i].getGridCluster() != null)
                         clusterList[i].getGridCluster().getCenter().hide();
-                    clusterList[i].hide();
+
+                    clusterList[i].hide(); 
                     
                     //clusterList[i].getGridCluster().hideRelations();
                     //clusterLineList[i].visible = false;

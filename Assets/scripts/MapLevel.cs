@@ -29,6 +29,11 @@ public class MapLevel  {
         this.quadHeight = zone.height / this.numQuadsV;
     }
 
+    public float getMinimum()
+    {
+        return this.quadWidth*2.0f;
+    }
+
     public int getNumQuads(){
         return numQuadsH * numQuadsV;
     }
@@ -184,6 +189,7 @@ public class MapLevel  {
     public void addCluster(GridCluster cluster)
     {
         this.clusters.Add(cluster);
+        cluster.setLevel(this.getLevel());
 
     }
 
@@ -192,6 +198,7 @@ public class MapLevel  {
     {
 
         int numPoints = points.Count;
+        bool pointKey = false;
 
         radius = radius * radius;
 
@@ -203,20 +210,37 @@ public class MapLevel  {
         {
             //Debug.Log("Analizando punto " + i + " = " + points[i].getX() + "," + points[i].getY());
 
+
+
             if (!points[i].clusteredLevel)
             {
-                GridCluster radialCluster = new GridCluster(0, 0, points[i], this);
-                //radialCluster.addPoint(points[i]);
-                //points[i].setGridCluster(radialCluster);
-                points[i].addCluster(radialCluster);
-                points[i].clusteredLevel = true;
+                GridCluster radialCluster = points[i].isInGroupPoint;
+
+                if (radialCluster==null)
+                {
+                    radialCluster = new GridCluster(0, 0, points[i], this);
+                    //radialCluster.addPoint(points[i]);
+                    //points[i].setGridCluster(radialCluster);
+                    points[i].addCluster(radialCluster);
+                    points[i].clusteredLevel = true;
+                }
+                else
+                {
+                    /*
+                    for (int gP = 0; gP < radialCluster.getNumPoints(); gP++)
+                    {
+                        radialCluster.setLevel(this);
+                        points[gP].addCluster(radialCluster);
+                        points[gP].clusteredLevel = true;
+                    }*/
+                }
 
                 //Debug.Log("Se crea el cluster con punto "+i);
 
                 for (int j = 0; j < numPoints; j++)
                 {
                     //Debug.Log("Analizando emparejamiento con punto " + j + " = " + points[j].getX() + "," + points[j].getY());
-                    if (!points[j].clusteredLevel && j != i)
+                    if (!points[j].clusteredLevel && j != i )
                     {
                         //Debug.Log("Distancia con punto " + j + " es de " + getDistance(points[i], points[j]));
                         if (getDistance(points[i], points[j]) <= radius)
@@ -228,17 +252,29 @@ public class MapLevel  {
                     }
                 }
 
-                //Debug.Log("El cluster radial tiene " + radialCluster.getNumPoints());
-                if (radialCluster.getNumPoints() > 1)
+                if (pointKey)
+                {
+                    Debug.Log("El cluster radial tiene " + radialCluster.getNumPoints());
+                    pointKey = false;
+                }
+
+                if (radialCluster.getNumPoints() > 0)
                 {
                     radialCluster.update();
                     this.addCluster(radialCluster);
                 }
                 else
                 {
-                    points[i].removeCluster(radialCluster);
-                    points[i].clusteredLevel = false;
+                    // points[i].removeCluster(radialCluster);
+                    //points[i].clusteredLevel = false;
+
+                    //for (int auxC=0;auxC<auxList.Count;auxC++)
+                    //{
+                      //  auxList[auxC].removeCluster(radialCluster);
+                    //    auxList[auxC].clusteredLevel = false;
+                  //  }
                 }
+                //auxList.Clear();
             }
         }
 
@@ -255,8 +291,10 @@ public class MapLevel  {
                 //radialCluster.addPoint(points[i]);
                 //points[i].setGridCluster(radialCluster);
                 points[i].clusteredLevel = true;
+                points[i].addCluster(radialCluster);
                 this.addCluster(radialCluster);
                 punto1++;
+
             }
         }
 
@@ -511,9 +549,9 @@ public class MapLevel  {
 
     public void showInfo()
     {
-        Debug.Log("En este nivel .......");
-        Debug.Log("Hay una resolucion de " + numQuadsH + " x " + numQuadsV + " quads-");
-        Debug.Log("Hay un total de " + clusters.Count + " clusters.");
+        //Debug.Log("En este nivel .......");
+        //Debug.Log("Hay una resolucion de " + numQuadsH + " x " + numQuadsV + " quads-");
+        //Debug.Log("Hay un total de " + clusters.Count + " clusters.");
     }
 
     public List<GridCluster> getGridClusters()

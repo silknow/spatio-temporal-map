@@ -1,7 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO.Compression;
 using UnityEngine;
-
+/**
+ * Class which manage the points related to a period of time.
+ */
 public class TimeFrame 
 {
     private int from;
@@ -37,6 +40,11 @@ public class TimeFrame
     public bool checkInFrame(MapPoint point)
     {
         bool inFrame = false;
+
+        if (point.getURI().Equals("http://data.silknow.org/object/d80d1671-7b4b-382e-a8a4-c41164c80794"))
+            Debug.Log("Procesando");
+        
+        /*
         if (point.getFrom() >= from)
         {
             if (point.getTo() <= to)
@@ -47,9 +55,16 @@ public class TimeFrame
         {
             if (point.getTo() >= from)
                 inFrame = true;
-        }
+        }*/
+
+        inFrame = !(point.getTo() >= from && point.getFrom() <= to);
+        
+        if (!inFrame && !point.isFiltered())
+            filteredPoints.Add(point);
+        
             //bool inFrame = point.getFrom()>= from && point.getTo()<=to;
 
+        /*    
         if (!inFrame) {
             if (!filteredPoints.Contains(point))
             {
@@ -57,7 +72,8 @@ public class TimeFrame
                 if (!point.isFiltered())
                     point.setFiltered(true);
             }
-        }
+        }*/
+        
 
         return inFrame;
     }

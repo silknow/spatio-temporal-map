@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>{{{ PRODUCT_NAME }}}</title>
+	<script src="js/jquery-3.5.0.min.js"></script>
+	<script src="js/bootstrap.bundle.min.js"></script>
+
+	<script src="Build/{{{ LOADER_FILENAME }}}"></script>
+
+
+	<script>
+		var gameInstance;
+	</script>
+	<script>
+		var min = 0;
+		var sec = 0;
+		var stoptime = true;
+		function OnLoadBody() {
+			$(".btn-adasilk").attr("disabled", true);
+			$(".btn-adasilk").addClass('disabled');
+		}
+		function OnDataLoaded() {
+			console.log("Datos Cargados");
+			$("#loadingContainer").hide();
+			$(".btn-adasilk").attr("disabled", false);
+			$(".btn-adasilk").removeClass('disabled');
+		}
+		function LoadDataset(objectCount) {
+			$("#loadingContainer").show();
+			$(".btn-adasilk").attr("disabled", true);
+			$(".btn-adasilk").addClass('disabled');
+			setTimeout(() => {
+				gameInstance.SendMessage('APIManager', "LoadDataset", objectCount);
+			}, 100);
+		}
+		function InitStopwatch() {
+			if (stoptime == true) {
+				stoptime = false;
+				min = 0;
+				sec = 0;
+				UpdateStopWatch();
+			}
+			else {
+				stoptime = true;
+				min = 0;
+				sec = 0;
+				setTimeout(() => {
+					stoptime = false;
+				}, 100);
+			}
+		}
+		function PauseStopWatch() {
+			if (stoptime == false) {
+				stoptime = true;
+			}
+		}
+		function UpdateStopWatch(params) {
+			if (stoptime == false) {
+				sec = parseInt(sec);
+				min = parseInt(min);
+
+				sec = sec + 1;
+
+				if (sec == 60) {
+					min = min + 1;
+					sec = 0;
+				}
+
+
+				if (sec < 10 || sec == 0) {
+					sec = '0' + sec;
+				}
+				if (min < 10 || min == 0) {
+					min = '0' + min;
+				}
+
+				$("#timer").html(min + ':' + sec);
+
+				setTimeout("UpdateStopWatch()", 1000);
+			}
+		}
+	</script>
+	<style>
+		html,
+		body {
+			background-color: #f7f7ef;
+			width: 100%;
+			height: 100%;
+			overflow: visible;
+			padding: 0;
+			margin: 0;
+		}
+
+		div#gameContainer[data-pixelated='true'] canvas {
+			image-rendering: optimizeSpeed;
+			image-rendering: -webkit-crisp-edges;
+			image-rendering: -moz-crisp-edges;
+			image-rendering: -o-crisp-edges;
+			image-rendering: crisp-edges;
+			image-rendering: -webkit-optimize-contrast;
+			image-rendering: optimize-contrast;
+			image-rendering: pixelated;
+			-ms-interpolation-mode: nearest-neighbor;
+		}
+
+
+		.btn-adasilk {
+			background-color: #f48568 !important;
+			border-color: #f48568 !important;
+		}
+
+		#loadingContainer {
+			display: none;
+		}
+	</style>
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body onload="OnLoadBody()">
+	<nav class="navbar navbar-dark bg-dark">
+		<a class="navbar-brand" href="#">
+			<img src="/img/Silknow_Brand_Negative.png" width="auto" height="30" class="d-inline-block align-top" alt="">
+			STMaps Evaluation
+		</a>
+	</nav>
+	<div class="container" style="margin-top: 25px;margin-bottom: 25px;">
+		<div class="row">
+			<div class="col-lg-3 col-md-3  d-flex justify-content-center">
+				<button onclick="LoadDataset(300)" class="btn btn-info wrn-btn btn-adasilk">
+					Dataset 1 (301)
+				</button>
+			</div>
+
+			<div class="col-lg-3 col-md-3  ml-auto d-flex justify-content-center">
+				<button onclick="LoadDataset(3000)" class="btn btn-info wrn-btn btn-adasilk">
+					Dataset 2 (3001)
+				</button>
+			</div> 
+
+			<div class="col-lg-3 col-md-3  ml-auto d-flex justify-content-center">
+				<button onclick="LoadDataset(15000)" class="btn btn-info wrn-btn btn-adasilk">
+					Dataset 3 (15001)
+				</button>
+			</div>
+			<div class="col-lg-3 col-md-3  ml-auto d-flex justify-content-center">
+				<button onclick="LoadDataset(30000)" class="btn btn-info wrn-btn btn-adasilk">
+					Dataset 4 (32249)
+				</button>
+			</div>
+		</div>
+		<div class="row" id="loadingContainer">
+			<div class="container" style="margin-top: 10px; margin-bottom: 15px;">
+				<div class="d-flex align-items-center">
+					<strong>Cargando...</strong>
+					<div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="d-flex justify-content-center" style=" margin-top:5px; width:100%;">
+				<canvas id="unity-canvas" data-pixel-art="{{{ OPTIMIZE_FOR_PIXEL_ART }}}"></canvas>
+
+				<script>
+					createUnityInstance(document.querySelector("#unity-canvas"), {
+						dataUrl: "Build/{{{ DATA_FILENAME }}}",
+						frameworkUrl: "Build/{{{ FRAMEWORK_FILENAME }}}",
+						codeUrl: "Build/{{{ CODE_FILENAME }}}",
+					#if MEMORY_FILENAME
+					memoryUrl: "Build/{{{ MEMORY_FILENAME }}}",
+							#endif
+					#if SYMBOLS_FILENAME
+					symbolsUrl: "Build/{{{ SYMBOLS_FILENAME }}}",
+							#endif
+					streamingAssetsUrl: "StreamingAssets",
+							companyName: "{{{ COMPANY_NAME }}}",
+							productName: "{{{ PRODUCT_NAME }}}",
+							productVersion: "{{{ PRODUCT_VERSION }}}",
+					}).then(function (instance) {
+						var canvas = instance.Module.canvas;
+						gameInstance = instance;
+						var container = canvas.parentElement;
+						function onResize() {
+							var w;
+							var h;
+
+							if (scaleToFit) {
+								w = window.innerWidth;
+								h = window.innerHeight;
+
+								var r = {{{ HEIGHT }}} / {{{ WIDTH }}};
+
+								if (w * r > window.innerHeight) {
+									w = Math.min(w, Math.ceil(h / r));
+								}
+								h = Math.floor(w * r);
+							} else {
+								w = {{{ WIDTH }}};
+								h = {{{ HEIGHT }}};
+							}
+
+							canvas.style.width = w + "px";
+							canvas.style.height = h + "px";
+						}
+
+						var scaleToFit;
+						try {
+							scaleToFit = !!JSON.parse("{{{ SCALE_TO_FIT }}}");
+						} catch (e) {
+							scaleToFit = true;
+						}
+						window.addEventListener('resize', onResize);
+						onResize();
+						setTimeout(() => {
+							$(".btn-adasilk").attr("disabled", false);
+							$(".btn-adasilk").removeClass('disabled');
+							gameInstance.SendMessage("APIManager", "SetAPIEndpoint", 'https://grlc.eurecom.fr/api-git/silknow/api/');
+							gameInstance.SendMessage("APIManager", "SetLanguage", "EN"); //ES, EN, FR, IT
+						}, 4000);
+					});
+				</script>
+				</div>
+	</div>
+		<!--<div class="row" style="margin-top: 5px;">
+
+			<div class="col-lg-4 col-md-4  d-flex justify-content-center">
+				<button onclick="InitStopwatch()" class="btn btn-success wrn-btn ">
+					Start Timer
+				</button>
+			</div>
+			<div class="col-lg-4 col-md-4 ml-auto d-flex justify-content-center">
+				<h4 id="timer">00:00</h4>
+			</div>
+
+			<div class="col-lg-4 col-md-4 ml-auto d-flex justify-content-center">
+				<button onclick="PauseStopWatch()" class="btn btn-danger wrn-btn ">
+					Stop Timer
+				</button>
+			</div>
+
+
+		</div> -->
+	</div>
+	<button class="btn btn-warning btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+		Console
+	</button>
+	<div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+		<div class="offcanvas-header">
+			<h5 class="offcanvas-title" id="offcanvasExampleLabel">Console Log</h5>
+			<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		</div>
+		<div class="offcanvas-body">
+			<div id="evaluationConsole">
+			</div>
+
+		</div>
+	</div>
+</body>
+
+</html>

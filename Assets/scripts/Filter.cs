@@ -7,8 +7,8 @@ public class Filter
 {
     protected string propertyName;
     protected List<string> values;
-    public const bool AND_COMPARATION = true;
-    public const bool OR_COMPARATION = false;
+    public const bool AND_COMPARATION = false;
+    public const bool OR_COMPARATION = true;
 
     public Filter(string propertyName, List<string>values)
     {

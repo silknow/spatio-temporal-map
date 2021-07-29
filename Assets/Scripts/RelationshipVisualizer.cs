@@ -44,8 +44,8 @@ public class RelationshipVisualizer : Singleton<RelationshipVisualizer>
             items.Add(item);
         }
 
-        Debug.Log($"Numero de anillos creados { items.Count}");
-        Debug.Log($"Crear Relaciones Anillos: {startTime.ElapsedMilliseconds * 0.001f} segundos");
+        EvaluationConsole._instance.AddLine($"Numero de relaciones de arco creados { items.Count}");
+        EvaluationConsole._instance.AddLine($"Tiempo Creación Relaciones Arcos: {startTime.ElapsedMilliseconds * 0.001f} s");
         InitRelationsVisualizer();
         OnlineMaps.instance.OnChangePosition += UpdateItemsPositions;
        
@@ -80,7 +80,7 @@ public class RelationshipVisualizer : Singleton<RelationshipVisualizer>
             item.gameObject.SetActive(active);
             if(active)
                 item.UpdateSpritePosition();
-            //marker.DestroyInstance();
+            marker.DestroyInstance();
 
         }
        

@@ -54,6 +54,7 @@ public class InitApp : MonoBehaviour
 
     private Dictionary<string, ScriptableCategory> categoriesDictionary;
     private List<ScriptableCategory> categoriesGroups;
+    private int numObject=0;
    
 
     private void OnGUI()
@@ -183,8 +184,8 @@ public class InitApp : MonoBehaviour
         OnlineMaps.instance.zoom = 3;
         map.setViewerZoom(3);
         
-        map.setGridingZoomData(3, 12, 4);// CAmbio 2,10,6 por 2,14,4
-        map.setGridingQuadsHorizonal(16); // cambio 16 por 8
+        map.setGridingZoomData(3, 12, 8);// CAmbio 2,10,6 por 2,14,4
+        map.setGridingQuadsHorizonal(8); // cambio 16 por 8
         map.fixZoomInterval(OnlineMaps.instance, 3, 12);
       
         SilkMap.Instance.map = map;
@@ -374,6 +375,19 @@ public class InitApp : MonoBehaviour
             var obj = objectList[index];
             if (obj.production?.location == null)
                 continue;
+/*
+            if (numObject == 300)
+                Debug.Log("EL 300 es " + obj.id);
+
+            if (numObject == 3000)
+                Debug.Log("EL 3000 es " + obj.id);
+
+            if (numObject == 15000)
+                Debug.Log("EL 15000 es " + obj.id);
+
+            numObject++;
+*/
+
             /* PRUEBA RENDIMIENTO */
             var listOfCenturies = new List<TimeElement>();
             if (obj.production?.time.Length > 0)
@@ -502,17 +516,11 @@ public class InitApp : MonoBehaviour
             AppendObjectsToMap(smallerList.ToArray());
             yield return null;
         }
-
-       
-        
-        EvaluationConsole.instance.AddLine($"CARGAR OBJETOS: {startTime.ElapsedMilliseconds * 0.001f} s");
+        EvaluationConsole.instance.AddLine($"Se han generado: {map.getNumPoints()} marcadores");
+        EvaluationConsole.instance.AddLine($"Tiempo Generación Marcadores: {startTime.ElapsedMilliseconds * 0.001f} s");
         yield return new WaitForSeconds(0.1f);
-        var resetTime = Stopwatch.StartNew();
         ResetMapParameters();
-        EvaluationConsole.instance.AddLine($"Resetear parametros Mapa: {resetTime.ElapsedMilliseconds * 0.001f} s");
-        var updateTime = Stopwatch.StartNew();
         map.update();
-        EvaluationConsole.instance.AddLine($"Actualizar Mapa: {updateTime.ElapsedMilliseconds * 0.001f} s");
 
         //print("loadedDataEvent triggered");
         loadedDataEvent.Invoke();
@@ -522,7 +530,6 @@ public class InitApp : MonoBehaviour
         objectList = null;
         GC.Collect();
         Resources.UnloadUnusedAssets();
-        EvaluationConsole.instance.AddLine($"Tiempo Total Load Dataset: {updateTime.ElapsedMilliseconds * 0.001f} s");
     }
     /*public IEnumerator LoadRestData(ManMadeObject[] objectList)
     {

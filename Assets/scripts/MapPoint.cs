@@ -392,6 +392,8 @@ public class MapPoint
     public void addCluster(GridCluster cluster)
     {
         this.clusterList.Add(cluster);
+        if (cluster.getLevel() == 1)
+            Debug.Log("Se ha añadido un cluster de nivel 1");
     }
 
     public void removeCluster(GridCluster cluster)
@@ -443,6 +445,8 @@ public class MapPoint
                 showAllRelations();*/
             if (!isCluster())
                 showAllRelations();
+            else
+                this.getGridCluster().showRelations();
         }
     }
 
@@ -513,10 +517,10 @@ public class MapPoint
     }
 
     protected GridCluster getDirectCluster()
-    {
-        foreach (GridCluster cluster in clusterList)
+    {        
+        foreach (GridCluster cluster in clusterList)        
             if (cluster.getLevel() == 1)
-                return cluster;
+                return cluster;        
 
         return null;
     }
@@ -555,6 +559,10 @@ public class MapPoint
             relationsPerProperty.Add(propertyName, relation);
 
             List<GridCluster> relatedClusters = clustersOfPoints(relatedPoints);
+            if (this.getDirectCluster() == null)
+                Debug.Log("El cluster directo es null");
+            else
+                Debug.Log("EL cluster directo es " + this.getDirectCluster());
             this.getDirectCluster().addRelationsPerPoint(this, relatedClusters);
             //setClusterRelations(this.getDirectCluster(), relatedClusters);
             map.addPointWithRelation(this);
@@ -596,9 +604,46 @@ public class MapPoint
             }
             */
 
-            if (!isCluster() && isFiltered())
-                hideAllRelations();
+            //if (!isCluster() && isFiltered())
+            //  hideAllRelations();
+
+            hideAllRelations();
+
+            if (!isCluster())
+                this.showClusterRelations();
+            else
+            {
+                this.getGridCluster().hideRelations();
+                if (this.getGridCluster().getParent() != null)
+                {
+                    /*if (this.map.getLevel() != this.getGridCluster().getLevel())
+                    {
+                        //Debug.Log("El nivel del mapa es " + this.map.getLevel());
+                        //Debug.Log("El nivel del cluster es " + this.getGridCluster().getLevel());
+                    }*/
+                    if (this.map.getLevel()<this.getGridCluster().getLevel())
+                        this.getGridCluster().getParent().showRelations();
+                }
+            }
         }
+    }
+
+    public void showClusterRelations()
+    {
+        if (this.clusterList!=null)
+            for (int i=0;i<this.clusterList.Count;i++)
+                if (this.clusterList[i].getLevel() == this.map.getLevel()-1)
+                {
+                    if (this.getURI().Equals("http://data.silknow.org/object/a1f06a7e-243f-3ca5-b2c3-0970305276de"))
+                    {
+                       // Debug.Log("Este punto es " + this.getX() + "," + this.getY());
+                       // Debug.Log("El centro  es " + this.clusterList[i].getCenter().getX() + "," + this.clusterList[i].getCenter().getY());
+                    }
+                    if (this.map.getLevel() < this.clusterList[i].getLevel())
+                        this.clusterList[i].showRelations();
+                    return;
+                }
+            
     }
 
     public void setFiltered(bool filtered)
@@ -617,16 +662,16 @@ public class MapPoint
                     gCluster.addFilteredPoint();
 
 
-                if (isInGroupPoint != null)
-                    isInGroupPoint.addFilteredPoint();
+                //if (isInGroupPoint != null)
+                  //  isInGroupPoint.addFilteredPoint();
             }
             else
             {
                 foreach (GridCluster gCluster in this.clusterList)
                     gCluster.removeFilteredPoint();
 
-                if (isInGroupPoint != null)
-                    isInGroupPoint.removeFilteredPoint();
+                //if (isInGroupPoint != null)
+                 //   isInGroupPoint.removeFilteredPoint();
             }
         }
 

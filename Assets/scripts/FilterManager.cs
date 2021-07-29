@@ -8,7 +8,7 @@ public class FilterManager
 {
     Dictionary<string,Filter> filterDictionary = new Dictionary<string,Filter>();
     bool activeFilter;
-    bool comparationMode = Filter.OR_COMPARATION;
+    bool comparationMode = Filter.AND_COMPARATION;
     TimeFrame timeFrame;
 
 
@@ -116,7 +116,7 @@ public class FilterManager
         foreach (MapPoint p in points)
         {
             if (timeFrame != null)
-                timeFrame.checkInFrame(p);
+                p.setFiltered(timeFrame.checkInFrame(p));
             else
                 p.setFiltered(false);
         }
@@ -136,7 +136,7 @@ public class FilterManager
         {
             foreach (Filter f in filterDictionary.Values)
             {
-                if (!f.checkFilterWithPoint(p, comparationMode))
+                if (!f.checkFilterWithPoint(p, Filter.OR_COMPARATION)) //comparationMode))
                 {
                     if (filteredDictionary.ContainsKey(p))
                         filteredDictionary[p]++;
@@ -178,7 +178,7 @@ public class FilterManager
         filterDictionary.Clear();
         foreach (MapPoint p in points)
             if (timeFrame != null)
-                timeFrame.checkInFrame(p);
+                p.setFiltered(timeFrame.checkInFrame(p));
             else
                 p.setFiltered(false);
     }

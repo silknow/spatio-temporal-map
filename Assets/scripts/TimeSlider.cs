@@ -52,7 +52,7 @@ public class TimeSlider : MonoBehaviour
 
         UpdateTimeFrame(value);
 
-        Debug.Log($"UpdateTimeFrame {crono.ElapsedMilliseconds * 0.001f} segundos");
+        //Debug.Log($"UpdateTimeFrame {crono.ElapsedMilliseconds * 0.001f} segundos");
         //sliderText.text = slider.value.ToString(CultureInfo.InvariantCulture);
         sliderText.text = I18N.instance.gameLang == LanguageCode.EN
             ? NumericConversions.AddOrdinal((int) slider.value)
@@ -63,13 +63,13 @@ public class TimeSlider : MonoBehaviour
     {
         var crono = Stopwatch.StartNew();
         var selectedCentury = currentValues.Find(t => t.century == (int) value);
-        Debug.Log($"currentValues.Find {crono.ElapsedMilliseconds * 0.001f} segundos");
+        //Debug.Log($"currentValues.Find {crono.ElapsedMilliseconds * 0.001f} segundos");
         if (selectedCentury != null)
         {
             //Debug.LogFormat("Llamo a ActivateTimeFrame from:{0} to {1}",selectedCentury.@from,selectedCentury.to);
             crono = Stopwatch.StartNew();
             SilkMap.instance.map.activateTimeFrame(selectedCentury.@from, selectedCentury.to);
-            Debug.Log($"activateTimeFrame {crono.ElapsedMilliseconds * 0.001f} segundos");
+            //Debug.Log($"activateTimeFrame {crono.ElapsedMilliseconds * 0.001f} segundos");
             AnalyticsMonitor.instance.sendEvent("Timeline_Update",
                 new Dictionary<string, object> {{"from", selectedCentury.@from}, {"to", selectedCentury.to}});
         }
